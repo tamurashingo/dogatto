@@ -1,0 +1,64 @@
+; -*- mode: lisp -*-
+(in-package #:cl-user)
+(defpackage #:dogatto/config/database
+  (:use #:cl)
+  (:import-from #:clails/environment
+                #:*project-environment*)
+  (:import-from #:clails/util
+                #:env-or-default
+                #:env)
+  (:import-from #:clails/model/impl/mysql)
+  (:export #:initialize-database-config))
+(in-package #:dogatto/config/database)
+
+(defun initialize-database-config ()
+  (setf clails/environment:*database-config*
+        `(:database :mysql
+          :develop (:database-name ,(env-or-default "CLAILS_DB_NAME" "dogatto_development")
+                    :host ,(env-or-default "CLAILS_DB_HOST" "localhost")
+                    :port ,(env-or-default "CLAILS_DB_PORT" "3306")
+                    :username ,(env-or-default "CLAILS_DB_USERNAME" "dogatto")
+                    :password ,(env-or-default "CLAILS_DB_PASSWORD" "password")
+                    ;; Connection pool parameters (optional)
+                    ;; :initial-size 10
+                    ;; :max-size 10
+                    ;; :checkout-timeout 30
+                    ;; :idle-timeout 600
+                    ;; :max-lifetime 1800
+                    ;; :keepalive-interval 600
+                    ;; :validation-query "SELECT 1"
+                    ;; :reaper-interval 60
+                    )
+          :test (:database-name ,(env-or-default "CLAILS_DB_NAME" "dogatto_test")
+                 :host ,(env-or-default "CLAILS_DB_HOST" "localhost")
+                 :port ,(env-or-default "CLAILS_DB_PORT" "3306")
+                 :username ,(env-or-default "CLAILS_DB_USERNAME" "dogatto")
+                 :password ,(env-or-default "CLAILS_DB_PASSWORD" "password")
+                 ;; Connection pool parameters (optional)
+                 ;; :initial-size 10
+                 ;; :max-size 10
+                 ;; :checkout-timeout 30
+                 ;; :idle-timeout 600
+                 ;; :max-lifetime 1800
+                 ;; :keepalive-interval 600
+                 ;; :validation-query "SELECT 1"
+                 ;; :reaper-interval 60
+                 )
+          :production (:database-name ,(env "CLAILS_DB_NAME")
+                       :host ,(env "CLAILS_DB_HOST")
+                       :port ,(env "CLAILS_DB_PORT")
+                       :username ,(env "CLAILS_DB_USERNAME")
+                       :password ,(env "CLAILS_DB_PASSWORD")
+                       ;; Connection pool parameters (optional)
+                       ;; :initial-size 10
+                       ;; :max-size 10
+                       ;; :checkout-timeout 30
+                       ;; :idle-timeout 600
+                       ;; :max-lifetime 1800
+                       ;; :keepalive-interval 600
+                       ;; :validation-query "SELECT 1"
+                       ;; :reaper-interval 60
+                       ))))
+
+(setf clails/environment:*database-type*
+      (make-instance 'clails/environment::<database-type-mysql>))

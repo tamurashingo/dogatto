@@ -1,0 +1,59 @@
+services:
+  dogatto-app:
+    image: dogatto_dev
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: dogatto_dev_app
+    volumes:
+      - ../:/app
+    ports:
+      - ${PORT}:${PORT}
+      - ${SWANK_PORT}:${SWANK_PORT}
+    tty: true
+    command: ["/app/docker/run-dev.sh"]
+    environment:
+      CLAILS_HOME: "/app"
+      BIND_ADDRESS: "${BIND_ADDRESS}"
+      PORT: "${PORT}"
+      SWANK_ADDRESS: "${SWANK_ADDRESS}"
+      SWANK_PORT: "${SWANK_PORT}"
+
+      CLAILS_DB_HOST: "${CLAILS_DB_HOST}"
+      CLAILS_DB_PORT: "${CLAILS_DB_PORT}"
+      CLAILS_DB_USERNAME: "${CLAILS_DB_USERNAME}"
+      CLAILS_DB_PASSWORD: "${CLAILS_DB_PASSWORD}"
+
+
+    networks:
+      - dogatto-net
+
+    depends_on:
+      - mysql-dev
+
+  mysql-dev:
+    image: mysql:8.0
+    container_name: dogatto_dev_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: dogatto
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: dogatto_development
+    ports:
+      - 3306:3306
+    volumes:
+      - dogatto-mysql-data:/var/lib/mysql
+    networks:
+      - dogatto-net
+
+
+
+networks:
+  dogatto-net:
+    driver: bridge
+
+
+volumes:
+  dogatto-mysql-data:
+
+

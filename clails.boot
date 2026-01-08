@@ -1,0 +1,18 @@
+; -*- mode: lisp -*-
+;;;; boot from clails cli
+
+(let* ((clails-home (uiop:getenv "CLAILS_HOME"))
+       (project-dir (if clails-home
+                        (uiop:ensure-directory-pathname clails-home)
+                        (uiop/os:getcwd))))
+  (push project-dir asdf:*central-registry*)
+  (asdf:load-system :dogatto)
+  (setf clails/environment:*project-dir* project-dir)
+  (setf clails/environment:*migration-base-dir* clails/environment:*project-dir*)
+  (setf clails/environment:*task-base-dir* clails/environment:*project-dir*))
+
+(let ((envname (uiop:getenv "CLAILS_ENV")))
+  (when envname
+    (clails/environment:set-environment envname)))
+
+(dogatto/config/database:initialize-database-config)
