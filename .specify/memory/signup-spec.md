@@ -38,9 +38,11 @@
 
 **自動生成項目:**
 - ユーザー名 (username)
-  - 初期値: メールアドレスのローカル部分（@より前）
-  - 例: `taro@example.com` → `taro`
+  - 初期値: メールアドレス（そのまま）
+  - 例: `taro@example.com` → `taro@example.com`
+  - システム内でユニークである必要がある
   - ユーザーは後で変更可能（プロフィール画面で）
+  - 変更時はユニーク制約をチェック
 
 **ボタン:**
 - 登録ボタン
@@ -63,8 +65,10 @@
 
 **自動生成項目:**
 - ユーザー名 (username)
-  - 初期値: GitHubアカウント名
-  - 例: GitHubアカウント `taro-yamada` → ユーザー名 `taro-yamada`
+  - 初期値: メールアドレス（そのまま）
+  - 例: GitHubメールアドレス `taro@example.com` → ユーザー名 `taro@example.com`
+  - システム内でユニークである必要がある
+  - ユーザーは後で変更可能（プロフィール画面で）
 
 ### 2. ナビゲーション
 
@@ -97,7 +101,7 @@
     "user": {
       "ulid": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
       "email": "taro@example.com",
-      "username": "taro",
+      "username": "taro@example.com",
       "status": "pending_verification",
       "created_at": "2026-01-11T00:00:00Z"
     },
@@ -181,7 +185,7 @@
     "user": {
       "ulid": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
       "email": "taro@example.com",
-      "username": "taro",
+      "username": "taro@example.com",
       "status": "active",
       "verified_at": "2026-01-11T00:30:00Z"
     },
@@ -323,7 +327,7 @@ CREATE TABLE users (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   ulid CHAR(26) UNIQUE NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
-  username VARCHAR(255) NOT NULL,
+  username VARCHAR(255) UNIQUE NOT NULL,  -- システム内でユニーク
   password_hash VARCHAR(255),  -- NULL可 (OAuth専用ユーザー)
   provider VARCHAR(50) DEFAULT 'local',  -- 'local' or 'github'
   provider_id VARCHAR(255),  -- GitHubのユーザーID
@@ -334,6 +338,7 @@ CREATE TABLE users (
   deleted_at TIMESTAMP NULL,  -- 論理削除用
   INDEX idx_ulid (ulid),
   INDEX idx_email (email),
+  INDEX idx_username (username),
   INDEX idx_status (status)
 );
 ```
@@ -424,7 +429,8 @@ https://dogatto.example.com/api/auth/verify-email?token=01ARZ3NDEKTSV4RRFFQ69G5F
 ### 9.1 単体テスト
 - バリデーション関数のテスト
 - パスワードハッシュ化のテスト
-- ユーザー名生成ロジックのテスト
+- ユーザー名生成ロジックのテスト（メールアドレスをそのまま使用）
+- ユーザー名ユニーク制約のテスト
 - トークン生成・検証のテスト
 
 ### 9.2 統合テスト
@@ -457,6 +463,7 @@ https://dogatto.example.com/api/auth/verify-email?token=01ARZ3NDEKTSV4RRFFQ69G5F
 
 ## 将来の拡張
 
+- ユーザー名変更機能（プロフィール画面で実装）
 - メールアドレス変更機能
 - 電話番号認証
 - SMS認証
@@ -474,6 +481,6 @@ https://dogatto.example.com/api/auth/verify-email?token=01ARZ3NDEKTSV4RRFFQ69G5F
 
 ---
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Created**: 2026-01-11
 **Last Updated**: 2026-01-11
