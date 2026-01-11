@@ -25,3 +25,8 @@
 
 ;; shutdown hooks
 (push "dogatto/config/logger:finalize-logger" clails/environment:*shutdown-hooks*)
+;; 20260111230022 : add health controller
+(setf clails/environment:*routing-tables*
+      (append clails/environment:*routing-tables*
+              '((:path "/health"
+                 :controller "dogatto/controllers/health-controller:<health-controller>"))))
