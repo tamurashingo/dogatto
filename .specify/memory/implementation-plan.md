@@ -8,7 +8,7 @@ DOGATTO（タグベースTODO管理アプリ）の実装計画。仕様書に基
 
 - **プロジェクト名**: DOGATTO
 - **技術スタック**:
-  - バックエンド: Common Lisp (clails framework) + MySQL
+  - バックエンド: Common Lisp (clails framework) + MySQL + Redis
   - フロントエンド: TypeScript + React + Next.js
   - インフラ: Docker
 - **開発期間**: 約3-4ヶ月（想定）
@@ -23,6 +23,7 @@ DOGATTO（タグベースTODO管理アプリ）の実装計画。仕様書に基
 #### 0.1 開発環境セットアップ
 - [ ] Docker環境の構築
   - MySQL コンテナ
+  - Redis コンテナ（セッション管理用）
   - clails アプリケーションコンテナ
   - Next.js 開発サーバーコンテナ
 - [ ] docker-compose.yml の作成
@@ -45,7 +46,8 @@ DOGATTO（タグベースTODO管理アプリ）の実装計画。仕様書に基
 - [ ] clails プロジェクト構造の整理
 - [ ] ルーティング設定
 - [ ] CORS設定
-- [ ] セッション管理の実装
+- [ ] Redis接続設定
+- [ ] セッション管理の実装（Redis使用）
 - [ ] CSRF対策の実装
 - [ ] エラーハンドリング共通処理
   - エラーレスポンス生成関数
@@ -676,6 +678,6 @@ Phase 10 (デプロイ)
 
 ---
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Created**: 2026-01-11
 **Last Updated**: 2026-01-11
