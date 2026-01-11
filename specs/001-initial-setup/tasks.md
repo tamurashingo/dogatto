@@ -31,12 +31,12 @@ description: "Actionable task list for DOGATTO initial setup phase"
 
 **Purpose**: Project initialization and Docker environment
 
-- [ ] T001 Verify existing project structure matches implementation plan
-- [ ] T002 Create docker-compose.yml with MySQL, Redis, and clails services in project root
-- [ ] T003 [P] Create MySQL Dockerfile in docker/mysql/Dockerfile
-- [ ] T004 [P] Create Redis configuration in docker/redis/redis.conf
-- [ ] T005 [P] Create clails Dockerfile in docker/clails/Dockerfile
-- [ ] T006 Test Docker environment startup with docker-compose up
+- [x] T001 Verify existing project structure matches implementation plan
+- [x] T002 Create docker-compose.yml with MySQL, Redis, and clails services in project root
+- [x] T003 [P] Create MySQL Dockerfile in docker/mysql/Dockerfile
+- [x] T004 [P] Create Redis configuration in docker/redis/redis.conf
+- [x] T005 [P] Create clails Dockerfile in docker/clails/Dockerfile
+- [x] T006 Test Docker environment startup with docker-compose up
 
 ---
 
@@ -69,16 +69,16 @@ description: "Actionable task list for DOGATTO initial setup phase"
 
 ### Implementation for User Story 1
 
-- [ ] T017 [US1] Create MySQL initialization script in db/init/00_create_database.sql
-- [ ] T018 [US1] Configure MySQL character set to utf8mb4 in docker/mysql/my.cnf
-- [ ] T019 [US1] Configure Redis persistence settings in docker/redis/redis.conf
-- [ ] T020 [US1] Create healthcheck endpoint in app/routes/health.lisp
-- [ ] T021 [US1] Add container health checks to docker-compose.yml
-- [ ] T022 [US1] Create development startup script in Makefile (make dev-start)
-- [ ] T023 [US1] Create development stop script in Makefile (make dev-stop)
-- [ ] T024 [US1] Document environment setup in README.md
+- [x] T017 [US1] Create MySQL initialization script in db/init/00_create_database.sql
+- [x] T018 [US1] Configure MySQL character set to utf8mb4 in docker/mysql/my.cnf
+- [x] T019 [US1] Configure Redis persistence settings in docker/redis/redis.conf
+- [x] T020 [US1] Create healthcheck endpoint in app/routes/health.lisp
+- [x] T021 [US1] Add container health checks to docker-compose.yml
+- [x] T022 [US1] Create development startup script in Makefile (make dev-start)
+- [x] T023 [US1] Create development stop script in Makefile (make dev-stop)
+- [x] T024 [US1] Document environment setup in README.md
 
-**Checkpoint**: Docker環境が完全に動作し、開発を開始できる
+**Checkpoint**: Docker環境が完全に動作し、開発を開始できる ✅
 
 ---
 
@@ -90,21 +90,21 @@ description: "Actionable task list for DOGATTO initial setup phase"
 
 ### Implementation for User Story 2
 
-- [ ] T025 [P] [US2] Create users table migration in db/migrations/001_create_users.sql
-- [ ] T026 [P] [US2] Create todos table migration in db/migrations/002_create_todos.sql
-- [ ] T027 [P] [US2] Create todo_comments table migration in db/migrations/003_create_todo_comments.sql
-- [ ] T028 [P] [US2] Create tags table migration in db/migrations/004_create_tags.sql
-- [ ] T029 [P] [US2] Create todos_tags junction table migration in db/migrations/005_create_todos_tags.sql
-- [ ] T030 [P] [US2] Create labels table migration in db/migrations/006_create_labels.sql
-- [ ] T031 [P] [US2] Create labels_tags junction table migration in db/migrations/007_create_labels_tags.sql
-- [ ] T032 [US2] Create migration runner script in db/migrate.lisp
+- [x] T025 [P] [US2] Create users table migration in db/migrations/001_create_users.sql
+- [x] T026 [P] [US2] Create todos table migration in db/migrations/002_create_todos.sql
+- [x] T027 [P] [US2] Create todo_comments table migration in db/migrations/003_create_todo_comments.sql
+- [x] T028 [P] [US2] Create tags table migration in db/migrations/004_create_tags.sql
+- [x] T029 [P] [US2] Create todos_tags junction table migration in db/migrations/005_create_todos_tags.sql
+- [x] T030 [P] [US2] Create labels table migration in db/migrations/006_create_labels.sql
+- [x] T031 [P] [US2] Create labels_tags junction table migration in db/migrations/007_create_labels_tags.sql
+- [x] T032 [US2] Create migration runner script in db/migrate.lisp
 - [ ] T033 [US2] Add indexes for ULID columns in db/migrations/008_add_indexes.sql
 - [ ] T034 [US2] Add indexes for foreign keys in db/migrations/009_add_foreign_key_indexes.sql
 - [ ] T035 [US2] Create seed data script for development in db/seeds/development.sql
-- [ ] T036 [US2] Add migration commands to Makefile (make migrate, make migrate-rollback)
-- [ ] T037 [US2] Test ULID generation and uniqueness in app/utils/ulid.lisp
+- [x] T036 [US2] Add migration commands to Makefile (make migrate, make migrate-rollback)
+- [x] T037 [US2] Test ULID generation and uniqueness in app/utils/ulid.lisp
 
-**Checkpoint**: データベーススキーマが完全に構築され、マイグレーション管理ができる
+**Checkpoint**: データベーススキーマが完全に構築され、マイグレーション管理ができる ✅ (indexes and seed data pending)
 
 ---
 
