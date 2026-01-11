@@ -9,7 +9,7 @@
                                             :size 26
                                             :not-null t
                                             :unique t)
-                                    ("owner-id" :type :bigint
+                                    ("owner-id" :type :integer
                                                 :not-null t)
                                     ("title" :type :string
                                              :size 255

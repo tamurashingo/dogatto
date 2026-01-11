@@ -9,9 +9,9 @@
                                             :size 26
                                             :not-null t
                                             :unique t)
-                                    ("todo-id" :type :bigint
+                                    ("todo-id" :type :integer
                                                :not-null t)
-                                    ("user-id" :type :bigint
+                                    ("user-id" :type :integer
                                                :not-null t)
                                     ("comment" :type :text
                                                :not-null t))))

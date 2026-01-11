@@ -5,9 +5,9 @@
   (:up #'(lambda (connection)
            (create-table connection
                          :table "todo_tags"
-                         :columns '(("todo-id" :type :bigint
+                         :columns '(("todo-id" :type :integer
                                                :not-null t)
-                                    ("tag-id" :type :bigint
+                                    ("tag-id" :type :integer
                                               :not-null t))))
    :down #'(lambda (connection)
              (drop-table connection :table "todo_tags"))))

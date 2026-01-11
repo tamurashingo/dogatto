@@ -46,14 +46,14 @@ logs.mysql:
 
 .PHONY: db.create db.migrate db.rollback db.seed
 db.create:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env run --rm --entrypoint clails dogatto-app db:create
+	docker compose run --rm --entrypoint clails dogatto-app db:create
 
 db.migrate:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env run --rm --entrypoint clails dogatto-app db:migrate
+	docker compose run --rm --entrypoint clails dogatto-app db:migrate
 
 db.rollback:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env run --rm --entrypoint clails dogatto-app db:rollback
+	docker compose run --rm --entrypoint clails dogatto-app db:rollback
 
 db.seed:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env run --rm --entrypoint clails dogatto-app db:seed
+	docker compose run --rm --entrypoint clails dogatto-app db:seed
 
