@@ -17,6 +17,20 @@ up:
 down:
 	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env down
 
+# New commands for main docker-compose.yml
+.PHONY: dev-start dev-stop dev-restart dev-logs
+dev-start:
+	docker compose up -d
+
+dev-stop:
+	docker compose down
+
+dev-restart:
+	docker compose restart
+
+dev-logs:
+	docker compose logs -f
+
 .PHONY: console
 console:
 	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env run --rm -it --entrypoint /bin/bash dogatto-app
