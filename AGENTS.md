@@ -49,7 +49,7 @@ ros run
 
 
 - パッケージは package-inferred-system で定義する
-  - 最終的には src/main.lisp で import すれば読み込まれるようにする
+  - 最終的には src/application-loader.lisp で import すれば読み込まれるようにする
 
 - ソースコードのコメント、標準出力、エラー出力に用いる言語は英語とする。
 
