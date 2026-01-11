@@ -9,8 +9,13 @@ DOGATTO（タグベースTODO管理アプリ）の実装計画。仕様書に基
 - **プロジェクト名**: DOGATTO
 - **技術スタック**:
   - バックエンド: Common Lisp (clails framework) + MySQL + Redis
-  - フロントエンド: TypeScript + React + Next.js
+  - フロントエンド: TypeScript + React (SPA)
+  - ビルドツール: Webpack or Vite
   - インフラ: Docker
+- **アーキテクチャ**: 
+  - clailsがHTMLとバンドルされたJSを配信
+  - ReactがSPAとして画面を生成
+  - REST APIでデータ取得
 - **開発期間**: 約3-4ヶ月（想定）
 - **計画作成日**: 2026-01-11
 
@@ -25,7 +30,6 @@ DOGATTO（タグベースTODO管理アプリ）の実装計画。仕様書に基
   - MySQL コンテナ
   - Redis コンテナ（セッション管理用）
   - clails アプリケーションコンテナ
-  - Next.js 開発サーバーコンテナ
 - [ ] docker-compose.yml の作成
 - [ ] ローカル開発環境の動作確認
 
@@ -56,21 +60,35 @@ DOGATTO（タグベースTODO管理アプリ）の実装計画。仕様書に基
 - [ ] ULID生成ユーティリティ
 
 #### 0.4 フロントエンド基盤
-- [ ] Next.js プロジェクトセットアップ
+- [ ] React + TypeScript プロジェクトセットアップ
+- [ ] ビルド環境構築（Webpack or Vite）
+  - TypeScript設定
+  - バンドル設定
+  - 開発サーバー設定
+  - ビルド出力先: public/assets/
 - [ ] ディレクトリ構成の整理
+  - front/src/components/
+  - front/src/pages/
+  - front/src/hooks/
+  - front/src/api/
+  - front/src/types/
 - [ ] 共通コンポーネントの骨格
 - [ ] API クライアントの実装
   - fetch wrapper
   - エラーハンドリング
   - ApiError クラス
 - [ ] 認証状態管理（Context/Store）
-- [ ] ルーティング設定
+- [ ] クライアントサイドルーティング（React Router）
+- [ ] HTMLテンプレート作成（clailsから配信）
+  - エントリーポイントHTML
+  - バンドルされたJSの読み込み
 
 **成果物**:
 - 動作する開発環境
 - データベーススキーマ
 - 基本的なAPI基盤
-- フロントエンド骨格
+- Reactフロントエンド骨格
+- clailsからのHTML/JS配信環境
 
 **所要期間**: 2週間
 
@@ -678,6 +696,6 @@ Phase 10 (デプロイ)
 
 ---
 
-**Version**: 1.1.0
+**Version**: 1.2.0
 **Created**: 2026-01-11
 **Last Updated**: 2026-01-11
