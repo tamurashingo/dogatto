@@ -161,6 +161,9 @@ TODOの新規登録および既存TODOの編集を行うコンポーネント。
 - `Enter`: 選択中の候補を確定
   - 候補未選択時: 新規タグとして登録
   - IME変換中のEnterは無視（compositionend イベントで判定）
+- `Space` (スペース): 選択中の候補を確定
+  - 候補未選択時: 新規タグとして登録
+  - IME変換中のSpaceは無視
 - `Escape`: サジェストを閉じる
 - `Backspace`: 
   - 入力フィールドが空の場合: 最後のタグを削除
@@ -194,7 +197,7 @@ TODOの新規登録および既存TODOの編集を行うコンポーネント。
 ### 4.4 新規タグの作成
 
 **トリガー条件:**
-- サジェスト未選択の状態で Enter キー
+- サジェスト未選択の状態で Enter キーまたは Space キー
 - IMEの変換確定後（compositionend イベント後）
 
 **新規タグの仕様:**
@@ -221,7 +224,7 @@ TODOの新規登録および既存TODOの編集を行うコンポーネント。
 - `compositionupdate`: IME変換中
 - `compositionend`: IME変換確定
 
-**Enter キーの処理:**
+**Enter/Space キーの処理:**
 ```javascript
 let isComposing = false;
 
@@ -234,15 +237,17 @@ element.addEventListener('compositionend', () => {
 });
 
 element.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !isComposing) {
+  if ((e.key === 'Enter' || e.key === ' ') && !isComposing) {
     // タグ確定処理
+    e.preventDefault(); // Spaceの場合、スペース入力を防ぐ
   }
 });
 ```
 
 **注意点:**
-- IME変換中のEnterは無視
-- compositionend 後のEnterでタグ確定
+- IME変換中のEnter/Spaceは無視
+- compositionend 後のEnter/Spaceでタグ確定
+- Space キーの場合は preventDefault() でスペース入力を防ぐ
 - ブラウザによって動作が異なる可能性があるため、複数ブラウザでテスト必須
 
 ## アクションボタン
@@ -586,6 +591,6 @@ CREATE TABLE tags (
 
 ---
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Created**: 2026-01-11
 **Last Updated**: 2026-01-11
