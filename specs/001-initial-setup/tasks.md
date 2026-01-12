@@ -98,13 +98,13 @@ description: "Actionable task list for DOGATTO initial setup phase"
 - [x] T030 [P] [US2] Create labels table migration in db/migrations/006_create_labels.sql
 - [x] T031 [P] [US2] Create labels_tags junction table migration in db/migrations/007_create_labels_tags.sql
 - [x] T032 [US2] Create migration runner script in db/migrate.lisp
-- [ ] T033 [US2] Add indexes for ULID columns in db/migrations/008_add_indexes.sql
-- [ ] T034 [US2] Add indexes for foreign keys in db/migrations/009_add_foreign_key_indexes.sql
+- [x] T033 [US2] Add indexes for ULID columns in db/migrations/008_add_indexes.sql
+- [x] T034 [US2] Add indexes for foreign keys in db/migrations/009_add_foreign_key_indexes.sql
 - [ ] T035 [US2] Create seed data script for development in db/seeds/development.sql
 - [x] T036 [US2] Add migration commands to Makefile (make migrate, make migrate-rollback)
 - [x] T037 [US2] Test ULID generation and uniqueness in app/utils/ulid.lisp
 
-**Checkpoint**: データベーススキーマが完全に構築され、マイグレーション管理ができる ✅ (indexes and seed data pending)
+**Checkpoint**: データベーススキーマが完全に構築され、マイグレーション管理ができる ✅ (seed data pending)
 
 ---
 
