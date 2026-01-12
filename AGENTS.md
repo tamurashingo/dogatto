@@ -23,6 +23,25 @@ ros run
 
 ##  方針
 
+### clails について
+
+以下のドキュメントを参照してください
+
+- command
+  - https://github.com/tamurashingo/clails/blob/develop/document/command.md
+- model / migration / sql など
+  - https://github.com/tamurashingo/clails/blob/develop/document/model.md
+- view
+  - https://github.com/tamurashingo/clails/blob/develop/document/view.md
+- controller
+  - https://github.com/tamurashingo/clails/blob/develop/document/controller.md
+- environment
+  - https://github.com/tamurashingo/clails/blob/develop/document/environment.md
+- test
+  - https://github.com/tamurashingo/clails/blob/develop/document/testing.md
+- task
+  - https://github.com/tamurashingo/clails/blob/develop/document/task.md
+
 ### 全体
 
 - 内部のコードに defstruct を使用しない。 plist もしくは class を使うこと
