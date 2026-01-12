@@ -15,16 +15,6 @@ A web application built with [clails](https://github.com/tamurashingo/clails) fr
 make build
 ```
 
-To specify a clails branch or tag, use the `CLAILS_BRANCH` environment variable (defaults to `develop` if not specified):
-
-```bash
-# branch
-CLAILS_BRANCH=release/0.0.2 make build
-
-# tag
-CLAILS_BRANCH=v0.0.1 make build
-```
-
 ### 2. Start Development Environment
 
 ```bash
@@ -34,10 +24,8 @@ make up
 This will start:
 - Application server on http://localhost:5000
 - Swank server on localhost:4005 (for REPL development)
-
 - MySQL database on localhost:3306
-
-
+- Redis on localhost:6379
 
 ### 3. Setup Database
 
@@ -59,7 +47,23 @@ Seed the database (optional):
 make db.seed
 ```
 
-### 4. Access the Application
+### 4. Build Frontend
+
+Build the React frontend:
+
+```bash
+make front-build
+```
+
+For development with hot reload:
+
+```bash
+make front-dev
+```
+
+This will start the Vite development server on http://localhost:3000
+
+### 5. Access the Application
 
 Open your browser and navigate to:
 ```
@@ -75,6 +79,20 @@ Connect to the Swank server from your editor (Emacs/SLIME, Vim/Slimv, etc.):
 - Host: `localhost`
 - Port: `4005`
 
+### Frontend Development
+
+The frontend is built with React + TypeScript + Vite.
+
+Source code is located in `front/src/`:
+- `api/` - API client and error handling
+- `components/` - React components
+- `contexts/` - React contexts (e.g., AuthContext)
+- `hooks/` - Custom React hooks
+- `pages/` - Page components
+- `types/` - TypeScript type definitions
+
+Build output goes to `public/assets/`.
+
 ### Available Make Commands
 
 | Command | Description |
@@ -85,14 +103,15 @@ Connect to the Swank server from your editor (Emacs/SLIME, Vim/Slimv, etc.):
 | `make down` | Stop and remove containers |
 | `make console` | Open bash shell in the application container |
 | `make logs` | View application logs |
-
 | `make logs.mysql` | View MySQL logs |
-
-
+| `make logs.redis` | View Redis logs |
 | `make db.create` | Create database |
 | `make db.migrate` | Run pending migrations |
 | `make db.rollback` | Rollback the last migration |
 | `make db.seed` | Load seed data |
+| `make front-dev` | Start frontend dev server with hot reload |
+| `make front-build` | Build frontend for production |
+| `make front-preview` | Preview production build |
 
 ### Project Structure
 
@@ -107,10 +126,22 @@ Connect to the Swank server from your editor (Emacs/SLIME, Vim/Slimv, etc.):
 │   ├── migrate/        # Database migration files
 │   └── seeds.lisp      # Seed data
 ├── docker/
-│   ├── Dockerfile.dev           # Development Dockerfile
-│   ├── docker-compose.dev.yml   # Docker Compose configuration
-│   ├── dev.env                  # Environment variables
-│   └── run-dev.sh               # Application startup script
+│   ├── clails/
+│   │   └── Dockerfile  # Clails application Dockerfile
+│   ├── mysql/          # MySQL configuration
+│   ├── redis/          # Redis configuration
+│   └── run-dev.sh      # Application startup script
+├── docker-compose.yml  # Docker Compose configuration
+├── front/              # Frontend React application
+│   ├── src/
+│   │   ├── api/        # API client
+│   │   ├── components/ # React components
+│   │   ├── contexts/   # React contexts
+│   │   ├── hooks/      # Custom hooks
+│   │   ├── pages/      # Page components
+│   │   └── types/      # TypeScript types
+│   ├── package.json    # Frontend dependencies
+│   └── vite.config.ts  # Vite configuration
 ├── public/             # Static assets
 ├── test/               # Test files
 └── Makefile            # Make commands
@@ -118,20 +149,22 @@ Connect to the Swank server from your editor (Emacs/SLIME, Vim/Slimv, etc.):
 
 ## Database Configuration
 
-
 **MySQL Configuration**
 
 Default settings:
-- Host: `mysql-dev` (inside Docker), `localhost` (from host)
+- Host: `mysql` (inside Docker), `localhost` (from host)
 - Port: `3306`
 - Username: `dogatto`
 - Password: `password`
 - Database: `dogatto_development`
 
-You can override these settings by editing `docker/dev.env`.
+**Redis Configuration**
 
+Default settings:
+- Host: `redis` (inside Docker), `localhost` (from host)
+- Port: `6379`
 
-
+You can override these settings using environment variables in docker-compose.yml.
 
 ## Troubleshooting
 
@@ -144,30 +177,29 @@ make logs
 
 ### Database connection issues
 
-
 Make sure the database container is running:
 ```bash
-docker compose -f docker/docker-compose.dev.yml ps
+docker compose ps
 ```
 
 Check database logs:
-
 ```bash
 make logs.mysql
 ```
 
+### Redis connection issues
 
-
+Check Redis logs:
+```bash
+make logs.redis
+```
 
 ### Reset everything
 
 Stop containers and remove volumes:
 ```bash
 make down
-
-docker volume rm dogatto-mysql-data
-
-
+docker volume rm dogatto-mysql-data dogatto-redis-data
 ```
 
 ## License

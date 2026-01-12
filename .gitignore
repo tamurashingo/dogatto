@@ -1,0 +1,34 @@
+# Vite build output
+public/assets/
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Common Lisp
+*.fasl
+*.dx64fsl
+*.lx64fsl
+*.x86f
+*~
+
+# Temporary files
+tmp/

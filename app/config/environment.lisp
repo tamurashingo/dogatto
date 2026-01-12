@@ -14,10 +14,13 @@
 ;; project environment
 (setf clails/environment:*project-environment* :develop)
 
+;; routing tables
+;; API routes
 (setf clails/environment:*routing-tables*
-  '((:path "/"
-     :controller "dogatto/controllers/application-controller:<application-controller>")))
-
+  '((:path "/health"
+     :controller "dogatto/controllers/health-controller:<health-controller>")
+    (:path "/"
+     :controller "dogatto/controllers/pages-controller:<pages-controller>")))
 
 ;; startup hooks
 (push "dogatto/config/logger:initialize-logger" clails/environment:*startup-hooks*)
