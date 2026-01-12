@@ -47,6 +47,7 @@
                                       ("content" :TYPE :TEXT :NOT-NULL NIL)
                                       ("due-date" :TYPE :DATETIME :NOT-NULL NIL)
                                       ("status" :TYPE :STRING :SIZE 20 :NOT-NULL T :DEFAULT-VALUE "active")
+                                      ("completed-at" :TYPE :DATETIME :NOT-NULL NIL)
                                      )
 
   (create-table connection :table "users"
