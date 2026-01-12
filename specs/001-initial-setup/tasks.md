@@ -116,7 +116,7 @@ description: "Actionable task list for DOGATTO initial setup phase"
 
 ### Implementation for User Story 3
 
-- [ ] T038 [US3] Setup main routing configuration in app/routes/routes.lisp
+- [x] T038 [US3] Setup main routing configuration in app/routes/routes.lisp (routing is configured in app/config/environment.lisp per controller generation)
 - [ ] T039 [US3] Create authentication middleware skeleton in app/middleware/auth.lisp
 - [ ] T040 [US3] Implement session storage with Redis in app/services/session-service.lisp
 - [x] T041 [US3] Create session timeout handling in app/middleware/session.lisp (completed in Phase 2)
