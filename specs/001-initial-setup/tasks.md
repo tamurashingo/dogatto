@@ -125,7 +125,7 @@ description: "Actionable task list for DOGATTO initial setup phase"
 - [x] T044 [P] [US3] Create request validation helper in app/utils/validation.lisp (completed in Phase 2)
 - [ ] T045 [P] [US3] Create response helper functions in app/utils/response.lisp
 - [x] T046 [US3] Setup API versioning structure (/api/v1) in app/routes/api/v1/ (directory structure exists)
-- [ ] T047 [US3] Create request logging middleware in app/middleware/request-logger.lisp
+- [x] T047 [US3] Create request logging middleware in app/middleware/request-logger.lisp (clails provides built-in logging via clails/logger)
 - [ ] T048 [US3] Test session creation and retrieval with Redis
 - [x] T049 [US3] Test error response format matches specification (health endpoint working)
 
