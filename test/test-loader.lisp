@@ -3,5 +3,6 @@
 (defpackage #:dogatto-test/test-loader
   (:use #:cl)
   (:import-from #:dogatto-test/sample)
-  (:import-from :dogatto-test/controllers/health-controller))
+  (:import-from :dogatto-test/controllers/health-controller)
+  (:import-from :dogatto-test/controllers/pages-controller))
 (in-package #:dogatto-test/test-loader)

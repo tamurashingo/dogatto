@@ -14,10 +14,13 @@
 ;; project environment
 (setf clails/environment:*project-environment* :develop)
 
+;; routing tables
+;; API routes
 (setf clails/environment:*routing-tables*
-  '((:path "/"
-     :controller "dogatto/controllers/application-controller:<application-controller>")))
-
+  '((:path "/health"
+     :controller "dogatto/controllers/health-controller:<health-controller>")
+    (:path "/"
+     :controller "dogatto/controllers/pages-controller:<pages-controller>")))
 
 ;; startup hooks
 (push "dogatto/config/logger:initialize-logger" clails/environment:*startup-hooks*)
@@ -25,8 +28,3 @@
 
 ;; shutdown hooks
 (push "dogatto/config/logger:finalize-logger" clails/environment:*shutdown-hooks*)
-;; 20260111230022 : add health controller
-(setf clails/environment:*routing-tables*
-      (append clails/environment:*routing-tables*
-              '((:path "/health"
-                 :controller "dogatto/controllers/health-controller:<health-controller>"))))

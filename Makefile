@@ -1,48 +1,37 @@
-CLAILS_BRANCH ?= develop
-
-
 .PHONY: build
 build:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env build --build-arg CLAILS_BRANCH=${CLAILS_BRANCH}
-	chmod +x docker/run-dev.sh
+	docker compose build --build-arg CLAILS_BRANCH=${CLAILS_BRANCH}
 
 .PHONY: rebuild
 rebuild:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env build --no-cache --build-arg CLAILS_BRANCH=${CLAILS_BRANCH}
+	docker compose build --no-cache --build-arg CLAILS_BRANCH=${CLAILS_BRANCH}
 
 .PHONY: up down
 up:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env up -d
-
-down:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env down
-
-# New commands for main docker-compose.yml
-.PHONY: dev-start dev-stop dev-restart dev-logs
-dev-start:
 	docker compose up -d
 
-dev-stop:
+down:
 	docker compose down
 
-dev-restart:
+.PHONY: restart
+restart:
 	docker compose restart
 
-dev-logs:
-	docker compose logs -f
+.PHONY: logs
+logs:
+	docker compose logs -f dogatto-app
+
+.PHONY: logs.mysql
+logs.mysql:
+	docker compose logs -f mysql
+
+.PHONY: logs.redis
+logs.redis:
+	docker compose logs -f redis
 
 .PHONY: console
 console:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env run --rm -it --entrypoint /bin/bash dogatto-app
-
-.PHONY: logs logs.mysql
-logs:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env logs -f dogatto-app
-
-logs.mysql:
-	docker compose -f docker/docker-compose.dev.yml --env-file docker/dev.env logs -f mysql-dev
-
-
+	docker compose run --rm -it --entrypoint /bin/bash dogatto-app
 
 .PHONY: db.create db.migrate db.rollback db.seed
 db.create:
@@ -56,4 +45,15 @@ db.rollback:
 
 db.seed:
 	docker compose run --rm --entrypoint clails dogatto-app db:seed
+
+
+.PHONY: front-dev front-build front-preview
+front-dev:
+	cd front && npm run dev
+
+front-build:
+	cd front && npm run build
+
+front-preview:
+	cd front && npm run preview
 
