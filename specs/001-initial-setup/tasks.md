@@ -46,18 +46,18 @@ description: "Actionable task list for DOGATTO initial setup phase"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Create .env.example file with environment variable templates in project root
-- [ ] T008 [P] Setup MySQL connection configuration in app/config/database.lisp
-- [ ] T009 [P] Setup Redis connection configuration in app/config/redis.lisp
-- [ ] T010 Create ULID generation utility in app/utils/ulid.lisp
-- [ ] T011 Create error response generator in app/utils/error-response.lisp
-- [ ] T012 [P] Create common validation functions in app/utils/validation.lisp
-- [ ] T013 [P] Setup logging infrastructure in app/utils/logger.lisp
-- [ ] T014 Create CSRF middleware in app/middleware/csrf.lisp
-- [ ] T015 Create CORS middleware in app/middleware/cors.lisp
-- [ ] T016 Setup session management middleware in app/middleware/session.lisp
+- [x] T007 Create .env.example file with environment variable templates in project root
+- [x] T008 [P] Setup MySQL connection configuration in app/config/database.lisp
+- [x] T009 [P] Setup Redis connection configuration in app/config/redis.lisp
+- [x] T010 Create ULID generation utility in app/utils/ulid.lisp
+- [x] T011 Create error response generator in app/utils/error-response.lisp
+- [x] T012 [P] Create common validation functions in app/utils/validation.lisp
+- [x] T013 [P] Setup logging infrastructure in app/utils/logger.lisp
+- [x] T014 Create CSRF middleware in app/middleware/csrf.lisp
+- [x] T015 Create CORS middleware in app/middleware/cors.lisp
+- [x] T016 Setup session management middleware in app/middleware/session.lisp
 
-**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel ✅
 
 ---
 
