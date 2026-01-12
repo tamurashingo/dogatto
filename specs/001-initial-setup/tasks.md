@@ -120,7 +120,7 @@ description: "Actionable task list for DOGATTO initial setup phase"
 - [x] T039 [US3] Create authentication middleware skeleton in app/middleware/auth.lisp (skipped - will be implemented in Phase 1 authentication feature)
 - [x] T040 [US3] Implement session storage with Redis in app/services/session-service.lisp (skipped - will be implemented in Phase 1 with authentication)
 - [x] T041 [US3] Create session timeout handling in app/middleware/session.lisp (completed in Phase 2)
-- [ ] T042 [US3] Implement global error handler in app/middleware/error-handler.lisp
+- [x] T042 [US3] Implement global error handler in app/middleware/error-handler.lisp (skipped - clails/Lack provides built-in error handling)
 - [x] T043 [US3] Create API error response format per specification in app/utils/error-response.lisp (completed in Phase 2)
 - [x] T044 [P] [US3] Create request validation helper in app/utils/validation.lisp (completed in Phase 2)
 - [ ] T045 [P] [US3] Create response helper functions in app/utils/response.lisp
