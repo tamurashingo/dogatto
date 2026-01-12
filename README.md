@@ -1,11 +1,19 @@
 # dogatto
 
-A web application built with [clails](https://github.com/tamurashingo/clails) framework.
+A tag-based TODO management web application built with [clails](https://github.com/tamurashingo/clails) framework.
 
 ## Prerequisites
 
 - Docker
 - Docker Compose
+
+## Documentation
+
+- [Contributing Guide](CONTRIBUTING.md) - Development workflow and guidelines
+- [Environment Variables](docs/environment.md) - Configuration options
+- [Database Schema](docs/database.md) - Database structure and design
+- [API Conventions](docs/api-conventions.md) - REST API standards
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
 
 ## Getting Started
 
