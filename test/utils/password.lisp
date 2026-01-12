@@ -3,10 +3,11 @@
 (defpackage #:dogatto-test/utils/password
   (:use #:cl
         #:rove
+        #:clails/test
         #:dogatto/utils/password))
 (in-package #:dogatto-test/utils/password)
 
-(deftest test-hash-password
+(deftest-suite :utils test-hash-password
   (testing "hash-password returns a non-empty string"
     (let ((hash (hash-password "password123")))
       (ok (stringp hash))
@@ -18,7 +19,7 @@
       ;; Due to random salt, hashes should be different
       (ok (not (string= hash1 hash2))))))
 
-(deftest test-verify-password
+(deftest-suite :utils test-verify-password
   (testing "verify-password succeeds with correct password"
     (let ((hash (hash-password "password123")))
       (ok (verify-password "password123" hash))))
@@ -30,7 +31,7 @@
   (testing "verify-password handles invalid hash gracefully"
     (ok (not (verify-password "password123" "invalid-hash")))))
 
-(deftest test-validate-password
+(deftest-suite (:utils :validation) test-validate-password
   (testing "validate-password accepts valid password"
     (multiple-value-bind (valid errors)
         (validate-password "Password123")
@@ -61,7 +62,7 @@
       (ok (not valid))
       (ok (>= (length errors) 2)))))
 
-(deftest test-integration
+(deftest-suite (:utils :integration) test-integration
   (testing "full password workflow"
     (let ((password "SecurePass123"))
       ;; Validate

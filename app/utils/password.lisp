@@ -19,18 +19,21 @@
 
    Takes a plain text password and returns a secure hash that can be
    safely stored in the database. Uses PBKDF2 with 10000 iterations
-   and a random salt for each password.
+   and a random salt for each password. The result contains both the
+   salt and the hash, encoded as a hex string.
 
    @param password [string] The plain text password to hash
-   @return [string] Base64-encoded hash with embedded salt
+   @return [string] Hex-encoded hash with embedded salt
    "
   (let* ((password-octets (string-to-octets password :encoding :utf-8))
          (salt (make-random-salt))
          (hash (pbkdf2-hash-password password-octets
                                      :salt salt
                                      :digest :sha256
-                                     :iterations 10000)))
-    (ironclad:byte-array-to-hex-string hash)))
+                                     :iterations 10000))
+         ;; Store salt (first 16 bytes) and hash together
+         (salt-and-hash (concatenate '(vector (unsigned-byte 8)) salt hash)))
+    (ironclad:byte-array-to-hex-string salt-and-hash)))
 
 (defun verify-password (password hash)
   "Verifies a password against a stored hash.
@@ -39,13 +42,22 @@
    Returns T if the password matches, NIL otherwise.
 
    @param password [string] The plain text password to verify
-   @param hash [string] The stored password hash
+   @param hash [string] The stored password hash (hex-encoded salt+hash)
    @return [boolean] T if password matches, NIL otherwise
    "
   (handler-case
       (let* ((password-octets (string-to-octets password :encoding :utf-8))
-             (stored-hash (ironclad:hex-string-to-byte-array hash)))
-        (pbkdf2-check-password password-octets stored-hash))
+             (salt-and-hash (ironclad:hex-string-to-byte-array hash))
+             ;; Extract salt (first 16 bytes) and hash (remaining bytes)
+             (salt (subseq salt-and-hash 0 16))
+             (stored-hash (subseq salt-and-hash 16))
+             ;; Compute hash with the extracted salt
+             (computed-hash (pbkdf2-hash-password password-octets
+                                                  :salt salt
+                                                  :digest :sha256
+                                                  :iterations 10000)))
+        ;; Compare the hashes
+        (ironclad:constant-time-equal stored-hash computed-hash))
     (error () nil)))
 
 (defun validate-password (password)
