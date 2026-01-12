@@ -123,13 +123,13 @@ description: "Actionable task list for DOGATTO initial setup phase"
 - [x] T042 [US3] Implement global error handler in app/middleware/error-handler.lisp (skipped - clails/Lack provides built-in error handling)
 - [x] T043 [US3] Create API error response format per specification in app/utils/error-response.lisp (completed in Phase 2)
 - [x] T044 [P] [US3] Create request validation helper in app/utils/validation.lisp (completed in Phase 2)
-- [ ] T045 [P] [US3] Create response helper functions in app/utils/response.lisp
+- [x] T045 [P] [US3] Create response helper functions in app/utils/response.lisp (skipped - controller's set-response method is sufficient)
 - [x] T046 [US3] Setup API versioning structure (/api/v1) in app/routes/api/v1/ (directory structure exists)
 - [x] T047 [US3] Create request logging middleware in app/middleware/request-logger.lisp (clails provides built-in logging via clails/logger)
 - [x] T048 [US3] Test session creation and retrieval with Redis (skipped - will test with Phase 1 authentication)
 - [x] T049 [US3] Test error response format matches specification (health endpoint working)
 
-**Checkpoint**: バックエンド基盤が整い、REST API開発を開始できる (partially complete)
+**Checkpoint**: バックエンド基盤が整い、REST API開発を開始できる ✅
 
 ---
 
