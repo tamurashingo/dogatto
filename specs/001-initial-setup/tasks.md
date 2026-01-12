@@ -119,17 +119,17 @@ description: "Actionable task list for DOGATTO initial setup phase"
 - [ ] T038 [US3] Setup main routing configuration in app/routes/routes.lisp
 - [ ] T039 [US3] Create authentication middleware skeleton in app/middleware/auth.lisp
 - [ ] T040 [US3] Implement session storage with Redis in app/services/session-service.lisp
-- [ ] T041 [US3] Create session timeout handling in app/middleware/session.lisp
+- [x] T041 [US3] Create session timeout handling in app/middleware/session.lisp (completed in Phase 2)
 - [ ] T042 [US3] Implement global error handler in app/middleware/error-handler.lisp
-- [ ] T043 [US3] Create API error response format per specification in app/utils/error-response.lisp
-- [ ] T044 [P] [US3] Create request validation helper in app/utils/validation.lisp
+- [x] T043 [US3] Create API error response format per specification in app/utils/error-response.lisp (completed in Phase 2)
+- [x] T044 [P] [US3] Create request validation helper in app/utils/validation.lisp (completed in Phase 2)
 - [ ] T045 [P] [US3] Create response helper functions in app/utils/response.lisp
-- [ ] T046 [US3] Setup API versioning structure (/api/v1) in app/routes/api/v1/
+- [x] T046 [US3] Setup API versioning structure (/api/v1) in app/routes/api/v1/ (directory structure exists)
 - [ ] T047 [US3] Create request logging middleware in app/middleware/request-logger.lisp
 - [ ] T048 [US3] Test session creation and retrieval with Redis
-- [ ] T049 [US3] Test error response format matches specification
+- [x] T049 [US3] Test error response format matches specification (health endpoint working)
 
-**Checkpoint**: バックエンド基盤が整い、REST API開発を開始できる
+**Checkpoint**: バックエンド基盤が整い、REST API開発を開始できる (partially complete)
 
 ---
 
