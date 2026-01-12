@@ -41,6 +41,8 @@ ros run
   - https://github.com/tamurashingo/clails/blob/develop/document/testing.md
 - task
   - https://github.com/tamurashingo/clails/blob/develop/document/task.md
+- logging
+  - https://github.com/tamurashingo/clails/blob/develop/document/logging.md
 
 ### 全体
 
