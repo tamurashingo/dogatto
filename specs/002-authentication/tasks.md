@@ -6,30 +6,30 @@
 
 ---
 
-## Phase 1: バックエンド - パスワードハッシュ化とユーティリティ
+## Phase 1: バックエンド - パスワードハッシュ化とユーティリティ ✅
 
 **目的**: パスワードを安全に処理するためのユーティリティを実装
 
-- [ ] T001 [P1] ironclad、babelをdogatto.asdに追加
-- [ ] T002 [P1] app/utils/password.lispを作成
-- [ ] T003 [P1] hash-password関数を実装（bcrypt/PBKDF2）
-- [ ] T004 [P1] verify-password関数を実装
-- [ ] T005 [P1] validate-password関数を実装（長さ、複雑さチェック）
-- [ ] T006 [P1] パスワードユーティリティのテストを作成
+- [x] T001 [P1] ironclad、babelをdogatto.asdに追加
+- [x] T002 [P1] app/utils/password.lispを作成
+- [x] T003 [P1] hash-password関数を実装（bcrypt/PBKDF2）
+- [x] T004 [P1] verify-password関数を実装
+- [x] T005 [P1] validate-password関数を実装（長さ、複雑さチェック）
+- [x] T006 [P1] パスワードユーティリティのテストを作成
 
 ---
 
-## Phase 2: バックエンド - セッション管理
+## Phase 2: バックエンド - セッション管理 ✅
 
 **目的**: Redisを使用したセッションストレージを実装
 
-- [ ] T007 [P1] app/utils/session.lispを作成
-- [ ] T008 [P1] create-session関数を実装（Redisに保存）
-- [ ] T009 [P1] get-session関数を実装（Redisから取得）
-- [ ] T010 [P1] delete-session関数を実装
-- [ ] T011 [P1] session-valid?関数を実装（有効期限チェック）
-- [ ] T012 [P1] generate-session-id関数を実装（UUID）
-- [ ] T013 [P1] セッションユーティリティのテストを作成
+- [x] T007 [P1] app/utils/session.lispを作成
+- [x] T008 [P1] create-session関数を実装（Redisに保存）
+- [x] T009 [P1] get-session関数を実装（Redisから取得）
+- [x] T010 [P1] delete-session関数を実装
+- [x] T011 [P1] session-valid?関数を実装（有効期限チェック）
+- [x] T012 [P1] generate-session-id関数を実装（UUID）
+- [x] T013 [P1] セッションユーティリティのテストを作成
 
 ---
 
