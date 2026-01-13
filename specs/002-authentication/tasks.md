@@ -92,16 +92,16 @@
 
 ---
 
-## Phase 6: バックエンド - ルーティング設定
+## Phase 6: バックエンド - ルーティング設定 ✅
 
 **目的**: 認証エンドポイントをルーティングに追加
 
-- [ ] T033 [P1] app/config/environment.lispに認証ルートを追加
+- [x] T033 [P1] app/config/environment.lispに認証ルートを追加
   - POST /api/v1/auth/register
   - POST /api/v1/auth/login
   - POST /api/v1/auth/logout
   - GET /api/v1/auth/me
-- [ ] T034 [P1] application-loaderに認証関連ファイルを追加
+- [x] T034 [P1] application-loaderに認証関連ファイルを追加
 
 ---
 
