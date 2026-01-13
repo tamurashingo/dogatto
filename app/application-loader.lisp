@@ -13,5 +13,6 @@
   (:import-from #:dogatto/utils/session)
   (:import-from :dogatto/controllers/health-controller)
   (:import-from :dogatto/controllers/pages-controller)
-  (:import-from :dogatto/views/pages/show/package))
+  (:import-from :dogatto/views/pages/show/package)
+  (:import-from :dogatto/models/user))
 (in-package #:dogatto/application-loader)

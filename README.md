@@ -117,6 +117,9 @@ Build output goes to `public/assets/`.
 | `make db.migrate` | Run pending migrations |
 | `make db.rollback` | Rollback the last migration |
 | `make db.seed` | Load seed data |
+| `make db.test.create` | Create test database |
+| `make db.test.migrate` | Run migrations for test database |
+| `make test` | Run tests |
 | `make front-dev` | Start frontend dev server with hot reload |
 | `make front-build` | Build frontend for production |
 | `make front-preview` | Preview production build |
@@ -140,6 +143,8 @@ Build output goes to `public/assets/`.
 │   ├── redis/          # Redis configuration
 │   └── run-dev.sh      # Application startup script
 ├── docker-compose.yml  # Docker Compose configuration
+├── .env.example        # Environment variables template
+├── .env.test           # Test environment variables
 ├── front/              # Frontend React application
 │   ├── src/
 │   │   ├── api/        # API client
@@ -173,6 +178,35 @@ Default settings:
 - Port: `6379`
 
 You can override these settings using environment variables in docker-compose.yml.
+
+## Testing
+
+### Running Tests
+
+Before running tests for the first time, set up the test database:
+
+```bash
+make db.test.create
+make db.test.migrate
+```
+
+Run all tests:
+
+```bash
+make test
+```
+
+Tests run in a separate test environment (`CLAILS_ENV=test`) with its own database (`dogatto_test`). This ensures that test data doesn't interfere with development data.
+
+The test configuration is located in `.env.test`.
+
+### Continuous Integration
+
+Tests are automatically run on GitHub Actions for:
+- Pushes to `main`, `develop`, and feature branches
+- Pull requests to `main` and `develop`
+
+The CI workflow automatically sets up the test database and runs migrations before executing tests.
 
 ## Troubleshooting
 
