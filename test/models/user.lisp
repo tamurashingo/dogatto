@@ -4,7 +4,14 @@
   (:use #:cl
         #:rove
         #:clails/test
-        #:dogatto/models/user))
+        #:dogatto/models/user)
+  (:import-from #:clails/model
+                #:ref
+                #:ref-error
+                #:has-error-p
+                #:make-record
+                #:save
+                #:destroy))
 (in-package #:dogatto-test/models/user)
 
 (deftest-suite :model test-find-user-by-email
@@ -24,7 +31,7 @@
         (ok (string= (ref found-user :email) test-email) "Email should match"))
       
       ;; Cleanup
-      (clails/model/base-model:delete-record user)))
+      (destroy user)))
   
   (testing "find-user-by-email returns nil when email does not exist"
     (let ((found-user (find-user-by-email "nonexistent@example.com")))
@@ -46,7 +53,7 @@
         (ok (= (ref found-user :id) user-id) "ID should match"))
       
       ;; Cleanup
-      (clails/model/base-model:delete-record user)))
+      (destroy user)))
   
   (testing "find-user-by-id returns nil when ID does not exist"
     (let ((found-user (find-user-by-id 999999)))
@@ -66,7 +73,7 @@
       (ok (string= (ref user :registration-status) "provisional") "Default status should be provisional")
       
       ;; Cleanup
-      (clails/model/base-model:delete-record user)))
+      (destroy user)))
   
   (testing "create-user with all optional parameters"
     (let* ((test-ulid "01234567890123456789012348")
@@ -85,7 +92,7 @@
       (ok (string= (ref user :registration-token) "token123") "Token should match")
       
       ;; Cleanup
-      (clails/model/base-model:delete-record user)))
+      (destroy user)))
   
   (testing "create-user fails with missing required fields"
     (let ((user (create-user :username ""
@@ -105,7 +112,7 @@
       (ok (user-exists-p test-email) "Should return T for existing email")
       
       ;; Cleanup
-      (clails/model/base-model:delete-record user)))
+      (destroy user)))
   
   (testing "user-exists-p returns NIL when user does not exist"
     (ok (not (user-exists-p "doesnotexist@example.com"))
@@ -118,8 +125,8 @@
                             :ulid "01234567890123456789012351"
                             :username "")))
       (ok (null (save user)) "Save should fail")
-      (ok (clails/model/base-model:has-error-p user) "Should have errors")
-      (ok (clails/model/base-model:ref-error user :username)
+      (ok (has-error-p user) "Should have errors")
+      (ok (ref-error user :username)
           "Should have username error")))
   
   (testing "validation catches missing email"
@@ -128,8 +135,8 @@
                             :ulid "01234567890123456789012352"
                             :email "")))
       (ok (null (save user)) "Save should fail")
-      (ok (clails/model/base-model:has-error-p user) "Should have errors")
-      (ok (clails/model/base-model:ref-error user :email)
+      (ok (has-error-p user) "Should have errors")
+      (ok (ref-error user :email)
           "Should have email error")))
   
   (testing "validation catches missing ulid"
@@ -138,6 +145,6 @@
                             :email "test@example.com"
                             :ulid "")))
       (ok (null (save user)) "Save should fail")
-      (ok (clails/model/base-model:has-error-p user) "Should have errors")
-      (ok (clails/model/base-model:ref-error user :ulid)
+      (ok (has-error-p user) "Should have errors")
+      (ok (ref-error user :ulid)
           "Should have ulid error"))))

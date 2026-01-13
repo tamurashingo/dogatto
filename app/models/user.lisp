@@ -2,16 +2,20 @@
 (in-package #:cl-user)
 (defpackage #:dogatto/models/user
   (:use #:cl)
-  (:import-from #:clails/model/base-model
+  (:import-from #:clails/model
                 #:<base-model>
                 #:defmodel
                 #:query
                 #:execute-query
                 #:make-record
                 #:save
-                #:ref
+                #:ref)
+  (:import-from #:clails/model/base-model
                 #:validate
-                #:setf-error)
+                #:ref-error
+                #:has-error-p)
+  (:import-from #:clails/model
+                #:destroy)
   (:export #:<user>
            #:find-user-by-email
            #:find-user-by-id
@@ -96,12 +100,12 @@
    "
   (when (or (null (ref user :username))
             (string= (ref user :username) ""))
-    (setf-error user :username "Username is required"))
+    (setf (ref-error user :username) "Username is required"))
 
   (when (or (null (ref user :email))
             (string= (ref user :email) ""))
-    (setf-error user :email "Email is required"))
+    (setf (ref-error user :email) "Email is required"))
 
   (when (or (null (ref user :ulid))
             (string= (ref user :ulid) ""))
-    (setf-error user :ulid "ULID is required")))
+    (setf (ref-error user :ulid) "ULID is required")))
