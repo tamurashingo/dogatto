@@ -15,12 +15,20 @@
 (setf clails/environment:*project-environment* :develop)
 
 ;; routing tables
-;; API routes
 (setf clails/environment:*routing-tables*
   '((:path "/health"
      :controller "dogatto/controllers/health-controller:<health-controller>")
     (:path "/"
-     :controller "dogatto/controllers/pages-controller:<pages-controller>")))
+     :controller "dogatto/controllers/pages-controller:<pages-controller>")
+    ;; Authentication endpoints
+    (:path "/api/v1/auth/register"
+     :controller "dogatto/controllers/auth-controller:<auth-register-controller>")
+    (:path "/api/v1/auth/login"
+     :controller "dogatto/controllers/auth-controller:<auth-login-controller>")
+    (:path "/api/v1/auth/logout"
+     :controller "dogatto/controllers/auth-controller:<auth-logout-controller>")
+    (:path "/api/v1/auth/me"
+     :controller "dogatto/controllers/auth-controller:<auth-me-controller>")))
 
 ;; startup hooks
 (push "dogatto/config/logger:initialize-logger" clails/environment:*startup-hooks*)
