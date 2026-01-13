@@ -46,6 +46,10 @@ db.rollback:
 db.seed:
 	docker compose run --rm --entrypoint clails dogatto-app db:seed
 
+.PHONY: test
+test:
+	docker compose exec dogatto-app clails test
+
 
 .PHONY: front-dev front-build front-preview
 front-dev:
