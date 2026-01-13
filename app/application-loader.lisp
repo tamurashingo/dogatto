@@ -14,5 +14,6 @@
   (:import-from :dogatto/controllers/health-controller)
   (:import-from :dogatto/controllers/pages-controller)
   (:import-from :dogatto/views/pages/show/package)
-  (:import-from :dogatto/models/user))
+  (:import-from :dogatto/models/user)
+  (:import-from :dogatto/controllers/auth-controller))
 (in-package #:dogatto/application-loader)

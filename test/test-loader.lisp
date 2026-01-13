@@ -7,5 +7,6 @@
   (:import-from #:dogatto-test/controllers/pages-controller)
   (:import-from #:dogatto-test/utils/password)
   (:import-from #:dogatto-test/utils/session)
-  (:import-from :dogatto-test/models/user))
+  (:import-from :dogatto-test/models/user)
+  (:import-from :dogatto-test/controllers/auth-controller))
 (in-package #:dogatto-test/test-loader)

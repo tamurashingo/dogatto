@@ -49,31 +49,31 @@
 
 ---
 
-## Phase 4: バックエンド - 認証コントローラー
+## Phase 4: バックエンド - 認証コントローラー ✅
 
 **目的**: 認証エンドポイントを実装
 
-- [ ] T023 [P1] clails generate:controller authでコントローラーを生成
-- [ ] T024 [P1] POST /api/v1/auth/register エンドポイントを実装
+- [x] T023 [P1] clails generate:controller authでコントローラーを生成
+- [x] T024 [P1] POST /api/v1/auth/register エンドポイントを実装
   - 入力バリデーション
   - メール重複チェック
   - パスワードハッシュ化
   - ユーザー作成
   - レスポンス（パスワードハッシュを除外）
-- [ ] T025 [P1] POST /api/v1/auth/login エンドポイントを実装
+- [x] T025 [P1] POST /api/v1/auth/login エンドポイントを実装
   - メールでユーザーを検索
   - パスワード検証
   - セッション作成
   - Cookieの設定
   - ユーザー情報を返す
-- [ ] T026 [P1] POST /api/v1/auth/logout エンドポイントを実装
+- [x] T026 [P1] POST /api/v1/auth/logout エンドポイントを実装
   - セッションID取得
   - セッション削除
   - Cookieクリア
-- [ ] T027 [P1] GET /api/v1/auth/me エンドポイントを実装
+- [x] T027 [P1] GET /api/v1/auth/me エンドポイントを実装
   - セッションからユーザーID取得
   - ユーザー情報を返す
-- [ ] T028 [P1] 認証コントローラーのテストを作成
+- [x] T028 [P1] 認証コントローラーのテストを作成
 
 ---
 
