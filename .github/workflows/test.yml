@@ -1,0 +1,54 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - '0*-**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build and start services
+        run: docker compose --env-file .env.ci up -d --wait
+      
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be healthy..."
+          timeout 60 bash -c 'until docker compose --env-file .env.ci ps | grep -q "healthy"; do sleep 2; done'
+      
+      - name: Run tests
+        run: docker compose --env-file .env.ci exec -T dogatto-app clails test
+      
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "=== Docker Compose Services ==="
+          docker compose --env-file .env.ci ps
+          echo "=== App Logs ==="
+          docker compose --env-file .env.ci logs dogatto-app
+          echo "=== MySQL Logs ==="
+          docker compose --env-file .env.ci logs mysql
+          echo "=== Redis Logs ==="
+          docker compose --env-file .env.ci logs redis
+      
+      - name: Cleanup
+        if: always()
+        run: docker compose --env-file .env.ci down -v
+      
+      - name: Test summary
+        if: always()
+        run: |
+          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "Tests completed for \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY

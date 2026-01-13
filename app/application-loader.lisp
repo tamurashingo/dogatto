@@ -8,6 +8,7 @@
   (:import-from #:dogatto/controllers/application-controller)
   (:import-from #:dogatto/views/package)
   (:import-from #:dogatto/helpers/asset-helper)
+  (:import-from #:dogatto/utils/password)
   (:import-from :dogatto/controllers/health-controller)
   (:import-from :dogatto/controllers/pages-controller)
   (:import-from :dogatto/views/pages/show/package))

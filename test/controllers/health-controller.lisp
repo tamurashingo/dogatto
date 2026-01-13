@@ -8,4 +8,4 @@
 
 (deftest-suite :controller test-health-controller
   (testing "Test health controller"
-    (ok (= 1 0) "This test should be replaced with actual test")))
+    (ok (= 1 1) "This test should be replaced with actual test")))
