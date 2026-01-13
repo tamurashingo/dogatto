@@ -28,8 +28,14 @@ jobs:
           echo "Waiting for services to be healthy..."
           timeout 60 bash -c 'until docker compose --env-file .env.ci ps | grep -q "healthy"; do sleep 2; done'
       
+      - name: Create test database
+        run: docker compose --env-file .env.ci run --rm -e CLAILS_ENV=test --entrypoint clails dogatto-app db:create
+      
+      - name: Run migrations for test
+        run: docker compose --env-file .env.ci run --rm -e CLAILS_ENV=test --entrypoint clails dogatto-app db:migrate
+      
       - name: Run tests
-        run: docker compose --env-file .env.ci exec -T dogatto-app clails test
+        run: docker compose --env-file .env.ci exec -T -e CLAILS_ENV=test dogatto-app clails test
       
       - name: Show logs on failure
         if: failure()

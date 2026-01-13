@@ -46,6 +46,17 @@ db.rollback:
 db.seed:
 	docker compose run --rm --entrypoint clails dogatto-app db:seed
 
+.PHONY: db.test.create db.test.migrate
+db.test.create:
+	docker compose run --rm -e CLAILS_ENV=test --entrypoint clails dogatto-app db:create
+
+db.test.migrate:
+	docker compose run --rm -e CLAILS_ENV=test --entrypoint clails dogatto-app db:migrate
+
+.PHONY: test
+test:
+	docker compose exec -e CLAILS_ENV=test dogatto-app clails test
+
 
 .PHONY: front-dev front-build front-preview
 front-dev:

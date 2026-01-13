@@ -1,5 +1,6 @@
 ; -*- mode: lisp -*-
 (in-package #:cl-user)
+(asdf:register-system-packages "cl-redis" '(:redis))
 (defpackage #:dogatto-system
   (:use #:asdf #:cl))
 (in-package #:dogatto-system)
@@ -15,6 +16,9 @@
                "swank"
                "ironclad"
                "babel"
+               "cl-redis"
+               "uuid"
+               "local-time"
                "dogatto/application-loader")
   :in-order-to ((test-op (test-op "dogatto-test"))))
 
