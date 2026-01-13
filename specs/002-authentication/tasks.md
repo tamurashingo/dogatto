@@ -77,18 +77,18 @@
 
 ---
 
-## Phase 5: バックエンド - 認証ミドルウェア
+## Phase 5: バックエンド - 認証ミドルウェア ✅
 
 **目的**: 保護されたルートのためのミドルウェアを実装
 
-- [ ] T029 [P1] app/middleware/authentication.lispを作成
-- [ ] T030 [P1] require-authentication関数を実装
+- [x] T029 [P1] app/middleware/authentication.lispを作成
+- [x] T030 [P1] require-authentication関数を実装
   - Cookieからセッションid取得
   - セッション検証
   - envにユーザー情報を追加
   - 未認証の場合は401を返す
-- [ ] T031 [P1] get-current-userヘルパー関数を実装
-- [ ] T032 [P1] 認証ミドルウェアのテストを作成
+- [x] T031 [P1] get-current-userヘルパー関数を実装
+- [x] T032 [P1] 認証ミドルウェアのテストを作成
 
 ---
 
