@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import App from './App';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
 /**
  * Application router configuration.
@@ -20,7 +21,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/register',
-    element: <div>Register Page (TODO)</div>,
+    element: <RegisterPage />,
   },
   {
     path: '/todos',
