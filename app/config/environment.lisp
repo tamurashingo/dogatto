@@ -18,9 +18,7 @@
 (setf clails/environment:*routing-tables*
   '((:path "/health"
      :controller "dogatto/controllers/health-controller:<health-controller>")
-    (:path "/"
-     :controller "dogatto/controllers/pages-controller:<pages-controller>")
-    ;; Authentication endpoints
+    ;; Authentication endpoints (must be before wildcard)
     (:path "/api/v1/auth/register"
      :controller "dogatto/controllers/auth-controller:<auth-register-controller>")
     (:path "/api/v1/auth/login"
@@ -28,7 +26,12 @@
     (:path "/api/v1/auth/logout"
      :controller "dogatto/controllers/auth-controller:<auth-logout-controller>")
     (:path "/api/v1/auth/me"
-     :controller "dogatto/controllers/auth-controller:<auth-me-controller>")))
+     :controller "dogatto/controllers/auth-controller:<auth-me-controller>")
+    ;; SPA wildcard route (must be last)
+    ;; All non-API routes return the same HTML for client-side routing
+    (:path "/*"
+     :controller "dogatto/controllers/pages-controller:<pages-controller>"
+     :scanner "^/.*$")))
 
 ;; startup hooks
 (push "dogatto/config/logger:initialize-logger" clails/environment:*startup-hooks*)

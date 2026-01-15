@@ -5,7 +5,7 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/assets/',
+  base: process.env.NODE_ENV === 'production' ? '/assets/' : '/',
   build: {
     outDir: path.resolve(__dirname, '../public/assets'),
     emptyOutDir: true,
