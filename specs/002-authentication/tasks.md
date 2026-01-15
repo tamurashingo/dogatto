@@ -133,16 +133,25 @@
 
 ---
 
-## Phase 8: フロントエンド - 認証API
+## Phase 8: フロントエンド - 認証API ✅
 
 **目的**: 認証APIクライアントを実装
 
-- [ ] T043 [P1] front/src/api/auth.tsを作成
-- [ ] T044 [P1] register関数を実装
-- [ ] T045 [P1] login関数を実装
-- [ ] T046 [P1] logout関数を実装
-- [ ] T047 [P1] getCurrentUser関数を実装
-- [ ] T048 [P1] APIエラーハンドリングを実装
+- [x] T043 [P1] front/src/api/auth.tsを作成
+- [x] T044 [P1] register関数を実装
+- [x] T045 [P1] login関数を実装
+- [x] T046 [P1] logout関数を実装
+- [x] T047 [P1] getCurrentUser関数を実装
+- [x] T048 [P1] APIエラーハンドリングを実装
+
+**追加実装:**
+- [x] テスト環境構築（Vitest + Testing Library）
+- [x] auth.test.ts作成（8テスト、全て合格）
+- [x] テストスクリプト追加（test, test:ui, test:run）
+- [x] error.test.ts作成（15テスト、全て合格）
+- [x] client.test.ts作成（16テスト、全て合格）
+- [x] fetcher.test.ts作成（12テスト、全て合格）
+- [x] **合計51テスト、全て合格（API層完全カバー）**
 
 ---
 
