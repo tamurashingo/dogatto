@@ -208,15 +208,15 @@
 
 ---
 
-## Phase 12: フロントエンド - ProtectedRoute
+## Phase 12: フロントエンド - ProtectedRoute ✅
 
 **目的**: 認証が必要なルートを保護
 
-- [ ] T070 [P1] front/src/components/ProtectedRoute.tsxを作成
-- [ ] T071 [P1] 認証状態をチェック
-- [ ] T072 [P1] 未認証の場合は/loginにリダイレクト
-- [ ] T073 [P1] ローディング中の表示
-- [ ] T074 [P1] ルーターでProtectedRouteを使用
+- [x] T070 [P1] front/src/components/ProtectedRoute.tsxを作成
+- [x] T071 [P1] 認証状態をチェック
+- [x] T072 [P1] 未認証の場合は/loginにリダイレクト
+- [x] T073 [P1] ローディング中の表示
+- [x] T074 [P1] ルーターでProtectedRouteを使用
 
 ---
 

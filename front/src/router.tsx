@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import App from './App';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 /**
  * Application router configuration.
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/todos',
-    element: <div>Todos Page (TODO)</div>,
+    element: (
+      <ProtectedRoute>
+        <div>Todos Page (TODO)</div>
+      </ProtectedRoute>
+    ),
   },
 ]);
