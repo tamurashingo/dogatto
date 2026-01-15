@@ -194,17 +194,17 @@
 
 ---
 
-## Phase 11: フロントエンド - AuthContext更新
+## Phase 11: フロントエンド - AuthContext更新 ✅
 
 **目的**: 既存のAuthContextを実際の認証と統合
 
-- [ ] T063 [P1] AuthContextに認証API統合
-- [ ] T064 [P1] login関数を実装
-- [ ] T065 [P1] logout関数を実装
-- [ ] T066 [P1] refreshUser関数を実装（getCurrentUser呼び出し）
-- [ ] T067 [P1] ローディング状態を追加
-- [ ] T068 [P1] エラー状態を追加
-- [ ] T069 [P1] アプリ起動時に現在のユーザーをロード
+- [x] T063 [P1] AuthContextに認証API統合
+- [x] T064 [P1] login関数を実装
+- [x] T065 [P1] logout関数を実装
+- [x] T066 [P1] refreshUser関数を実装（getCurrentUser呼び出し）
+- [x] T067 [P1] ローディング状態を追加
+- [x] T068 [P1] エラー状態を追加
+- [x] T069 [P1] アプリ起動時に現在のユーザーをロード
 
 ---
 
