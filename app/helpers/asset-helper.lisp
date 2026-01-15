@@ -4,13 +4,38 @@
   (:use #:cl)
   (:import-from #:jonathan
                 #:parse)
+  (:import-from #:clails/environment
+                #:*project-environment*)
   (:export #:asset-path
-           #:reload-manifest))
+           #:reload-manifest
+           #:get-vite-dev-server-url))
 
 (in-package #:dogatto/helpers/asset-helper)
 
 (defvar *manifest* nil
   "Cached Vite manifest data.")
+
+(defvar *vite-dev-server-url* nil
+  "Vite development server URL. Set from VITE_DEV_SERVER_URL environment variable.")
+
+(defun get-vite-dev-server-url ()
+  "Get the Vite development server URL from environment variable.
+
+   Reads VITE_DEV_SERVER_URL environment variable or returns default value.
+
+   @return [string] Vite development server URL (e.g., \"http://localhost:3000\")
+   "
+  (or *vite-dev-server-url*
+      (setf *vite-dev-server-url*
+            (or (uiop:getenv "VITE_DEV_SERVER_URL")
+                "http://localhost:3000"))))
+
+(defun production-environment-p ()
+  "Check if current environment is production.
+
+   @return [boolean] T if production, NIL otherwise
+   "
+  (eq *project-environment* :production))
 
 (defun load-manifest ()
   "Loads the Vite manifest.json file.
@@ -47,34 +72,45 @@
   *manifest*)
 
 (defun asset-path (path)
-  "Returns the hashed asset path for the given path.
+  "Returns the asset path based on the environment.
 
-   Takes a path like \"/assets/javascript/index.js\" and returns the
-   hashed version \"/assets/javascript/index-BsawTjHx.js\" by looking
-   up the Vite manifest.
+   In production: Returns the hashed asset path from Vite manifest.
+   In development/test: Returns the path pointing to Vite dev server.
 
-   @param path [string] Asset path (e.g., \"/assets/javascript/index.js\")
-   @return [string] Hashed asset path (e.g., \"/assets/javascript/index-BsawTjHx.js\")
-   @return [string] Original path if not found in manifest
+   @param path [string] Asset path (e.g., \"/assets/javascript/index.js\" or \"/assets/css/index.css\")
+   @return [string] Full URL or hashed path depending on environment
    "
-  (let ((manifest (ensure-manifest)))
-    (if manifest
-        ;; Extract the entry key from the path
-        ;; "/assets/javascript/index.js" -> look up "index.html" in manifest
-        (let ((entry (gethash "index.html" manifest)))
-          (if entry
-              (let ((file (gethash "file" entry)))
-                (cond
-                  ;; JavaScript file
-                  ((search "javascript" path)
-                   (concatenate 'string "/assets/" file))
-                  ;; CSS file
-                  ((search "css" path)
-                   (let ((css-files (gethash "css" entry)))
-                     (if (and css-files (> (length css-files) 0))
-                         (concatenate 'string "/assets/" (elt css-files 0))
-                         path)))
-                  ;; Other files
-                  (t path)))
-              path))
-        path)))
+  (if (production-environment-p)
+      ;; Production: Use built assets with hash
+      (let ((manifest (ensure-manifest)))
+        (if manifest
+            ;; Extract the entry key from the path
+            ;; "/assets/javascript/index.js" -> look up "index.html" in manifest
+            (let ((entry (gethash "index.html" manifest)))
+              (if entry
+                  (let ((file (gethash "file" entry)))
+                    (cond
+                      ;; JavaScript file
+                      ((search "javascript" path)
+                       (concatenate 'string "/assets/" file))
+                      ;; CSS file
+                      ((search "css" path)
+                       (let ((css-files (gethash "css" entry)))
+                         (if (and css-files (> (length css-files) 0))
+                             (concatenate 'string "/assets/" (elt css-files 0))
+                             path)))
+                      ;; Other files
+                      (t path)))
+                  path))
+            path))
+      ;; Development/Test: Use Vite dev server
+      (let ((dev-server (get-vite-dev-server-url)))
+        (cond
+          ;; JavaScript file: Point to src/main.tsx
+          ((search "javascript" path)
+           (concatenate 'string dev-server "/src/main.tsx"))
+          ;; CSS file: Not needed in dev (Vite injects via JS)
+          ((search "css" path)
+           "")
+          ;; Other files
+          (t (concatenate 'string dev-server path))))))

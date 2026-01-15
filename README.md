@@ -2,6 +2,21 @@
 
 A tag-based TODO management web application built with [clails](https://github.com/tamurashingo/clails) framework.
 
+## Architecture
+
+dogatto is a **Full SPA (Single Page Application)** built with:
+- **Backend**: Common Lisp (clails framework) + MySQL + Redis
+- **Frontend**: React + TypeScript + Vite + React Router
+
+### Key Features
+
+- **Client-Side Routing**: React Router handles all page transitions in the browser
+- **REST API**: Backend provides JSON APIs under `/api/*`
+- **Universal HTML**: Server returns the same HTML for all non-API routes
+- **Fast Navigation**: No server requests needed for page transitions
+
+See [Architecture Documentation](docs/architecture.md) for detailed information about the routing flow and design decisions.
+
 ## Prerequisites
 
 - Docker
@@ -9,6 +24,7 @@ A tag-based TODO management web application built with [clails](https://github.c
 
 ## Documentation
 
+- [Architecture](docs/architecture.md) - Full SPA architecture and routing design
 - [Contributing Guide](CONTRIBUTING.md) - Development workflow and guidelines
 - [Environment Variables](docs/environment.md) - Configuration options
 - [Database Schema](docs/database.md) - Database structure and design
@@ -71,12 +87,16 @@ make front-dev
 
 This will start the Vite development server on http://localhost:3000
 
+**Note**: In development mode (`CLAILS_ENV=develop` or `test`), the backend server automatically references the Vite development server for frontend assets. The `VITE_DEV_SERVER_URL` environment variable (default: `http://localhost:3000`) controls this behavior.
+
 ### 5. Access the Application
 
 Open your browser and navigate to:
 ```
 http://localhost:5000
 ```
+
+The backend serves HTML that loads JavaScript from the Vite dev server (port 3000) in development mode.
 
 ## Development
 
@@ -89,9 +109,10 @@ Connect to the Swank server from your editor (Emacs/SLIME, Vim/Slimv, etc.):
 
 ### Frontend Development
 
-The frontend is built with React + TypeScript + Vite.
+The frontend is built with React + TypeScript + Vite and uses React Router for client-side routing.
 
 Source code is located in `front/src/`:
+- `router.tsx` - React Router configuration (route definitions)
 - `api/` - API client and error handling
 - `components/` - React components
 - `contexts/` - React contexts (e.g., AuthContext)
@@ -100,6 +121,12 @@ Source code is located in `front/src/`:
 - `types/` - TypeScript type definitions
 
 Build output goes to `public/assets/`.
+
+**Routing Architecture:**
+- All page transitions happen in the browser (no server requests)
+- Backend serves the same HTML for all non-API routes
+- React Router maps URLs to page components
+- See [Architecture Documentation](docs/architecture.md) for details
 
 ### Available Make Commands
 
