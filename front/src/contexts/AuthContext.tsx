@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { apiClient } from '../api/client';
-import type { User } from '../types/user';
+import { authApi } from '../api/auth';
+import type { User, LoginRequest } from '../api/auth';
+import { ApiError } from '../api/error';
 
 /**
  * Authentication state.
@@ -10,15 +11,17 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  error: string | null;
 }
 
 /**
  * Authentication context value.
  */
 interface AuthContextValue extends AuthState {
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -43,34 +46,66 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
     user: null,
     isAuthenticated: false,
     isLoading: true,
+    error: null,
   });
 
   /**
-   * Logs in a user with username and password.
+   * Loads the current user on app startup.
+   */
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const user = await authApi.getCurrentUser();
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+        });
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  /**
+   * Logs in a user with email and password.
    *
-   * @param username [string] User's username
+   * @param email [string] User's email
    * @param password [string] User's password
    * @throws [ApiError] When login fails
    */
-  const login = useCallback(async (username: string, password: string): Promise<void> => {
-    setState((prev) => ({ ...prev, isLoading: true }));
+  const login = useCallback(async (email: string, password: string): Promise<void> => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      const response = await apiClient.post<{ user: User; token: string }>('/auth/login', {
-        username,
+      const loginData: LoginRequest = {
+        email,
         password,
-      });
+      };
       
-      apiClient.setAuthToken(response.data.token);
+      const user = await authApi.login(loginData);
       setState({
-        user: response.data.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
+        error: null,
       });
     } catch (error) {
+      const errorMessage = error instanceof ApiError 
+        ? error.message 
+        : 'Login failed';
       setState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        error: errorMessage,
       });
       throw error;
     }
@@ -82,14 +117,18 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
    * @throws [ApiError] When logout fails
    */
   const logout = useCallback(async (): Promise<void> => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      await apiClient.post('/auth/logout');
+      await authApi.logout();
+    } catch (error) {
+      // Continue with logout even if API call fails
+      console.error('Logout API call failed:', error);
     } finally {
-      apiClient.clearAuthToken();
       setState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        error: null,
       });
     }
   }, []);
@@ -100,23 +139,34 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
    * @throws [ApiError] When refresh fails
    */
   const refreshUser = useCallback(async (): Promise<void> => {
-    setState((prev) => ({ ...prev, isLoading: true }));
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      const response = await apiClient.get<{ user: User }>('/auth/me');
+      const user = await authApi.getCurrentUser();
       setState({
-        user: response.data.user,
+        user,
         isAuthenticated: true,
         isLoading: false,
+        error: null,
       });
     } catch (error) {
-      apiClient.clearAuthToken();
+      const errorMessage = error instanceof ApiError 
+        ? error.message 
+        : 'Failed to refresh user';
       setState({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        error: errorMessage,
       });
       throw error;
     }
+  }, []);
+
+  /**
+   * Clears the error state.
+   */
+  const clearError = useCallback(() => {
+    setState((prev) => ({ ...prev, error: null }));
   }, []);
 
   const value: AuthContextValue = {
@@ -124,6 +174,7 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
     login,
     logout,
     refreshUser,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
