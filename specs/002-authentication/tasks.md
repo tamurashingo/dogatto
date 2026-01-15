@@ -148,6 +148,10 @@
 - [x] テスト環境構築（Vitest + Testing Library）
 - [x] auth.test.ts作成（8テスト、全て合格）
 - [x] テストスクリプト追加（test, test:ui, test:run）
+- [x] error.test.ts作成（15テスト、全て合格）
+- [x] client.test.ts作成（16テスト、全て合格）
+- [x] fetcher.test.ts作成（12テスト、全て合格）
+- [x] **合計51テスト、全て合格（API層完全カバー）**
 
 ---
 
