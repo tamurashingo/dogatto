@@ -3,7 +3,7 @@ import { ApiClient } from './client';
 import { ApiError } from './error';
 
 // Mock global fetch
-global.fetch = vi.fn();
+(globalThis as any).fetch = vi.fn();
 
 describe('ApiClient', () => {
   let client: ApiClient;
