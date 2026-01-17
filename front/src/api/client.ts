@@ -169,12 +169,15 @@ export class ApiClient {
    */
   private async request<T>(url: string, options: RequestInit): Promise<ApiResponse<T>> {
     try {
+      // Only include Content-Type header if there's a body
+      const headers = { ...this.defaultHeaders, ...options.headers };
+      if (!options.body && headers['Content-Type']) {
+        delete headers['Content-Type'];
+      }
+
       const response = await fetch(url, {
         ...options,
-        headers: {
-          ...this.defaultHeaders,
-          ...options.headers,
-        },
+        headers,
         credentials: 'same-origin',
       });
 
