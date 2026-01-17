@@ -10,16 +10,16 @@ TODO基本機能の実装タスクを定義します。Phase 2（認証システ
 
 **目的**: TODOデータモデルとデータベースマイグレーションを実装
 
-- [ ] T001 [P1] マイグレーションファイルを作成（create_todos_table）
+- [x] T001 [P1] マイグレーションファイルを作成（create_todos_table）
   - id, user_id, title, description, due_date, completed, created_at, updated_at
   - user_idのFOREIGN KEY制約
   - 適切なINDEX追加
-- [ ] T002 [P1] clails generate:model todoでモデルを生成（--no-migration）
-- [ ] T003 [P1] app/models/todo.lispにバリデーションを実装
+- [x] T002 [P1] clails generate:model todoでモデルを生成（--no-migration）
+- [x] T003 [P1] app/models/todo.lispにバリデーションを実装
   - title必須、1-255文字
   - descriptionは任意
   - due_dateは任意、有効な日付形式
-- [ ] T004 [P1] TODOモデルのテストを作成
+- [x] T004 [P1] TODOモデルのテストを作成
   - バリデーションテスト
   - CRUD操作テスト
 

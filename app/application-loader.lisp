@@ -23,5 +23,8 @@
                 #:<auth-register-controller>
                 #:<auth-login-controller>
                 #:<auth-logout-controller>
-                #:<auth-me-controller>))
+                #:<auth-me-controller>)
+  (:import-from :dogatto/controllers/todos-controller
+                #:<todos-list-controller>
+                #:<todo-item-controller>))
 (in-package #:dogatto/application-loader)

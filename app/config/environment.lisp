@@ -27,6 +27,11 @@
      :controller "dogatto/controllers/auth-controller:<auth-logout-controller>")
     (:path "/api/v1/auth/me"
      :controller "dogatto/controllers/auth-controller:<auth-me-controller>")
+    ;; TODO endpoints
+    (:path "/api/v1/todos"
+     :controller "dogatto/controllers/todos-controller:<todos-list-controller>")
+    (:path "/api/v1/todos/:id"
+     :controller "dogatto/controllers/todos-controller:<todo-item-controller>")
     ;; SPA wildcard route (must be last)
     ;; All non-API routes return the same HTML for client-side routing
     (:path "/*"
