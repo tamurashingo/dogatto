@@ -4,12 +4,18 @@
   (:use #:cl)
   (:import-from #:clails/middleware/core
                 #:add-middleware-before)
+  (:import-from #:dogatto/middleware/cors
+                #:cors-middleware)
   (:import-from #:dogatto/middleware/session
                 #:session-middleware)
   (:import-from #:dogatto/middleware/authentication
                 #:require-authentication))
 
 (in-package #:dogatto/config/middleware)
+
+;; Register CORS middleware first
+;; This handles cross-origin requests from frontend dev server
+(add-middleware-before #'cors-middleware)
 
 ;; Register session middleware
 ;; This provides session management for all routes

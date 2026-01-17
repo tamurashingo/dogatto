@@ -9,7 +9,16 @@ export interface ApiResponse<T> {
 }
 
 /**
- * API error response format.
+ * API error response format (backend format).
+ */
+interface BackendErrorResponse {
+  status: string;
+  message: string;
+  errors?: unknown;
+}
+
+/**
+ * API error response format (legacy format).
  */
 interface ErrorResponse {
   error: {
@@ -174,12 +183,25 @@ export class ApiClient {
 
       if (!response.ok) {
         if (isJson) {
-          const errorData = (await response.json()) as ErrorResponse;
+          const errorData = await response.json() as BackendErrorResponse | ErrorResponse;
+          
+          // Check if it's backend format
+          if ('status' in errorData && errorData.status === 'error') {
+            throw new ApiError(
+              errorData.message,
+              response.status,
+              undefined,
+              (errorData as BackendErrorResponse).errors
+            );
+          }
+          
+          // Legacy format
+          const legacyError = errorData as ErrorResponse;
           throw new ApiError(
-            errorData.error.message,
+            legacyError.error.message,
             response.status,
-            errorData.error.code,
-            errorData.error.details
+            legacyError.error.code,
+            legacyError.error.details
           );
         } else {
           throw new ApiError(

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authApi } from '../api/auth';
-import type { LoginRequest } from '../api/auth';
+import { useAuth } from '../contexts/AuthContext';
 import { ApiError } from '../api/error';
 
 /**
@@ -12,6 +11,7 @@ import { ApiError } from '../api/error';
  */
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -62,12 +62,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const loginData: LoginRequest = {
-        email,
-        password,
-      };
-
-      await authApi.login(loginData);
+      await login(email, password);
       
       // Redirect to todos page on success
       navigate('/todos');
