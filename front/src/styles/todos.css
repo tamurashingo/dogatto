@@ -1,0 +1,50 @@
+/* Todos Page Styles */
+
+.todos-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f7fafc 0%, #edf2f7 100%);
+}
+
+.main-content {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.main-content h1 {
+  color: #2d3748;
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.main-content p {
+  color: #718096;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .main-content h1 {
+    font-size: 1.875rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .todos-page {
+    background: linear-gradient(to bottom, #1a202c 0%, #2d3748 100%);
+  }
+
+  .main-content h1 {
+    color: #f7fafc;
+  }
+
+  .main-content p {
+    color: #a0aec0;
+  }
+}

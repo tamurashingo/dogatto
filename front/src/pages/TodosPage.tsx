@@ -1,4 +1,5 @@
 import Header from '../components/Header';
+import '../styles/todos.css';
 
 /**
  * Todos page component.
