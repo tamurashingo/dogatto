@@ -11,8 +11,11 @@
                 #:delete-todo
                 #:toggle-todo-status
                 #:<todo>)
-  (:import-from #:dogatto/middleware/authentication
-                #:get-current-user)
+  (:import-from #:dogatto/models/user
+                #:find-user-by-id)
+  (:import-from #:dogatto/utils/session
+                #:get-session
+                #:session-valid-p)
   (:import-from #:clails/model
                 #:ref)
   (:import-from #:jonathan
@@ -34,6 +37,40 @@
 (defclass <todo-complete-controller> (<rest-controller>)
   ()
   (:documentation "Controller for completing a todo (POST /todos/:id/complete)"))
+
+(defun get-cookie-value (headers cookie-name)
+  "Extract cookie value from request headers.
+
+   @param headers [hash-table] Request headers
+   @param cookie-name [string] Name of the cookie to extract
+   @return [string] Cookie value if found
+   @return [nil] If cookie not found
+   "
+  (let ((cookie-header (gethash "cookie" headers)))
+    (when cookie-header
+      (let* ((cookies (cl-ppcre:split ";\\s*" cookie-header))
+             (target-cookie (find-if (lambda (c)
+                                       (cl-ppcre:scan (format nil "^~A=" cookie-name) c))
+                                     cookies)))
+        (when target-cookie
+          (cadr (cl-ppcre:split "=" target-cookie :limit 2)))))))
+
+(defun get-authenticated-user (env)
+  "Get authenticated user from session.
+
+   Extracts session ID from cookies, validates it, and returns the user.
+
+   @param env [plist] Request environment
+   @return [<user>] Authenticated user
+   @return [nil] If not authenticated
+   "
+  (let* ((headers (getf env :headers))
+         (session-id (get-cookie-value headers "session_id")))
+    (when (and session-id (session-valid-p session-id))
+      (let* ((session-data (get-session session-id))
+             (user-id (getf session-data :user-id)))
+        (when user-id
+          (find-user-by-id user-id))))))
 
 (defun todo-to-json (todo)
   "Convert todo model to JSON-safe alist.
@@ -60,7 +97,7 @@
    @param controller [<todos-list-controller>] Controller instance
    @return [list] HTTP response via set-response
    "
-  (let ((user (get-current-user (env controller))))
+  (let ((user (get-authenticated-user (env controller))))
     (unless user
       (setf (slot-value controller 'clails/controller/base-controller:code) 401)
       (return-from do-get
@@ -84,7 +121,7 @@
    @param controller [<todos-list-controller>] Controller instance
    @return [list] HTTP response via set-response
    "
-  (let ((user (get-current-user (env controller))))
+  (let ((user (get-authenticated-user (env controller))))
     (unless user
       (setf (slot-value controller 'clails/controller/base-controller:code) 401)
       (return-from do-post
@@ -127,7 +164,7 @@
    @param controller [<todo-item-controller>] Controller instance
    @return [list] HTTP response via set-response
    "
-  (let ((user (get-current-user (env controller))))
+  (let ((user (get-authenticated-user (env controller))))
     (unless user
       (setf (slot-value controller 'clails/controller/base-controller:code) 401)
       (return-from do-get
@@ -167,7 +204,7 @@
    @param controller [<todo-item-controller>] Controller instance
    @return [list] HTTP response via set-response
    "
-  (let ((user (get-current-user (env controller))))
+  (let ((user (get-authenticated-user (env controller))))
     (unless user
       (setf (slot-value controller 'clails/controller/base-controller:code) 401)
       (return-from do-put
@@ -223,7 +260,7 @@
    @param controller [<todo-item-controller>] Controller instance
    @return [list] HTTP response via set-response
    "
-  (let ((user (get-current-user (env controller))))
+  (let ((user (get-authenticated-user (env controller))))
     (unless user
       (setf (slot-value controller 'clails/controller/base-controller:code) 401)
       (return-from do-delete
@@ -264,7 +301,7 @@
    @param controller [<todo-complete-controller>] Controller instance
    @return [list] HTTP response via set-response
    "
-  (let ((user (get-current-user (env controller))))
+  (let ((user (get-authenticated-user (env controller))))
     (unless user
       (setf (slot-value controller 'clails/controller/base-controller:code) 401)
       (return-from do-put
