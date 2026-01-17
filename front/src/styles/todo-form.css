@@ -25,6 +25,14 @@
   text-align: center;
 }
 
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+  font-size: 1.1rem;
+}
+
 /* Error Message */
 .error-message {
   background: #feb2b2;
