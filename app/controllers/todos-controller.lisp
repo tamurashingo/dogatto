@@ -131,9 +131,12 @@
     
     (let* ((title (param controller "title"))
            (content (param controller "content"))
-           (due-date-str (param controller "dueDate"))
-           (due-date (when due-date-str
-                      (parse-integer due-date-str :junk-allowed t))))
+           (due-date-raw (param controller "dueDate"))
+           (due-date (cond
+                       ((null due-date-raw) nil)
+                       ((numberp due-date-raw) due-date-raw)
+                       ((stringp due-date-raw) (parse-integer due-date-raw :junk-allowed t))
+                       (t nil))))
       
       (unless title
         (setf (slot-value controller 'clails/controller/base-controller:code) 400)
@@ -232,9 +235,12 @@
       
       (let* ((title (param controller "title"))
              (content (param controller "content"))
-             (due-date-str (param controller "dueDate"))
-             (due-date (when due-date-str
-                        (parse-integer due-date-str :junk-allowed t))))
+             (due-date-raw (param controller "dueDate"))
+             (due-date (cond
+                         ((null due-date-raw) nil)
+                         ((numberp due-date-raw) due-date-raw)
+                         ((stringp due-date-raw) (parse-integer due-date-raw :junk-allowed t))
+                         (t nil))))
         
         (handler-case
             (progn
