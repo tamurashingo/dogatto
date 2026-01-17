@@ -78,18 +78,18 @@ TODO基本機能の実装タスクを定義します。Phase 2（認証システ
 
 **目的**: TODO操作のためのAPIクライアントを実装
 
-- [ ] T016 [P1] front/src/api/todos.tsを作成
-- [ ] T017 [P1] TypeScript型定義を作成
+- [x] T016 [P1] front/src/api/todos.tsを作成
+- [x] T017 [P1] TypeScript型定義を作成
   - Todo型
   - CreateTodoRequest型
   - UpdateTodoRequest型
-- [ ] T018 [P1] getTodos関数を実装
-- [ ] T019 [P1] getTodoById関数を実装
-- [ ] T020 [P1] createTodo関数を実装
-- [ ] T021 [P1] updateTodo関数を実装
-- [ ] T022 [P1] deleteTodo関数を実装
-- [ ] T023 [P1] toggleTodoComplete関数を実装
-- [ ] T024 [P1] APIクライアントのテストを作成
+- [x] T018 [P1] getTodos関数を実装
+- [x] T019 [P1] getTodoById関数を実装
+- [x] T020 [P1] createTodo関数を実装
+- [x] T021 [P1] updateTodo関数を実装
+- [x] T022 [P1] deleteTodo関数を実装
+- [x] T023 [P1] toggleTodoComplete関数を実装
+- [x] T024 [P1] APIクライアントのテストを作成
   - 各関数のユニットテスト
   - エラーハンドリングテスト
 
