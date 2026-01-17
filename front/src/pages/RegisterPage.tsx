@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { RegisterRequest } from '../api/auth';
 import { authApi } from '../api/auth';
 import { ApiError } from '../api/error';
+import '../styles/auth.css';
 
 /**
  * Register page component.
