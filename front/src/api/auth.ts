@@ -22,18 +22,34 @@ export interface RegisterRequest {
 }
 
 /**
- * User registration response.
- */
-export interface RegisterResponse {
-  user: User;
-}
-
-/**
  * User login request payload.
  */
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+/**
+ * Backend response wrapper.
+ */
+interface BackendResponse<T> {
+  status: string;
+  data: T;
+}
+
+/**
+ * Backend response wrapper.
+ */
+interface BackendResponse<T> {
+  status: string;
+  data: T;
+}
+
+/**
+ * User registration response.
+ */
+export interface RegisterResponse {
+  user: User;
 }
 
 /**
@@ -69,11 +85,11 @@ export const authApi = {
    * @throws [ApiError] When registration fails (e.g., email already exists)
    */
   async register(data: RegisterRequest): Promise<User> {
-    const response: ApiResponse<RegisterResponse> = await apiClient.post<RegisterResponse>(
-      '/auth/register',
+    const response: ApiResponse<BackendResponse<RegisterResponse>> = await apiClient.post<BackendResponse<RegisterResponse>>(
+      '/api/v1/auth/register',
       data
     );
-    return response.data.user;
+    return (response.data as any).data.user;
   },
 
   /**
@@ -88,11 +104,12 @@ export const authApi = {
    * @throws [ApiError] When login fails (e.g., invalid credentials)
    */
   async login(data: LoginRequest): Promise<User> {
-    const response: ApiResponse<LoginResponse> = await apiClient.post<LoginResponse>(
-      '/auth/login',
+    const response: ApiResponse<BackendResponse<LoginResponse>> = await apiClient.post<BackendResponse<LoginResponse>>(
+      '/api/v1/auth/login',
       data
     );
-    return response.data.user;
+    // response.data is BackendResponse, so we access data.user
+    return (response.data as any).data.user;
   },
 
   /**
@@ -104,7 +121,7 @@ export const authApi = {
    * @throws [ApiError] When logout fails
    */
   async logout(): Promise<void> {
-    await apiClient.post<void>('/auth/logout');
+    await apiClient.post<void>('/api/v1/auth/logout');
   },
 
   /**
@@ -116,9 +133,10 @@ export const authApi = {
    * @throws [ApiError] When user is not authenticated (status 401)
    */
   async getCurrentUser(): Promise<User> {
-    const response: ApiResponse<CurrentUserResponse> = await apiClient.get<CurrentUserResponse>(
-      '/auth/me'
+    const response: ApiResponse<BackendResponse<CurrentUserResponse>> = await apiClient.get<BackendResponse<CurrentUserResponse>>(
+      '/api/v1/auth/me'
     );
-    return response.data.user;
+    // response.data is BackendResponse, so we access data.user
+    return (response.data as any).data.user;
   },
 };

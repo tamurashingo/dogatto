@@ -12,10 +12,15 @@
   (:import-from #:dogatto/helpers/asset-helper)
   (:import-from #:dogatto/utils/password)
   (:import-from #:dogatto/utils/session)
+  (:import-from #:dogatto/middleware/cors)
   (:import-from #:dogatto/middleware/authentication)
   (:import-from :dogatto/controllers/health-controller)
   (:import-from :dogatto/controllers/pages-controller)
   (:import-from :dogatto/views/pages/show/package)
   (:import-from :dogatto/models/user)
-  (:import-from :dogatto/controllers/auth-controller))
+  (:import-from :dogatto/controllers/auth-controller
+                #:<auth-register-controller>
+                #:<auth-login-controller>
+                #:<auth-logout-controller>
+                #:<auth-me-controller>))
 (in-package #:dogatto/application-loader)

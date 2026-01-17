@@ -1,14 +1,8 @@
 ; -*- mode: lisp -*-
 (in-package #:cl-user)
 (defpackage #:dogatto/controllers/auth-controller
-  (:use #:cl)
-  (:import-from #:clails/controller/base-controller
-                #:<rest-controller>
-                #:param
-                #:env
-                #:code
-                #:header
-                #:set-response)
+  (:use #:cl
+        #:clails/controller/base-controller)
   (:import-from #:dogatto/models/user
                 #:find-user-by-email
                 #:find-user-by-id
@@ -24,10 +18,10 @@
                 #:get-session
                 #:delete-session
                 #:session-valid-p)
+  (:import-from #:dogatto/utils/ulid
+                #:generate-ulid)
   (:import-from #:clails/model
                 #:ref)
-  (:import-from #:uuid
-                #:make-v4-uuid)
   (:export #:<auth-controller>
            #:<auth-register-controller>
            #:<auth-login-controller>
@@ -58,13 +52,13 @@
    @param user [<user>] User model instance
    @return [alist] User data as alist
    "
-  `((:id . ,(ref user :id))
-    (:username . ,(ref user :username))
-    (:email . ,(ref user :email))
-    (:ulid . ,(ref user :ulid))
-    (:registration-status . ,(ref user :registration-status))
-    (:created-at . ,(ref user :created-at))
-    (:updated-at . ,(ref user :updated-at))))
+  `(("id" . ,(ref user :id))
+    ("name" . ,(ref user :username))
+    ("email" . ,(ref user :email))
+    ("ulid" . ,(ref user :ulid))
+    ("registrationStatus" . ,(ref user :registration-status))
+    ("createdAt" . ,(ref user :created-at))
+    ("updatedAt" . ,(ref user :updated-at))))
 
 (defun get-cookie-value (headers cookie-name)
   "Extract cookie value from request headers.
@@ -88,42 +82,42 @@
   "Register a new user.
 
    Expected parameters:
-   - username: User's display name
+   - name: User's display name
    - email: User's email address
    - password: User's password (plain text, will be hashed)
 
    Returns 201 with user data on success, 400 on validation errors.
    "
-  (let ((username (param controller "username"))
+  (let ((name (param controller "name"))
         (email (param controller "email"))
         (password (param controller "password")))
     
     ;; Input validation
     (cond
-      ((or (null username) (string= username ""))
+      ((or (null name) (string= name ""))
        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
        (set-response controller
-                     `((:status . "error")
-                       (:message . "Username is required"))))
+                     `(("status" . "error")
+                       ("message" . "Name is required"))))
       
       ((or (null email) (string= email ""))
        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
        (set-response controller
-                     `((:status . "error")
-                       (:message . "Email is required"))))
+                     `(("status" . "error")
+                       ("message" . "Email is required"))))
       
       ((or (null password) (string= password ""))
        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
        (set-response controller
-                     `((:status . "error")
-                       (:message . "Password is required"))))
+                     `(("status" . "error")
+                       ("message" . "Password is required"))))
       
       ;; Check email duplication
       ((user-exists-p email)
        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
        (set-response controller
-                     `((:status . "error")
-                       (:message . "Email already registered"))))
+                     `(("status" . "error")
+                       ("message" . "Email already registered"))))
       
       ;; Validate password strength
       (t (multiple-value-bind (valid errors)
@@ -131,8 +125,8 @@
            (if valid
                ;; Create user
                (let* ((password-hash (hash-password password))
-                      (ulid (format nil "~(~a~)" (make-v4-uuid)))
-                      (user (create-user :username username
+                     (ulid (generate-ulid))
+                      (user (create-user :username name
                                          :email email
                                          :password-hash password-hash
                                          :ulid ulid)))
@@ -140,20 +134,20 @@
                      (progn
                        (setf (slot-value controller 'clails/controller/base-controller:code) 201)
                        (set-response controller
-                                     `((:status . "success")
-                                       (:data . ,(user-to-json user)))))
+                                     `(("status" . "success")
+                                       ("data" . (("user" . ,(user-to-json user)))))))
                      (progn
                        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
                        (set-response controller
-                                     `((:status . "error")
-                                       (:message . "Failed to create user"))))))
+                                     `(("status" . "error")
+                                       ("message" . "Failed to create user"))))))
                ;; Password validation failed
                (progn
                  (setf (slot-value controller 'clails/controller/base-controller:code) 400)
                  (set-response controller
-                               `((:status . "error")
-                                 (:message . "Password validation failed")
-                                 (:errors . ,errors))))))))))
+                               `(("status" . "error")
+                                 ("message" . "Password validation failed")
+                                 ("errors" . ,errors))))))))))
 
 ;; POST /api/v1/auth/login
 (defmethod do-post ((controller <auth-login-controller>))
@@ -174,14 +168,14 @@
       ((or (null email) (string= email ""))
        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
        (set-response controller
-                     `((:status . "error")
-                       (:message . "Email is required"))))
+                     `(("status" . "error")
+                       ("message" . "Email is required"))))
       
       ((or (null password) (string= password ""))
        (setf (slot-value controller 'clails/controller/base-controller:code) 400)
        (set-response controller
-                     `((:status . "error")
-                       (:message . "Password is required"))))
+                     `(("status" . "error")
+                       ("message" . "Password is required"))))
       
       (t
        (let ((user (find-user-by-email email)))
@@ -196,14 +190,14 @@
                                             session-id
                                             (* 7 24 60 60)))) ; 7 days
                (set-response controller
-                             `((:status . "success")
-                               (:data . ,(user-to-json user)))))
+                             `(("status" . "success")
+                               ("data" . (("user" . ,(user-to-json user)))))))
              ;; Authentication failed
              (progn
                (setf (slot-value controller 'clails/controller/base-controller:code) 401)
                (set-response controller
-                             `((:status . "error")
-                               (:message . "Invalid email or password"))))))))))
+                             `(("status" . "error")
+                               ("message" . "Invalid email or password"))))))))))
 
 ;; POST /api/v1/auth/logout
 (defmethod do-post ((controller <auth-logout-controller>))
@@ -227,8 +221,8 @@
             :set-cookie "session_id=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"))
     
     (set-response controller
-                  `((:status . "success")
-                    (:message . "Logged out successfully")))))
+                  `(("status" . "success")
+                    ("message" . "Logged out successfully")))))
 
 ;; GET /api/v1/auth/me
 (defmethod do-get ((controller <auth-me-controller>))
@@ -249,16 +243,16 @@
                (user (find-user-by-id user-id)))
           (if user
               (set-response controller
-                            `((:status . "success")
-                              (:data . ,(user-to-json user))))
+                            `(("status" . "success")
+                              ("data" . (("user" . ,(user-to-json user))))))
               (progn
                 (setf (slot-value controller 'clails/controller/base-controller:code) 401)
                 (set-response controller
-                              `((:status . "error")
-                                (:message . "User not found"))))))
+                              `(("status" . "error")
+                                ("message" . "User not found"))))))
         (progn
           (setf (slot-value controller 'clails/controller/base-controller:code) 401)
           (set-response controller
-                        `((:status . "error")
-                          (:message . "Not authenticated")))))))
+                        `(("status" . "error")
+                          ("message" . "Not authenticated")))))))
 

@@ -33,7 +33,7 @@ describe('authApi', () => {
       };
 
       vi.mocked(apiClient.post).mockResolvedValue({
-        data: { user: mockUser },
+        data: { status: 'success', data: { user: mockUser } },
         status: 201,
       });
 
@@ -41,7 +41,7 @@ describe('authApi', () => {
       const result = await authApi.register(registerRequest);
 
       // Assert
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/register', registerRequest);
+      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/auth/register', registerRequest);
       expect(result).toEqual(mockUser);
     });
 
@@ -78,7 +78,7 @@ describe('authApi', () => {
       };
 
       vi.mocked(apiClient.post).mockResolvedValue({
-        data: { user: mockUser },
+        data: { status: 'success', data: { user: mockUser } },
         status: 200,
       });
 
@@ -86,7 +86,7 @@ describe('authApi', () => {
       const result = await authApi.login(loginRequest);
 
       // Assert
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/login', loginRequest);
+      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/auth/login', loginRequest);
       expect(result).toEqual(mockUser);
     });
 
@@ -118,7 +118,7 @@ describe('authApi', () => {
       await authApi.logout();
 
       // Assert
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/logout');
+      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/auth/logout');
     });
 
     it('should throw ApiError when logout fails', async () => {
@@ -144,7 +144,7 @@ describe('authApi', () => {
       };
 
       vi.mocked(apiClient.get).mockResolvedValue({
-        data: { user: mockUser },
+        data: { status: 'success', data: { user: mockUser } },
         status: 200,
       });
 
@@ -152,7 +152,7 @@ describe('authApi', () => {
       const result = await authApi.getCurrentUser();
 
       // Assert
-      expect(apiClient.get).toHaveBeenCalledWith('/auth/me');
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/auth/me');
       expect(result).toEqual(mockUser);
     });
 
