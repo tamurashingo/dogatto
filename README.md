@@ -14,6 +14,12 @@ dogatto is a **Full SPA (Single Page Application)** built with:
 - **REST API**: Backend provides JSON APIs under `/api/*`
 - **Universal HTML**: Server returns the same HTML for all non-API routes
 - **Fast Navigation**: No server requests needed for page transitions
+- **User Authentication**: Secure authentication system with session management
+  - User registration with password validation
+  - Login/Logout functionality
+  - Session-based authentication with Redis
+  - Protected routes and authorization
+  - Password hashing with PBKDF2
 
 See [Architecture Documentation](docs/architecture.md) for detailed information about the routing flow and design decisions.
 
@@ -30,6 +36,8 @@ See [Architecture Documentation](docs/architecture.md) for detailed information 
 - [Database Schema](docs/database.md) - Database structure and design
 - [API Conventions](docs/api-conventions.md) - REST API standards
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
+- [Phase 14 Integration Testing](docs/phase14-integration-testing.md) - Authentication integration testing
+- [Phase 15 UI/UX Improvements](docs/phase15-ui-ux-improvements.md) - UI/UX enhancements
 
 ## Getting Started
 
@@ -96,7 +104,44 @@ Open your browser and navigate to:
 http://localhost:5000
 ```
 
+The application provides user authentication. You can:
+1. Register a new account at `/register`
+2. Login at `/login`
+3. Access the TODO management page at `/todos` (requires authentication)
+
 The backend serves HTML that loads JavaScript from the Vite dev server (port 3000) in development mode.
+
+## Features
+
+### Authentication System
+
+The application includes a complete user authentication system:
+
+- **User Registration**: Create new accounts with email and password
+  - Email validation and duplicate checking
+  - Password strength validation (minimum 8 characters, must include letters and numbers)
+  - Automatic ULID generation for user identification
+
+- **Login/Logout**: Session-based authentication
+  - Secure password verification with PBKDF2 hashing
+  - Session management with Redis (7-day expiration)
+  - HttpOnly cookies for session security
+
+- **Protected Routes**: Authorization middleware
+  - Automatic redirection to login for unauthenticated users
+  - Session validation on each request
+  - User context available in all protected endpoints
+
+- **User Profile**: Access current user information
+  - GET `/api/v1/auth/me` endpoint
+  - User data available through AuthContext in frontend
+
+### UI/UX Features
+
+- **Modern Design**: Purple gradient theme with smooth animations
+- **Responsive Layout**: Mobile-first design with touch-friendly interface
+- **Dark Mode**: Automatic dark mode support based on system preferences
+- **Accessible**: WCAG compliant with keyboard navigation support
 
 ## Development
 
