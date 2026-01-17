@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/header.css';
 
@@ -40,7 +40,7 @@ export default function Header(): React.JSX.Element | null {
     <header className="app-header">
       <div className="header-container">
         <div className="header-left">
-          <h1 className="app-title">Dogatto</h1>
+          <Link to="/todos" className="app-title">Dogatto</Link>
         </div>
 
         <div className="header-right">

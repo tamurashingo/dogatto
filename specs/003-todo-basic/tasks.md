@@ -165,15 +165,15 @@ TODO基本機能の実装タスクを定義します。Phase 2（認証システ
 
 **目的**: TODO詳細表示UIを実装
 
-- [ ] T042 [P1] front/src/pages/TodoDetailPage.tsxを作成
-- [ ] T043 [P1] TODO詳細情報の取得と表示
+- [x] T042 [P1] front/src/pages/TodoDetailPage.tsxを作成
+- [x] T043 [P1] TODO詳細情報の取得と表示
   - タイトル、説明、期限、完了状態
   - 作成日時、更新日時
-- [ ] T044 [P1] アクションボタンを実装
+- [x] T044 [P1] アクションボタンを実装
   - 編集ボタン → 編集ページへ
   - 削除ボタン → 確認後削除して一覧へ
   - 完了切り替えボタン
-- [ ] T045 [P1] 戻るボタンを実装
+- [x] T045 [P1] 戻るボタンを実装
   - TODO一覧へ戻る
 
 ---
@@ -182,13 +182,13 @@ TODO基本機能の実装タスクを定義します。Phase 2（認証システ
 
 **目的**: TODOページのルートを追加
 
-- [ ] T046 [P1] router.tsxにTODOルートを追加
+- [x] T046 [P1] router.tsxにTODOルートを追加
   - /todos → TodoListPage（保護ルート）
   - /todos/new → TodoCreatePage（保護ルート）
   - /todos/:id → TodoDetailPage（保護ルート）
   - /todos/:id/edit → TodoEditPage（保護ルート）
-- [ ] T047 [P1] すべてのTODOルートをProtectedRouteで保護
-- [ ] T048 [P1] ナビゲーションの更新
+- [x] T047 [P1] すべてのTODOルートをProtectedRouteで保護
+- [x] T048 [P1] ナビゲーションの更新
   - ヘッダーにTODO一覧へのリンク追加
 
 ---

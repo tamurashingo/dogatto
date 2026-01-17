@@ -3,6 +3,9 @@ import App from './App';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import TodosPage from './pages/TodosPage';
+import TodoCreatePage from './pages/TodoCreatePage';
+import TodoDetailPage from './pages/TodoDetailPage';
+import TodoEditPage from './pages/TodoEditPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
@@ -30,6 +33,30 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <TodosPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/todos/new',
+    element: (
+      <ProtectedRoute>
+        <TodoCreatePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/todos/:id',
+    element: (
+      <ProtectedRoute>
+        <TodoDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/todos/:id/edit',
+    element: (
+      <ProtectedRoute>
+        <TodoEditPage />
       </ProtectedRoute>
     ),
   },
