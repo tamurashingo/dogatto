@@ -18,6 +18,7 @@
   (:import-from :dogatto/controllers/pages-controller)
   (:import-from :dogatto/views/pages/show/package)
   (:import-from :dogatto/models/user)
+  (:import-from :dogatto/models/todo)
   (:import-from :dogatto/controllers/auth-controller
                 #:<auth-register-controller>
                 #:<auth-login-controller>
