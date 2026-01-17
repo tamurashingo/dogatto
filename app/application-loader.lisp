@@ -26,5 +26,6 @@
                 #:<auth-me-controller>)
   (:import-from :dogatto/controllers/todos-controller
                 #:<todos-list-controller>
-                #:<todo-item-controller>))
+                #:<todo-item-controller>
+                #:<todo-complete-controller>))
 (in-package #:dogatto/application-loader)

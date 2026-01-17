@@ -29,29 +29,29 @@ TODO基本機能の実装タスクを定義します。Phase 2（認証システ
 
 **目的**: TODO操作のためのRESTful APIエンドポイントを実装
 
-- [ ] T005 [P1] clails generate:controller todosでコントローラーを生成
-- [ ] T006 [P1] GET /api/v1/todos エンドポイントを実装
+- [x] T005 [P1] clails generate:controller todosでコントローラーを生成
+- [x] T006 [P1] GET /api/v1/todos エンドポイントを実装
   - 認証ユーザーのTODO一覧を返す
   - user_idでフィルタリング
   - JSON形式で返す
-- [ ] T007 [P1] POST /api/v1/todos エンドポイントを実装
+- [x] T007 [P1] POST /api/v1/todos エンドポイントを実装
   - リクエストボディからTODOを作成
   - バリデーション
   - 認証ユーザーのuser_idを自動設定
-- [ ] T008 [P1] GET /api/v1/todos/:id エンドポイントを実装
+- [x] T008 [P1] GET /api/v1/todos/:id エンドポイントを実装
   - 指定IDのTODO詳細を返す
   - 自分のTODOのみアクセス可能（認可チェック）
-- [ ] T009 [P1] PUT /api/v1/todos/:id エンドポイントを実装
+- [x] T009 [P1] PUT /api/v1/todos/:id エンドポイントを実装
   - TODO更新
   - 認可チェック（自分のTODOのみ）
   - バリデーション
-- [ ] T010 [P1] DELETE /api/v1/todos/:id エンドポイントを実装
+- [x] T010 [P1] DELETE /api/v1/todos/:id エンドポイントを実装
   - TODO削除
   - 認可チェック（自分のTODOのみ）
-- [ ] T011 [P1] PATCH /api/v1/todos/:id/complete エンドポイントを実装
+- [x] T011 [P1] PUT /api/v1/todos/:id/complete エンドポイントを実装
   - completedフラグの切り替え
   - 認可チェック
-- [ ] T012 [P1] TODOコントローラーのテストを作成
+- [x] T012 [P1] TODOコントローラーのテストを作成
   - 各エンドポイントのテスト
   - 認可テスト（他ユーザーのTODOへのアクセス拒否）
   - バリデーションテスト
@@ -62,15 +62,15 @@ TODO基本機能の実装タスクを定義します。Phase 2（認証システ
 
 **目的**: TODOエンドポイントをルーティングに追加
 
-- [ ] T013 [P1] app/config/environment.lispにTODOルートを追加
+- [x] T013 [P1] app/config/environment.lispにTODOルートを追加
   - GET /api/v1/todos
   - POST /api/v1/todos
   - GET /api/v1/todos/:id
   - PUT /api/v1/todos/:id
   - DELETE /api/v1/todos/:id
-  - PATCH /api/v1/todos/:id/complete
-- [ ] T014 [P1] すべてのTODOルートに認証ミドルウェアを適用
-- [ ] T015 [P1] application-loaderにtodoモデルとコントローラーを追加
+  - PUT /api/v1/todos/:id/complete
+- [x] T014 [P1] すべてのTODOルートに認証ミドルウェアを適用
+- [x] T015 [P1] application-loaderにtodoモデルとコントローラーを追加
 
 ---
 

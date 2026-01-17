@@ -99,7 +99,7 @@ CREATE TABLE todos (
 | GET | /api/v1/todos/:id | TODO詳細取得 | 必須 |
 | PUT | /api/v1/todos/:id | TODO更新 | 必須 |
 | DELETE | /api/v1/todos/:id | TODO削除 | 必須 |
-| PATCH | /api/v1/todos/:id/complete | TODO完了切替 | 必須 |
+| PUT | /api/v1/todos/:id/complete | TODO完了切替 | 必須 |
 
 ### レスポンス形式
 
