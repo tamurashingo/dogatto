@@ -33,7 +33,7 @@ describe('authApi', () => {
       };
 
       vi.mocked(apiClient.post).mockResolvedValue({
-        data: { user: mockUser },
+        data: { status: 'success', data: { user: mockUser } },
         status: 201,
       });
 
@@ -78,7 +78,7 @@ describe('authApi', () => {
       };
 
       vi.mocked(apiClient.post).mockResolvedValue({
-        data: { user: mockUser },
+        data: { status: 'success', data: { user: mockUser } },
         status: 200,
       });
 
@@ -144,7 +144,7 @@ describe('authApi', () => {
       };
 
       vi.mocked(apiClient.get).mockResolvedValue({
-        data: { user: mockUser },
+        data: { status: 'success', data: { user: mockUser } },
         status: 200,
       });
 
