@@ -2,6 +2,27 @@
 
 A tag-based TODO management web application built with [clails](https://github.com/tamurashingo/clails) framework.
 
+## Architecture
+
+dogatto is a **Full SPA (Single Page Application)** built with:
+- **Backend**: Common Lisp (clails framework) + MySQL + Redis
+- **Frontend**: React + TypeScript + Vite + React Router
+
+### Key Features
+
+- **Client-Side Routing**: React Router handles all page transitions in the browser
+- **REST API**: Backend provides JSON APIs under `/api/*`
+- **Universal HTML**: Server returns the same HTML for all non-API routes
+- **Fast Navigation**: No server requests needed for page transitions
+- **User Authentication**: Secure authentication system with session management
+  - User registration with password validation
+  - Login/Logout functionality
+  - Session-based authentication with Redis
+  - Protected routes and authorization
+  - Password hashing with PBKDF2
+
+See [Architecture Documentation](docs/architecture.md) for detailed information about the routing flow and design decisions.
+
 ## Prerequisites
 
 - Docker
@@ -9,11 +30,14 @@ A tag-based TODO management web application built with [clails](https://github.c
 
 ## Documentation
 
+- [Architecture](docs/architecture.md) - Full SPA architecture and routing design
 - [Contributing Guide](CONTRIBUTING.md) - Development workflow and guidelines
 - [Environment Variables](docs/environment.md) - Configuration options
 - [Database Schema](docs/database.md) - Database structure and design
 - [API Conventions](docs/api-conventions.md) - REST API standards
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
+- [Phase 14 Integration Testing](docs/phase14-integration-testing.md) - Authentication integration testing
+- [Phase 15 UI/UX Improvements](docs/phase15-ui-ux-improvements.md) - UI/UX enhancements
 
 ## Getting Started
 
@@ -71,12 +95,53 @@ make front-dev
 
 This will start the Vite development server on http://localhost:3000
 
+**Note**: In development mode (`CLAILS_ENV=develop` or `test`), the backend server automatically references the Vite development server for frontend assets. The `VITE_DEV_SERVER_URL` environment variable (default: `http://localhost:3000`) controls this behavior.
+
 ### 5. Access the Application
 
 Open your browser and navigate to:
 ```
 http://localhost:5000
 ```
+
+The application provides user authentication. You can:
+1. Register a new account at `/register`
+2. Login at `/login`
+3. Access the TODO management page at `/todos` (requires authentication)
+
+The backend serves HTML that loads JavaScript from the Vite dev server (port 3000) in development mode.
+
+## Features
+
+### Authentication System
+
+The application includes a complete user authentication system:
+
+- **User Registration**: Create new accounts with email and password
+  - Email validation and duplicate checking
+  - Password strength validation (minimum 8 characters, must include letters and numbers)
+  - Automatic ULID generation for user identification
+
+- **Login/Logout**: Session-based authentication
+  - Secure password verification with PBKDF2 hashing
+  - Session management with Redis (7-day expiration)
+  - HttpOnly cookies for session security
+
+- **Protected Routes**: Authorization middleware
+  - Automatic redirection to login for unauthenticated users
+  - Session validation on each request
+  - User context available in all protected endpoints
+
+- **User Profile**: Access current user information
+  - GET `/api/v1/auth/me` endpoint
+  - User data available through AuthContext in frontend
+
+### UI/UX Features
+
+- **Modern Design**: Purple gradient theme with smooth animations
+- **Responsive Layout**: Mobile-first design with touch-friendly interface
+- **Dark Mode**: Automatic dark mode support based on system preferences
+- **Accessible**: WCAG compliant with keyboard navigation support
 
 ## Development
 
@@ -89,9 +154,10 @@ Connect to the Swank server from your editor (Emacs/SLIME, Vim/Slimv, etc.):
 
 ### Frontend Development
 
-The frontend is built with React + TypeScript + Vite.
+The frontend is built with React + TypeScript + Vite and uses React Router for client-side routing.
 
 Source code is located in `front/src/`:
+- `router.tsx` - React Router configuration (route definitions)
 - `api/` - API client and error handling
 - `components/` - React components
 - `contexts/` - React contexts (e.g., AuthContext)
@@ -100,6 +166,12 @@ Source code is located in `front/src/`:
 - `types/` - TypeScript type definitions
 
 Build output goes to `public/assets/`.
+
+**Routing Architecture:**
+- All page transitions happen in the browser (no server requests)
+- Backend serves the same HTML for all non-API routes
+- React Router maps URLs to page components
+- See [Architecture Documentation](docs/architecture.md) for details
 
 ### Available Make Commands
 
@@ -117,6 +189,9 @@ Build output goes to `public/assets/`.
 | `make db.migrate` | Run pending migrations |
 | `make db.rollback` | Rollback the last migration |
 | `make db.seed` | Load seed data |
+| `make db.test.create` | Create test database |
+| `make db.test.migrate` | Run migrations for test database |
+| `make test` | Run tests |
 | `make front-dev` | Start frontend dev server with hot reload |
 | `make front-build` | Build frontend for production |
 | `make front-preview` | Preview production build |
@@ -140,6 +215,8 @@ Build output goes to `public/assets/`.
 │   ├── redis/          # Redis configuration
 │   └── run-dev.sh      # Application startup script
 ├── docker-compose.yml  # Docker Compose configuration
+├── .env.example        # Environment variables template
+├── .env.test           # Test environment variables
 ├── front/              # Frontend React application
 │   ├── src/
 │   │   ├── api/        # API client
@@ -173,6 +250,35 @@ Default settings:
 - Port: `6379`
 
 You can override these settings using environment variables in docker-compose.yml.
+
+## Testing
+
+### Running Tests
+
+Before running tests for the first time, set up the test database:
+
+```bash
+make db.test.create
+make db.test.migrate
+```
+
+Run all tests:
+
+```bash
+make test
+```
+
+Tests run in a separate test environment (`CLAILS_ENV=test`) with its own database (`dogatto_test`). This ensures that test data doesn't interfere with development data.
+
+The test configuration is located in `.env.test`.
+
+### Continuous Integration
+
+Tests are automatically run on GitHub Actions for:
+- Pushes to `main`, `develop`, and feature branches
+- Pull requests to `main` and `develop`
+
+The CI workflow automatically sets up the test database and runs migrations before executing tests.
 
 ## Troubleshooting
 

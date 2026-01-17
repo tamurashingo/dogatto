@@ -5,8 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/assets/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DOGATTO - Tag-based TODO Manager</title>
-    <link rel="stylesheet" crossorigin href="<%= (asset-path "/assets/css/index.css") %>">
-    <script type="module" crossorigin src="<%= (asset-path "/assets/javascript/index.js") %>"></script>
+    <%= (if (eq clails/environment:*project-environment* :production)
+            ;; Production: Use built assets
+            (concatenate 'string
+              "<link rel=\"stylesheet\" crossorigin href=\"" (asset-path "/assets/css/index.css") "\">"
+              "<script type=\"module\" crossorigin src=\"" (asset-path "/assets/javascript/index.js") "\"></script>")
+            ;; Development: Use Vite dev server
+            (concatenate 'string
+              "<script type=\"module\">"
+              "  import RefreshRuntime from \"" (dogatto/helpers/asset-helper:get-vite-dev-server-url) "/@react-refresh\";"
+              "  RefreshRuntime.injectIntoGlobalHook(window);"
+              "  window.$RefreshReg$ = () => {};"
+              "  window.$RefreshSig$ = () => (type) => type;"
+              "  window.__vite_plugin_react_precompile_installed__ = true; "
+              "</script>"
+              "<script type=\"module\" src=\"" (asset-path "/assets/javascript/index.js") "\"></script>")) %>
   </head>
   <body>
     <div id="root"></div>
