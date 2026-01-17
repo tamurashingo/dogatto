@@ -30,6 +30,8 @@
     ;; TODO endpoints
     (:path "/api/v1/todos"
      :controller "dogatto/controllers/todos-controller:<todos-list-controller>")
+    (:path "/api/v1/todos/:id/complete"
+     :controller "dogatto/controllers/todos-controller:<todo-complete-controller>")
     (:path "/api/v1/todos/:id"
      :controller "dogatto/controllers/todos-controller:<todo-item-controller>")
     ;; SPA wildcard route (must be last)

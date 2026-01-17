@@ -9,6 +9,7 @@
                 #:find-todos-by-user
                 #:update-todo
                 #:delete-todo
+                #:toggle-todo-status
                 #:<todo>)
   (:import-from #:dogatto/middleware/authentication
                 #:get-current-user)
@@ -17,7 +18,8 @@
   (:import-from #:jonathan
                 #:to-json)
   (:export #:<todos-list-controller>
-           #:<todo-item-controller>))
+           #:<todo-item-controller>
+           #:<todo-complete-controller>))
 
 (in-package #:dogatto/controllers/todos-controller)
 
@@ -28,6 +30,10 @@
 (defclass <todo-item-controller> (<rest-controller>)
   ()
   (:documentation "Controller for single todo item (GET /todos/:id, PUT /todos/:id, DELETE /todos/:id)"))
+
+(defclass <todo-complete-controller> (<rest-controller>)
+  ()
+  (:documentation "Controller for completing a todo (POST /todos/:id/complete)"))
 
 (defun todo-to-json (todo)
   "Convert todo model to JSON-safe alist.
@@ -248,3 +254,44 @@
       (set-response controller
                    `(("status" . "success")
                      ("message" . "TODO deleted successfully"))))))
+
+(defmethod do-put ((controller <todo-complete-controller>))
+  "Mark a todo as completed.
+
+   Only completes if todo belongs to authenticated user.
+   Toggles the status between 'pending' and 'completed'.
+
+   @param controller [<todo-complete-controller>] Controller instance
+   @return [list] HTTP response via set-response
+   "
+  (let ((user (get-current-user (env controller))))
+    (unless user
+      (setf (slot-value controller 'clails/controller/base-controller:code) 401)
+      (return-from do-put
+        (set-response controller
+                     `(("status" . "error")
+                       ("message" . "Authentication required")))))
+    
+    (let* ((todo-id (parse-integer (param controller "id") :junk-allowed t))
+           (todo (when todo-id (find-todo-by-id todo-id))))
+      
+      (unless todo
+        (setf (slot-value controller 'clails/controller/base-controller:code) 404)
+        (return-from do-put
+          (set-response controller
+                       `(("status" . "error")
+                         ("message" . "TODO not found")))))
+      
+      ;; Check if todo belongs to current user
+      (unless (= (ref todo :owner-id) (ref user :id))
+        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
+        (return-from do-put
+          (set-response controller
+                       `(("status" . "error")
+                         ("message" . "Access denied")))))
+      
+      (toggle-todo-status todo)
+      (setf (slot-value controller 'clails/controller/base-controller:code) 200)
+      (set-response controller
+                   `(("status" . "success")
+                     ("data" . (("todo" . ,(todo-to-json todo)))))))))

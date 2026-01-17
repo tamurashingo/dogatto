@@ -7,6 +7,7 @@
   (:import-from #:dogatto/controllers/todos-controller
                 #:<todos-list-controller>
                 #:<todo-item-controller>
+                #:<todo-complete-controller>
                 #:do-get
                 #:do-post
                 #:do-put
@@ -296,6 +297,58 @@
       (unwind-protect
            (progn
              (do-delete controller)
+             (ok (= (slot-value controller 'clails/controller/base-controller::code) 403)
+                 "Should return 403 Forbidden"))
+        (when todo (destroy todo))
+        (delete-session (ref user1 :id))
+        (delete-session (ref user2 :id))
+        (destroy user1)
+        (destroy user2)))))
+
+(deftest-suite :controller test-todo-complete-put
+  (testing "PUT /api/v1/todos/:id/complete toggles todo status"
+    (let* ((user (create-user :username "Todo User"
+                             :email "todo-complete@example.com"
+                             :password-hash "hashedpass"
+                             :ulid "01234567890123456789012363"))
+           (todo (create-todo (ref user :id) "Complete Me"))
+           (controller (setup-authenticated-controller 
+                       '<todo-complete-controller>
+                       user
+                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+      (unwind-protect
+           (progn
+             (ok (string= (ref todo :status) "active")
+                 "Todo should start as active")
+             (do-put controller)
+             (ok (= (slot-value controller 'clails/controller/base-controller::code) 200)
+                 "Should return 200 OK")
+             (let* ((resp (response controller))
+                    (data (cdr (assoc "data" resp :test #'string=)))
+                    (todo-data (cdr (assoc "todo" data :test #'string=))))
+               (ok (string= (cdr (assoc "status" todo-data :test #'string=)) "completed")
+                   "Todo status should be completed")))
+        (when todo (destroy todo))
+        (delete-session (ref user :id))
+        (destroy user))))
+  
+  (testing "PUT /api/v1/todos/:id/complete fails for other user's todo"
+    (let* ((user1 (create-user :username "User 1"
+                              :email "user1-complete@example.com"
+                              :password-hash "hashedpass"
+                              :ulid "01234567890123456789012364"))
+           (user2 (create-user :username "User 2"
+                              :email "user2-complete@example.com"
+                              :password-hash "hashedpass"
+                              :ulid "01234567890123456789012365"))
+           (todo (create-todo (ref user1 :id) "User 1's Todo"))
+           (controller (setup-authenticated-controller 
+                       '<todo-complete-controller>
+                       user2
+                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+      (unwind-protect
+           (progn
+             (do-put controller)
              (ok (= (slot-value controller 'clails/controller/base-controller::code) 403)
                  "Should return 403 Forbidden"))
         (when todo (destroy todo))
