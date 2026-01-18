@@ -92,7 +92,8 @@
   letter-spacing: 0.5px;
 }
 
-.badge.pending {
+.badge.pending,
+.badge.active {
   background: #bee3f8;
   color: #2c5282;
 }
