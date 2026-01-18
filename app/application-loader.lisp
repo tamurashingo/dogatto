@@ -12,6 +12,7 @@
   (:import-from #:dogatto/helpers/asset-helper)
   (:import-from #:dogatto/utils/password)
   (:import-from #:dogatto/utils/session)
+  (:import-from #:dogatto/utils/time-conversion)
   (:import-from #:dogatto/middleware/cors)
   (:import-from #:dogatto/middleware/authentication)
   (:import-from :dogatto/controllers/health-controller)

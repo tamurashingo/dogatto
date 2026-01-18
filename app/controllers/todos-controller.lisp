@@ -16,6 +16,9 @@
   (:import-from #:dogatto/utils/session
                 #:get-session
                 #:session-valid-p)
+  (:import-from #:dogatto/utils/time-conversion
+                #:universal-time-to-unix-time
+                #:unix-time-to-universal-time)
   (:import-from #:clails/model
                 #:ref)
   (:import-from #:jonathan
@@ -78,16 +81,23 @@
    @param todo [<todo>] TODO model instance
    @return [list] Alist representation of TODO
    "
-  (list (cons "id" (ref todo :id))
-        (cons "ulid" (ref todo :ulid))
-        (cons "ownerId" (ref todo :owner-id))
-        (cons "title" (ref todo :title))
-        (cons "content" (ref todo :content))
-        (cons "dueDate" (ref todo :due-date))
-        (cons "status" (ref todo :status))
-        (cons "completedAt" (ref todo :completed-at))
-        (cons "createdAt" (ref todo :created-at))
-        (cons "updatedAt" (ref todo :updated-at))))
+  (let ((content-val (ref todo :content))
+        (completed-at-val (ref todo :completed-at))
+        (due-date-val (ref todo :due-date)))
+    (list (cons "id" (ref todo :id))
+          (cons "ulid" (ref todo :ulid))
+          (cons "ownerId" (ref todo :owner-id))
+          (cons "title" (ref todo :title))
+          (cons "content" content-val)
+          (cons "dueDate" (if (or (null due-date-val) (zerop due-date-val))
+                              :null
+                              (universal-time-to-unix-time due-date-val)))
+          (cons "status" (ref todo :status))
+          (cons "completedAt" (if (or (null completed-at-val) (zerop completed-at-val))
+                                  :null
+                                  (universal-time-to-unix-time completed-at-val)))
+          (cons "createdAt" (universal-time-to-unix-time (ref todo :created-at)))
+          (cons "updatedAt" (universal-time-to-unix-time (ref todo :updated-at))))))
 
 (defmethod do-get ((controller <todos-list-controller>))
   "Get all todos for the authenticated user.
@@ -134,8 +144,10 @@
            (due-date-raw (param controller "dueDate"))
            (due-date (cond
                        ((null due-date-raw) nil)
-                       ((numberp due-date-raw) due-date-raw)
-                       ((stringp due-date-raw) (parse-integer due-date-raw :junk-allowed t))
+                       ((numberp due-date-raw) (unix-time-to-universal-time due-date-raw))
+                       ((stringp due-date-raw) 
+                        (let ((unix-time (parse-integer due-date-raw :junk-allowed t)))
+                          (when unix-time (unix-time-to-universal-time unix-time))))
                        (t nil))))
       
       (unless title
@@ -238,8 +250,10 @@
              (due-date-raw (param controller "dueDate"))
              (due-date (cond
                          ((null due-date-raw) nil)
-                         ((numberp due-date-raw) due-date-raw)
-                         ((stringp due-date-raw) (parse-integer due-date-raw :junk-allowed t))
+                         ((numberp due-date-raw) (unix-time-to-universal-time due-date-raw))
+                         ((stringp due-date-raw)
+                          (let ((unix-time (parse-integer due-date-raw :junk-allowed t)))
+                            (when unix-time (unix-time-to-universal-time unix-time))))
                          (t nil))))
         
         (handler-case
