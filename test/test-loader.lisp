@@ -8,6 +8,8 @@
   (:import-from #:dogatto-test/utils/password)
   (:import-from #:dogatto-test/utils/session)
   (:import-from :dogatto-test/models/user)
+  (:import-from :dogatto-test/models/todo)
   (:import-from :dogatto-test/controllers/auth-controller)
+  (:import-from :dogatto-test/controllers/todos-controller)
   (:import-from :dogatto-test/middleware/authentication))
 (in-package #:dogatto-test/test-loader)

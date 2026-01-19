@@ -29,6 +29,12 @@
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.5px;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.app-title:hover {
+  opacity: 0.9;
 }
 
 .header-right {

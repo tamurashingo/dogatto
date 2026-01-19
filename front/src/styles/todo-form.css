@@ -1,0 +1,226 @@
+/* TODO Form Page Styles */
+
+.todo-form-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f7fafc 0%, #edf2f7 100%);
+}
+
+.form-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.form-container {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h1 {
+  color: #2d3748;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+/* Error Message */
+.error-message {
+  background: #feb2b2;
+  color: #742a2a;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #fc8181;
+}
+
+/* Form */
+.todo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.form-group label {
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.required {
+  color: #e53e3e;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4299e1;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background: #f7fafc;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.char-count {
+  font-size: 0.875rem;
+  color: #718096;
+  text-align: right;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.btn-submit,
+.btn-cancel {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-submit {
+  background: #4299e1;
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #3182ce;
+}
+
+.btn-submit:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: #e2e8f0;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel:hover {
+  background: #cbd5e0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .form-container {
+    padding: 1.5rem;
+  }
+
+  .form-container h1 {
+    font-size: 1.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .todo-form-page {
+    background: linear-gradient(to bottom, #1a202c 0%, #2d3748 100%);
+  }
+
+  .form-container {
+    background: #2d3748;
+  }
+
+  .form-container h1 {
+    color: #f7fafc;
+  }
+
+  .form-group label {
+    color: #f7fafc;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    background: #1a202c;
+    border-color: #4a5568;
+    color: #f7fafc;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: #4299e1;
+  }
+
+  .form-group input:disabled,
+  .form-group textarea:disabled {
+    background: #4a5568;
+  }
+
+  .char-count {
+    color: #a0aec0;
+  }
+
+  .error-message {
+    background: #9b2c2c;
+    color: #fed7d7;
+    border-left-color: #fc8181;
+  }
+
+  .btn-cancel {
+    background: #4a5568;
+    color: #f7fafc;
+  }
+
+  .btn-cancel:hover {
+    background: #718096;
+  }
+
+  .btn-submit:disabled {
+    background: #4a5568;
+  }
+}

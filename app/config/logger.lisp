@@ -40,8 +40,11 @@
   ;; SQL logger
   (register-logger
    :sql
-   :appender (make-console-appender
-              :formatter (make-instance '<text-formatter>))
+   :appenders (list (make-console-appender
+                     :formatter (make-instance '<text-formatter>))
+                    (make-file-appender
+                     :filepath "logs/sql.develop.log"
+                     :formatter (make-instance '<text-formatter>)))
    :level :debug)
 
   ;; web-access logger
