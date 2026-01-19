@@ -78,18 +78,18 @@ export const todosApi = {
   },
 
   /**
-   * Gets a specific todo by ID.
+   * Gets a specific todo by ULID.
    *
    * Retrieves detailed information for a single todo.
    * Only returns todos owned by the authenticated user.
    *
-   * @param id [number] TODO ID
+   * @param ulid [string] TODO ULID
    * @return [Promise<Todo>] TODO data
    * @throws [ApiError] When todo not found or access denied
    */
-  async getTodoById(id: number): Promise<Todo> {
+  async getTodoByUlid(ulid: string): Promise<Todo> {
     const response: ApiResponse<BackendResponse<TodoResponse>> = 
-      await apiClient.get<BackendResponse<TodoResponse>>(`/api/v1/todos/${id}`);
+      await apiClient.get<BackendResponse<TodoResponse>>(`/api/v1/todos/${ulid}`);
     return (response.data as any).data.todo;
   },
 
@@ -117,7 +117,7 @@ export const todosApi = {
    * Updates a todo's information.
    * Only updates todos owned by the authenticated user.
    *
-   * @param id [number] TODO ID
+   * @param ulid [string] TODO ULID
    * @param data [UpdateTodoRequest] TODO update data
    * @param data.title [string] Updated title (optional)
    * @param data.content [string] Updated description (optional)
@@ -125,9 +125,9 @@ export const todosApi = {
    * @return [Promise<Todo>] Updated todo data
    * @throws [ApiError] When update fails or access denied
    */
-  async updateTodo(id: number, data: UpdateTodoRequest): Promise<Todo> {
+  async updateTodo(ulid: string, data: UpdateTodoRequest): Promise<Todo> {
     const response: ApiResponse<BackendResponse<TodoResponse>> = 
-      await apiClient.put<BackendResponse<TodoResponse>>(`/api/v1/todos/${id}`, data);
+      await apiClient.put<BackendResponse<TodoResponse>>(`/api/v1/todos/${ulid}`, data);
     return (response.data as any).data.todo;
   },
 
@@ -137,12 +137,12 @@ export const todosApi = {
    * Permanently deletes a todo.
    * Only deletes todos owned by the authenticated user.
    *
-   * @param id [number] TODO ID
+   * @param ulid [string] TODO ULID
    * @return [Promise<void>] No return value
    * @throws [ApiError] When deletion fails or access denied
    */
-  async deleteTodo(id: number): Promise<void> {
-    await apiClient.delete(`/api/v1/todos/${id}`);
+  async deleteTodo(ulid: string): Promise<void> {
+    await apiClient.delete(`/api/v1/todos/${ulid}`);
   },
 
   /**
@@ -151,13 +151,13 @@ export const todosApi = {
    * Toggles between 'pending' and 'completed' status.
    * Only affects todos owned by the authenticated user.
    *
-   * @param id [number] TODO ID
+   * @param ulid [string] TODO ULID
    * @return [Promise<Todo>] Updated todo data
    * @throws [ApiError] When toggle fails or access denied
    */
-  async toggleTodoComplete(id: number): Promise<Todo> {
+  async toggleTodoComplete(ulid: string): Promise<Todo> {
     const response: ApiResponse<BackendResponse<TodoResponse>> = 
-      await apiClient.put<BackendResponse<TodoResponse>>(`/api/v1/todos/${id}/complete`);
+      await apiClient.put<BackendResponse<TodoResponse>>(`/api/v1/todos/${ulid}/complete`);
     return (response.data as any).data.todo;
   },
 };

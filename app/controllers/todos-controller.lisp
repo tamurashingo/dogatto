@@ -6,6 +6,7 @@
   (:import-from #:dogatto/models/todo
                 #:create-todo
                 #:find-todo-by-id
+                #:find-todo-by-ulid
                 #:find-todos-by-user
                 #:update-todo
                 #:delete-todo
@@ -172,7 +173,7 @@
                          ("message" . ,(format nil "~A" e)))))))))
 
 (defmethod do-get ((controller <todo-item-controller>))
-  "Get a specific todo by ID.
+  "Get a specific todo by ULID.
 
    Only returns the todo if it belongs to the authenticated user.
 
@@ -187,8 +188,8 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
-    (let* ((todo-id (parse-integer (param controller "id") :junk-allowed t))
-           (todo (when todo-id (find-todo-by-id todo-id))))
+    (let* ((todo-ulid (param controller "id"))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -227,8 +228,8 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
-    (let* ((todo-id (parse-integer (param controller "id") :junk-allowed t))
-           (todo (when todo-id (find-todo-by-id todo-id))))
+    (let* ((todo-ulid (param controller "id"))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -288,8 +289,8 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
-    (let* ((todo-id (parse-integer (param controller "id") :junk-allowed t))
-           (todo (when todo-id (find-todo-by-id todo-id))))
+    (let* ((todo-ulid (param controller "id"))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -329,8 +330,8 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
-    (let* ((todo-id (parse-integer (param controller "id") :junk-allowed t))
-           (todo (when todo-id (find-todo-by-id todo-id))))
+    (let* ((todo-ulid (param controller "id"))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)

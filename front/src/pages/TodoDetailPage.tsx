@@ -13,7 +13,7 @@ import '../styles/todo-detail.css';
  */
 export default function TodoDetailPage(): React.JSX.Element {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { ulid } = useParams<{ ulid: string }>();
   const [todo, setTodo] = useState<Todo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -60,14 +60,14 @@ export default function TodoDetailPage(): React.JSX.Element {
    */
   useEffect(() => {
     const fetchTodo = async () => {
-      if (!id) {
-        setError('Invalid TODO ID');
+      if (!ulid) {
+        setError('Invalid TODO ULID');
         setIsLoading(false);
         return;
       }
 
       try {
-        const data = await todosApi.getTodoById(parseInt(id, 10));
+        const data = await todosApi.getTodoByUlid(ulid);
         setTodo(data);
       } catch (err) {
         if (err instanceof ApiError) {
@@ -81,7 +81,7 @@ export default function TodoDetailPage(): React.JSX.Element {
     };
 
     fetchTodo();
-  }, [id]);
+  }, [ulid]);
 
   /**
    * Toggles todo completion status.
@@ -90,7 +90,7 @@ export default function TodoDetailPage(): React.JSX.Element {
     if (!todo) return;
 
     try {
-      const updatedTodo = await todosApi.toggleTodoComplete(todo.id);
+      const updatedTodo = await todosApi.toggleTodoComplete(todo.ulid);
       setTodo(updatedTodo);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -110,7 +110,7 @@ export default function TodoDetailPage(): React.JSX.Element {
     }
 
     try {
-      await todosApi.deleteTodo(todo.id);
+      await todosApi.deleteTodo(todo.ulid);
       navigate('/todos');
     } catch (err) {
       if (err instanceof ApiError) {
@@ -215,7 +215,7 @@ export default function TodoDetailPage(): React.JSX.Element {
                 {todo.status === 'completed' ? 'Mark as Pending' : 'Mark as Completed'}
               </button>
 
-              <Link to={`/todos/${todo.id}/edit`} className="btn-edit-large">
+              <Link to={`/todos/${todo.ulid}/edit`} className="btn-edit-large">
                 Edit
               </Link>
 

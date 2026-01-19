@@ -18,6 +18,7 @@
   (:export #:<todo>
            #:create-todo
            #:find-todo-by-id
+           #:find-todo-by-ulid
            #:find-todos-by-user
            #:update-todo
            #:delete-todo
@@ -89,6 +90,21 @@
                           :as :todo
                           :where (:= (:todo :id) :id))
                    (list :id id))))
+    (if results
+        (car results)
+        nil)))
+
+(defun find-todo-by-ulid (ulid)
+  "Find a TODO by its ULID.
+
+   @param ulid [string] TODO ULID
+   @return [<todo>] TODO instance or NIL if not found
+   "
+  (let ((results (execute-query
+                   (query <todo>
+                          :as :todo
+                          :where (:= (:todo :ulid) :ulid))
+                   (list :ulid ulid))))
     (if results
         (car results)
         nil)))

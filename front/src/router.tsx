@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/todos/:id',
+    path: '/todos/:ulid',
     element: (
       <ProtectedRoute>
         <TodoDetailPage />
@@ -53,7 +53,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/todos/:id/edit',
+    path: '/todos/:ulid/edit',
     element: (
       <ProtectedRoute>
         <TodoEditPage />

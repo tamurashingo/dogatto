@@ -13,7 +13,7 @@ import '../styles/todo-form.css';
  */
 export default function TodoEditPage(): React.JSX.Element {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { ulid } = useParams<{ ulid: string }>();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -26,14 +26,14 @@ export default function TodoEditPage(): React.JSX.Element {
    */
   useEffect(() => {
     const fetchTodo = async () => {
-      if (!id) {
-        setError('Invalid TODO ID');
+      if (!ulid) {
+        setError('Invalid TODO ULID');
         setIsFetching(false);
         return;
       }
 
       try {
-        const todo = await todosApi.getTodoById(parseInt(id, 10));
+        const todo = await todosApi.getTodoByUlid(ulid);
         setTitle(todo.title);
         setContent(todo.content || '');
         
@@ -53,7 +53,7 @@ export default function TodoEditPage(): React.JSX.Element {
     };
 
     fetchTodo();
-  }, [id]);
+  }, [ulid]);
 
   /**
    * Validates the todo form.
@@ -83,7 +83,7 @@ export default function TodoEditPage(): React.JSX.Element {
     e.preventDefault();
     setError('');
 
-    if (!validateForm() || !id) {
+    if (!validateForm() || !ulid) {
       return;
     }
 
@@ -94,7 +94,7 @@ export default function TodoEditPage(): React.JSX.Element {
         ? Math.floor(new Date(dueDate).getTime() / 1000)
         : undefined;
 
-      await todosApi.updateTodo(parseInt(id, 10), {
+      await todosApi.updateTodo(ulid, {
         title: title.trim(),
         content: content.trim() || undefined,
         dueDate: dueDateTimestamp,

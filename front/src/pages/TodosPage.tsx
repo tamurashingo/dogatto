@@ -39,12 +39,12 @@ export default function TodosPage(): React.JSX.Element {
   /**
    * Toggles todo completion status.
    *
-   * @param id [number] TODO ID
+   * @param ulid [string] TODO ULID
    */
-  const handleToggleComplete = async (id: number) => {
+  const handleToggleComplete = async (ulid: string) => {
     try {
-      const updatedTodo = await todosApi.toggleTodoComplete(id);
-      setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo));
+      const updatedTodo = await todosApi.toggleTodoComplete(ulid);
+      setTodos(todos.map(todo => todo.ulid === ulid ? updatedTodo : todo));
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -57,16 +57,16 @@ export default function TodosPage(): React.JSX.Element {
   /**
    * Deletes a todo.
    *
-   * @param id [number] TODO ID
+   * @param ulid [string] TODO ULID
    */
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (ulid: string) => {
     if (!window.confirm('Are you sure you want to delete this todo?')) {
       return;
     }
 
     try {
-      await todosApi.deleteTodo(id);
-      setTodos(todos.filter(todo => todo.id !== id));
+      await todosApi.deleteTodo(ulid);
+      setTodos(todos.filter(todo => todo.ulid !== ulid));
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -135,14 +135,14 @@ export default function TodosPage(): React.JSX.Element {
           <div className="todos-grid">
             {todos.map(todo => (
               <div
-                key={todo.id}
+                key={todo.ulid}
                 className={`todo-card ${todo.status === 'completed' ? 'completed' : ''} ${isOverdue(todo.dueDate, todo.status) ? 'overdue' : ''}`}
               >
                 <div className="todo-header">
                   <input
                     type="checkbox"
                     checked={todo.status === 'completed'}
-                    onChange={() => handleToggleComplete(todo.id)}
+                    onChange={() => handleToggleComplete(todo.ulid)}
                     className="todo-checkbox"
                   />
                   <h3 className="todo-title">{todo.title}</h3>
@@ -159,14 +159,14 @@ export default function TodosPage(): React.JSX.Element {
                 )}
 
                 <div className="todo-actions">
-                  <Link to={`/todos/${todo.id}`} className="btn-view">
+                  <Link to={`/todos/${todo.ulid}`} className="btn-view">
                     View
                   </Link>
-                  <Link to={`/todos/${todo.id}/edit`} className="btn-edit">
+                  <Link to={`/todos/${todo.ulid}/edit`} className="btn-edit">
                     Edit
                   </Link>
                   <button
-                    onClick={() => handleDelete(todo.id)}
+                    onClick={() => handleDelete(todo.ulid)}
                     className="btn-delete"
                     type="button"
                   >
