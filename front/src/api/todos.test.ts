@@ -72,7 +72,7 @@ describe('todosApi', () => {
       const result = await todosApi.getTodoByUlid("test-ulid");
 
       // Assert
-      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos/1');
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos/test-ulid');
       expect(result).toEqual(mockTodo);
     });
 
@@ -164,7 +164,7 @@ describe('todosApi', () => {
       const result = await todosApi.updateTodo("test-ulid", updateRequest);
 
       // Assert
-      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/1', updateRequest);
+      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/test-ulid', updateRequest);
       expect(result).toEqual(updatedTodo);
     });
 
@@ -182,7 +182,7 @@ describe('todosApi', () => {
       const result = await todosApi.updateTodo("test-ulid", updateRequest);
 
       // Assert
-      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/1', updateRequest);
+      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/test-ulid', updateRequest);
       expect(result).toEqual(mockTodo);
     });
 
@@ -218,7 +218,7 @@ describe('todosApi', () => {
       await todosApi.deleteTodo("test-ulid");
 
       // Assert
-      expect(apiClient.delete).toHaveBeenCalledWith('/api/v1/todos/1');
+      expect(apiClient.delete).toHaveBeenCalledWith('/api/v1/todos/test-ulid');
     });
 
     it('should throw ApiError when todo not found', async () => {
@@ -255,7 +255,7 @@ describe('todosApi', () => {
       const result = await todosApi.toggleTodoComplete("test-ulid");
 
       // Assert
-      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/1/complete');
+      expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/test-ulid/complete');
       expect(result).toEqual(completedTodo);
       expect(result.status).toBe('completed');
     });
