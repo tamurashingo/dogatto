@@ -39,9 +39,12 @@
    "
   (let* ((session-id (create-session (ref user :id)))
          (controller (make-instance controller-class))
-         (env (list :headers (make-hash-table :test 'equal)
+         (headers (make-hash-table :test 'equal))
+         (env (list :headers headers
                    :cookies (list (cons "session_id" session-id))
                    :current-user user)))
+    ;; Set Cookie header for authentication
+    (setf (gethash "cookie" headers) (format nil "session_id=~A" session-id))
     (setf (slot-value controller 'clails/controller/base-controller::env) env)
     (when params
       (loop for (key . value) in params
@@ -153,7 +156,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user
-                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))))))
       (unwind-protect
            (progn
              (do-get controller)
@@ -174,7 +177,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user
-                       '(("id" . "999999")))))
+                       '(("id" . "invalid-ulid-99999")))))
       (unwind-protect
            (progn
              (do-get controller)
@@ -196,7 +199,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user2
-                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))))))
       (unwind-protect
            (progn
              (do-get controller)
@@ -218,7 +221,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user
-                       `(("id" . ,(format nil "~A" (ref todo :id)))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))
                          ("title" . "Updated Title")))))
       (unwind-protect
            (progn
@@ -245,7 +248,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user2
-                       `(("id" . ,(format nil "~A" (ref todo :id)))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))
                          ("title" . "Hacked")))))
       (unwind-protect
            (progn
@@ -268,7 +271,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user
-                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))))))
       (unwind-protect
            (progn
              (do-delete controller)
@@ -293,7 +296,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-item-controller>
                        user2
-                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))))))
       (unwind-protect
            (progn
              (do-delete controller)
@@ -315,7 +318,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-complete-controller>
                        user
-                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))))))
       (unwind-protect
            (progn
              (ok (string= (ref todo :status) "active")
@@ -345,7 +348,7 @@
            (controller (setup-authenticated-controller 
                        '<todo-complete-controller>
                        user2
-                       `(("id" . ,(format nil "~A" (ref todo :id)))))))
+                       `(("id" . ,(format nil "~A" (ref todo :ulid)))))))
       (unwind-protect
            (progn
              (do-put controller)
