@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import { todosApi } from '../api/todos';
 import { ApiError } from '../api/error';
@@ -13,6 +13,7 @@ import '../styles/todo-form.css';
  */
 export default function TodoEditPage(): React.JSX.Element {
   const navigate = useNavigate();
+  const location = useLocation();
   const { ulid } = useParams<{ ulid: string }>();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -20,6 +21,9 @@ export default function TodoEditPage(): React.JSX.Element {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  
+  // Get the source page from location state
+  const from = (location.state as { from?: string })?.from || 'list';
 
   /**
    * Fetches todo data for editing.
@@ -100,7 +104,12 @@ export default function TodoEditPage(): React.JSX.Element {
         dueDate: dueDateTimestamp,
       });
 
-      navigate('/todos');
+      // Navigate back to the source page
+      if (from === 'detail') {
+        navigate(`/todos/${ulid}`);
+      } else {
+        navigate('/todos');
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -192,7 +201,10 @@ export default function TodoEditPage(): React.JSX.Element {
                 {isLoading ? 'Updating...' : 'Update TODO'}
               </button>
 
-              <Link to="/todos" className="btn-cancel">
+              <Link 
+                to={from === 'detail' ? `/todos/${ulid}` : '/todos'} 
+                className="btn-cancel"
+              >
                 Cancel
               </Link>
             </div>

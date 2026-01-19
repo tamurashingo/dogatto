@@ -60,7 +60,7 @@ describe('todosApi', () => {
     });
   });
 
-  describe('getTodoById', () => {
+  describe('getTodoByUlid', () => {
     it('should get a specific todo successfully', async () => {
       // Arrange
       vi.mocked(apiClient.get).mockResolvedValue({
@@ -69,7 +69,7 @@ describe('todosApi', () => {
       });
 
       // Act
-      const result = await todosApi.getTodoById(1);
+      const result = await todosApi.getTodoByUlid("test-ulid");
 
       // Assert
       expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos/1');
@@ -82,8 +82,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.get).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.getTodoById(999)).rejects.toThrow(ApiError);
-      await expect(todosApi.getTodoById(999)).rejects.toThrow('TODO not found');
+      await expect(todosApi.getTodoByUlid("invalid-ulid")).rejects.toThrow(ApiError);
+      await expect(todosApi.getTodoByUlid("invalid-ulid")).rejects.toThrow('TODO not found');
     });
 
     it('should throw ApiError when access denied', async () => {
@@ -92,8 +92,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.get).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.getTodoById(1)).rejects.toThrow(ApiError);
-      await expect(todosApi.getTodoById(1)).rejects.toThrow('Access denied');
+      await expect(todosApi.getTodoByUlid("test-ulid")).rejects.toThrow(ApiError);
+      await expect(todosApi.getTodoByUlid("test-ulid")).rejects.toThrow('Access denied');
     });
   });
 
@@ -161,7 +161,7 @@ describe('todosApi', () => {
       });
 
       // Act
-      const result = await todosApi.updateTodo(1, updateRequest);
+      const result = await todosApi.updateTodo("test-ulid", updateRequest);
 
       // Assert
       expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/1', updateRequest);
@@ -179,7 +179,7 @@ describe('todosApi', () => {
       });
 
       // Act
-      const result = await todosApi.updateTodo(1, updateRequest);
+      const result = await todosApi.updateTodo("test-ulid", updateRequest);
 
       // Assert
       expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/1', updateRequest);
@@ -192,7 +192,7 @@ describe('todosApi', () => {
       vi.mocked(apiClient.put).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.updateTodo(999, { title: 'Updated' })).rejects.toThrow(ApiError);
+      await expect(todosApi.updateTodo("invalid-ulid", { title: 'Updated' })).rejects.toThrow(ApiError);
     });
 
     it('should throw ApiError when access denied', async () => {
@@ -201,8 +201,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.put).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.updateTodo(1, { title: 'Updated' })).rejects.toThrow(ApiError);
-      await expect(todosApi.updateTodo(1, { title: 'Updated' })).rejects.toThrow('Access denied');
+      await expect(todosApi.updateTodo("test-ulid", { title: 'Updated' })).rejects.toThrow(ApiError);
+      await expect(todosApi.updateTodo("test-ulid", { title: 'Updated' })).rejects.toThrow('Access denied');
     });
   });
 
@@ -215,7 +215,7 @@ describe('todosApi', () => {
       });
 
       // Act
-      await todosApi.deleteTodo(1);
+      await todosApi.deleteTodo("test-ulid");
 
       // Assert
       expect(apiClient.delete).toHaveBeenCalledWith('/api/v1/todos/1');
@@ -227,8 +227,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.delete).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.deleteTodo(999)).rejects.toThrow(ApiError);
-      await expect(todosApi.deleteTodo(999)).rejects.toThrow('TODO not found');
+      await expect(todosApi.deleteTodo("invalid-ulid")).rejects.toThrow(ApiError);
+      await expect(todosApi.deleteTodo("invalid-ulid")).rejects.toThrow('TODO not found');
     });
 
     it('should throw ApiError when access denied', async () => {
@@ -237,8 +237,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.delete).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.deleteTodo(1)).rejects.toThrow(ApiError);
-      await expect(todosApi.deleteTodo(1)).rejects.toThrow('Access denied');
+      await expect(todosApi.deleteTodo("test-ulid")).rejects.toThrow(ApiError);
+      await expect(todosApi.deleteTodo("test-ulid")).rejects.toThrow('Access denied');
     });
   });
 
@@ -252,7 +252,7 @@ describe('todosApi', () => {
       });
 
       // Act
-      const result = await todosApi.toggleTodoComplete(1);
+      const result = await todosApi.toggleTodoComplete("test-ulid");
 
       // Assert
       expect(apiClient.put).toHaveBeenCalledWith('/api/v1/todos/1/complete');
@@ -266,8 +266,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.put).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.toggleTodoComplete(999)).rejects.toThrow(ApiError);
-      await expect(todosApi.toggleTodoComplete(999)).rejects.toThrow('TODO not found');
+      await expect(todosApi.toggleTodoComplete("invalid-ulid")).rejects.toThrow(ApiError);
+      await expect(todosApi.toggleTodoComplete("invalid-ulid")).rejects.toThrow('TODO not found');
     });
 
     it('should throw ApiError when access denied', async () => {
@@ -276,8 +276,8 @@ describe('todosApi', () => {
       vi.mocked(apiClient.put).mockRejectedValue(apiError);
 
       // Act & Assert
-      await expect(todosApi.toggleTodoComplete(1)).rejects.toThrow(ApiError);
-      await expect(todosApi.toggleTodoComplete(1)).rejects.toThrow('Access denied');
+      await expect(todosApi.toggleTodoComplete("test-ulid")).rejects.toThrow(ApiError);
+      await expect(todosApi.toggleTodoComplete("test-ulid")).rejects.toThrow('Access denied');
     });
   });
 });

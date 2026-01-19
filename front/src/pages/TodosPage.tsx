@@ -162,7 +162,11 @@ export default function TodosPage(): React.JSX.Element {
                   <Link to={`/todos/${todo.ulid}`} className="btn-view">
                     View
                   </Link>
-                  <Link to={`/todos/${todo.ulid}/edit`} className="btn-edit">
+                  <Link 
+                    to={`/todos/${todo.ulid}/edit`}
+                    state={{ from: 'list' }}
+                    className="btn-edit"
+                  >
                     Edit
                   </Link>
                   <button

@@ -215,7 +215,11 @@ export default function TodoDetailPage(): React.JSX.Element {
                 {todo.status === 'completed' ? 'Mark as Pending' : 'Mark as Completed'}
               </button>
 
-              <Link to={`/todos/${todo.ulid}/edit`} className="btn-edit-large">
+              <Link 
+                to={`/todos/${todo.ulid}/edit`} 
+                state={{ from: 'detail' }}
+                className="btn-edit-large"
+              >
                 Edit
               </Link>
 
