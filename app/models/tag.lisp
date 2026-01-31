@@ -82,7 +82,7 @@
     (save tag)
     tag))
 
-(defun find-tag-by-id (id)
+(defun find-tag-by-id (id owner-id)
   "Find a tag by its internal ID.
 
    @param id [integer] Tag ID
@@ -92,10 +92,12 @@
   (first (execute-query
           (query <tag>
                  :as :tag
-                 :where (:= (:tag :id) :id))
-          (list :id id))))
+                 :where (:and (:= (:tag :id) :id)
+                              (:= (:tag :owner-id) :owner-id)))
+          (list :id id
+                :owner-id owner-id))))
 
-(defun find-tag-by-ulid (ulid)
+(defun find-tag-by-ulid (ulid owner-id)
   "Find a tag by its ULID.
 
    @param ulid [string] Tag ULID
@@ -105,8 +107,10 @@
   (first (execute-query
           (query <tag>
                  :as :tag
-                 :where (:= (:tag :ulid) :ulid))
-          (list :ulid ulid))))
+                 :where (:and (:= (:tag :ulid) :ulid)
+                              (:= (:tag :owner-id) :owner-id)))
+          (list :ulid ulid
+                :owner-id owner-id))))
 
 (defun find-tags-by-user (owner-id)
   "Find all tags belonging to a user.

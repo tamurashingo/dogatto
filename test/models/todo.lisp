@@ -11,16 +11,6 @@
                 #:destroy))
 (in-package #:dogatto-test/models/todo)
 
-(setup
-  (format t "-------------------------~%")
-(maphash #'(lambda (k v)
-             (format t "key: ~S, value: ~S~%" k v))
-         clails/logger/core::*logger-registry*)
-  
-  (format t "-------------------------~%")
-  (dogatto/config/logger:initialize-logger :test)
-)
-
 (deftest-suite :model test-create-todo
   (testing "Create a new TODO successfully"
     (let ((user (create-user :username "Test User" 

@@ -61,7 +61,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (todo (find-todo-by-ulid ulid)))
+           (todo (find-todo-by-ulid ulid (ref user :id))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -69,13 +69,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "TODO not found")))))
-      
-      (unless (= (ref todo :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-get
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Forbidden")))))
       
       (let* ((tags (find-tags-for-todo ulid))
              (tags-json (mapcar #'tag-to-json tags)))
@@ -95,7 +88,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (todo (find-todo-by-ulid ulid)))
+           (todo (find-todo-by-ulid ulid (ref user :id))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -103,13 +96,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "TODO not found")))))
-      
-      (unless (= (ref todo :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-put
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Forbidden")))))
       
       (let ((tag-ulids (param controller "tagUlids")))
         (handler-case

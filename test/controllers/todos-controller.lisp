@@ -332,10 +332,8 @@
                     (todo-data (cdr (assoc "todo" data :test #'string=))))
                (ok (string= (cdr (assoc "status" todo-data :test #'string=)) "completed")
                    "Todo status should be completed")))
-;        (when todo (destroy todo))
-        (delete-session (ref user :id))
-;        (destroy user))))
-)))
+        (when todo (destroy todo))
+        (delete-session (ref user :id)))))
   
   (testing "PUT /api/v1/todos/:id/complete fails for other user's todo"
     (let* ((user1 (create-user :username "User 1"

@@ -319,11 +319,6 @@
     (let* ((todo-ulid (param controller "id"))
            (todo (when todo-ulid (find-todo-by-ulid todo-ulid (ref user :id)))))
 
-(format t "ulid: ~S~%" todo-ulid)
-(format t "userid: ~S~%" (ref user :id))
-(format t "todo: ~S~%" todo)
-
-
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
         (return-from do-put

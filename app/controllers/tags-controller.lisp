@@ -33,19 +33,39 @@
   ()
   (:documentation "Controller for single tag item (GET /tags/:ulid, PUT /tags/:ulid, DELETE /tags/:ulid)"))
 
+(defun get-cookie-value (headers cookie-name)
+  "Extract cookie value from request headers.
+
+   @param headers [hash-table] Request headers
+   @param cookie-name [string] Name of the cookie to extract
+   @return [string] Cookie value if found
+   @return [nil] If cookie not found
+   "
+  (let ((cookie-header (gethash "cookie" headers)))
+    (when cookie-header
+      (let* ((cookies (cl-ppcre:split ";\\s*" cookie-header))
+             (target-cookie (find-if (lambda (c)
+                                       (cl-ppcre:scan (format nil "^~A=" cookie-name) c))
+                                     cookies)))
+        (when target-cookie
+          (cadr (cl-ppcre:split "=" target-cookie :limit 2)))))))
+
 (defun get-authenticated-user (env)
   "Get authenticated user from session.
 
+   Extracts session ID from cookies, validates it, and returns the user.
+
    @param env [plist] Request environment
-   @return [<user>] User instance if authenticated
+   @return [<user>] Authenticated user
    @return [nil] If not authenticated
    "
-  (let* ((cookies (getf env :cookies))
-         (session-id (cdr (assoc "session_id" cookies :test #'string=))))
-    (when session-id
-      (let ((session (get-session session-id)))
-        (when (and session (session-valid-p session))
-          (find-user-by-id (getf session :user-id)))))))
+  (let* ((headers (getf env :headers))
+         (session-id (get-cookie-value headers "session_id")))
+    (when (and session-id (session-valid-p session-id))
+      (let* ((session-data (get-session session-id))
+             (user-id (getf session-data :user-id)))
+        (when user-id
+          (find-user-by-id user-id))))))
 
 (defun tag-to-json (tag)
   "Convert tag instance to JSON-friendly alist.
@@ -120,7 +140,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (tag (find-tag-by-ulid ulid)))
+           (tag (find-tag-by-ulid ulid (ref user :id))))
       
       (unless tag
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -129,14 +149,7 @@
                        `(("status" . "error")
                          ("message" . "Tag not found")))))
       
-      (unless (= (ref tag :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-get
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Forbidden")))))
-      
-      (let ((stats (get-tag-statistics ulid)))
+      (let ((stats (get-tag-statistics ulid (ref user :id))))
         (setf (slot-value controller 'clails/controller/base-controller:code) 200)
         (set-response controller
                      `(("status" . "success")
@@ -154,7 +167,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (tag (find-tag-by-ulid ulid)))
+           (tag (find-tag-by-ulid ulid (ref user :id))))
       
       (unless tag
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -162,13 +175,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "Tag not found")))))
-      
-      (unless (= (ref tag :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-put
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Forbidden")))))
       
       (handler-case
           (progn
@@ -199,7 +205,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (tag (find-tag-by-ulid ulid)))
+           (tag (find-tag-by-ulid ulid (ref user :id))))
       
       (unless tag
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -207,13 +213,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "Tag not found")))))
-      
-      (unless (= (ref tag :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-delete
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Forbidden")))))
       
       (delete-tag tag)
       (setf (slot-value controller 'clails/controller/base-controller:code) 200)

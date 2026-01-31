@@ -62,8 +62,9 @@
     SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
   FROM todos t 
   INNER JOIN todo_tags tt ON t.id = tt.todo_id 
-  WHERE tt.tag_id = :tag_id")
-(defsql select-tag-statistics (tag_id))
+  WHERE tt.tag_id = :tag_id
+  AND   t.owner_id = :owner_id")
+(defsql select-tag-statistics (tag_id owner_id))
 
 ;; Functions
 (defun assign-tags-to-todo (todo-ulid tag-ulids)
@@ -164,21 +165,23 @@
     (execute-query *find-todos-for-tag-query*
                    (list :tag-id (ref tag :id)))))
 
-(defun get-tag-statistics (tag-ulid)
+(defun get-tag-statistics (tag-ulid owner-id)
   "Get statistics for a tag.
 
    Returns counts of total, active, and completed TODOs with this tag.
 
    @param tag-ulid [string] Tag ULID
+   @param owner-id [string] Tag owner-id
    @return [plist] Statistics (:total :active :completed)
    @return [nil] If tag not found
    "
-  (let ((tag (find-tag-by-ulid tag-ulid)))
+  (let ((tag (find-tag-by-ulid tag-ulid owner-id)))
     (unless tag
       (return-from get-tag-statistics nil))
     
     (let* ((result (clails/model:execute-query select-tag-statistics
-                                               (list :tag_id (ref tag :id))))
+                                               (list :tag_id (ref tag :id)
+                                                     :owner_id owner-id)))
            (row (first result)))
       (list :total (getf row :total)
             :active (getf row :active)

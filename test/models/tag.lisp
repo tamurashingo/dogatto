@@ -42,23 +42,23 @@
 (deftest-suite :model test-tag-find
   (testing "find-tag-by-id finds existing tag"
     (let* ((tag (create-tag 1 "FindMe"))
-           (found (find-tag-by-id (ref tag :id))))
+           (found (find-tag-by-id (ref tag :id) 1)))
       (ok found "Should find tag by ID")
       (ok (= (ref found :id) (ref tag :id)) "Should return correct tag")
       (destroy tag)))
   
   (testing "find-tag-by-id returns nil for non-existent tag"
-    (ok (null (find-tag-by-id 999999)) "Should return nil"))
+    (ok (null (find-tag-by-id 999999 0)) "Should return nil"))
   
   (testing "find-tag-by-ulid finds existing tag"
     (let* ((tag (create-tag 1 "FindMeByUlid"))
-           (found (find-tag-by-ulid (ref tag :ulid))))
+           (found (find-tag-by-ulid (ref tag :ulid) 1)))
       (ok found "Should find tag by ULID")
       (ok (string= (ref found :ulid) (ref tag :ulid)) "Should return correct tag")
       (destroy tag)))
   
   (testing "find-tag-by-ulid returns nil for non-existent tag"
-    (ok (null (find-tag-by-ulid "non-existent-ulid")) "Should return nil")))
+    (ok (null (find-tag-by-ulid "non-existent-ulid" 0)) "Should return nil")))
 
 (deftest-suite :model test-tag-find-by-user
   (testing "find-tags-by-user returns all user tags"
@@ -108,4 +108,4 @@
     (let* ((tag (create-tag 1 "DeleteMe"))
            (id (ref tag :id)))
       (delete-tag tag)
-      (ok (null (find-tag-by-id id)) "Tag should be deleted"))))
+      (ok (null (find-tag-by-id id 1)) "Tag should be deleted"))))
