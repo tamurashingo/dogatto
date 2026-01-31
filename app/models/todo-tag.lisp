@@ -21,6 +21,15 @@
 
 (in-package #:dogatto/models/todo-tag)
 
+(defmodel <todo-tag> (<base-model>)
+  (:table "todo-tags"
+   :relations ((:belongs-to "dogatto/models/todo:<todo>"
+                :column :todo
+                :key :todo-id)
+               (:belongs-to "dogatto/models/tag:<tag>"
+                :column :tag
+                :key :tag-id))))
+
 (cl-syntax:use-syntax :annot)
 
 ;; Native queries
@@ -36,19 +45,15 @@
 ("DELETE FROM todo_tags WHERE todo_id = :todo_id AND tag_id = :tag_id")
 (defsql delete-todo-tag (todo_id tag_id))
 
-@cl-batis:select
-("SELECT t.* FROM tags t 
-  INNER JOIN todo_tags tt ON t.id = tt.tag_id 
-  WHERE tt.todo_id = :todo_id 
-  ORDER BY t.name ASC")
-(defsql select-tags-for-todo (todo_id))
 
-@cl-batis:select
-("SELECT t.* FROM todos t 
-  INNER JOIN todo_tags tt ON t.id = tt.todo_id 
-  WHERE tt.tag_id = :tag_id 
-  ORDER BY t.created_at DESC")
-(defsql select-todos-for-tag (tag_id))
+
+(defparameter *find-todos-for-tag-query*
+  (query <todo>
+         :as :todo
+         :joins ((:inner-join :todo-tags))
+         :where (:= (:todo-tags :tag-id) :tag-id)
+         :order-by ((:todo :created-at :desc))))
+
 
 @cl-batis:select
 ("SELECT 
@@ -119,23 +124,30 @@
                                       :tag_id (ref tag :id)))
     t))
 
-(defun find-tags-for-todo (todo-ulid)
+(defparameter *find-tags-for-todo-query*
+  (query <tag>
+         :as :tag
+         :joins ((:inner-join :todo-tags))
+         :where (:and (:= (:todo-tags :todo-id) :todo-id)
+                      (:= (:tag :owner-id) :owner-id))
+         :order-by ((:tag :name :asc))))
+
+(defun find-tags-for-todo (todo-ulid owner-id)
   "Find all tags assigned to a TODO.
 
    Returns tags ordered by name.
 
    @param todo-ulid [string] TODO ULID
+   @param owner-id [string] TODO owner-id
    @return [list] List of tag instances
    "
-  (let ((todo (find-todo-by-ulid todo-ulid)))
+  (let ((todo (find-todo-by-ulid todo-ulid owner-id)))
     (unless todo
       (return-from find-tags-for-todo nil))
     
-    (let ((results (clails/model:execute-query select-tags-for-todo
-                                               (list :todo_id (ref todo :id)))))
-      (mapcar #'(lambda (row)
-                  (hydrate '<tag> row))
-              results))))
+    (execute-query *find-tags-for-todo-query*
+                   (list :todo-id (ref todo :id)
+                         :owner-id owner-id))))`
 
 (defun find-todos-for-tag (tag-ulid)
   "Find all TODOs with a specific tag.
@@ -149,11 +161,8 @@
     (unless tag
       (return-from find-todos-for-tag nil))
     
-    (let ((results (clails/model:execute-query select-todos-for-tag
-                                               (list :tag_id (ref tag :id)))))
-      (mapcar #'(lambda (row)
-                  (hydrate '<todo> row))
-              results))))
+    (execute-query *find-todos-for-tag-query*
+                   (list :tag-id (ref tag :id)))))
 
 (defun get-tag-statistics (tag-ulid)
   "Get statistics for a tag.

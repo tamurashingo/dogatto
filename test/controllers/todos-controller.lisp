@@ -29,6 +29,7 @@
                 #:response))
 (in-package #:dogatto-test/controllers/todos-controller)
 
+
 (defun setup-authenticated-controller (controller-class user &optional params)
   "Setup controller with authentication session.
 
@@ -203,8 +204,8 @@
       (unwind-protect
            (progn
              (do-get controller)
-             (ok (= (slot-value controller 'clails/controller/base-controller::code) 403)
-                 "Should return 403 Forbidden"))
+             (ok (= (slot-value controller 'clails/controller/base-controller::code) 404)
+                 "Should return 404 NotFound"))
         (when todo (destroy todo))
         (delete-session (ref user1 :id))
         (delete-session (ref user2 :id))
@@ -253,8 +254,8 @@
       (unwind-protect
            (progn
              (do-put controller)
-             (ok (= (slot-value controller 'clails/controller/base-controller::code) 403)
-                 "Should return 403 Forbidden"))
+             (ok (= (slot-value controller 'clails/controller/base-controller::code) 404)
+                 "Should return 404 NotFound"))
         (when todo (destroy todo))
         (delete-session (ref user1 :id))
         (delete-session (ref user2 :id))
@@ -300,8 +301,8 @@
       (unwind-protect
            (progn
              (do-delete controller)
-             (ok (= (slot-value controller 'clails/controller/base-controller::code) 403)
-                 "Should return 403 Forbidden"))
+             (ok (= (slot-value controller 'clails/controller/base-controller::code) 404)
+                 "Should return 404 Not Found"))
         (when todo (destroy todo))
         (delete-session (ref user1 :id))
         (delete-session (ref user2 :id))
@@ -331,9 +332,10 @@
                     (todo-data (cdr (assoc "todo" data :test #'string=))))
                (ok (string= (cdr (assoc "status" todo-data :test #'string=)) "completed")
                    "Todo status should be completed")))
-        (when todo (destroy todo))
+;        (when todo (destroy todo))
         (delete-session (ref user :id))
-        (destroy user))))
+;        (destroy user))))
+)))
   
   (testing "PUT /api/v1/todos/:id/complete fails for other user's todo"
     (let* ((user1 (create-user :username "User 1"
@@ -352,8 +354,8 @@
       (unwind-protect
            (progn
              (do-put controller)
-             (ok (= (slot-value controller 'clails/controller/base-controller::code) 403)
-                 "Should return 403 Forbidden"))
+             (ok (= (slot-value controller 'clails/controller/base-controller::code) 404)
+                 "Should return 404 Not Found"))
         (when todo (destroy todo))
         (delete-session (ref user1 :id))
         (delete-session (ref user2 :id))

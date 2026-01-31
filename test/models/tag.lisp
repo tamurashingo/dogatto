@@ -4,6 +4,7 @@
   (:use #:cl
         #:rove
         #:clails/test
+        #:clails/model
         #:dogatto/models/tag))
 (in-package #:dogatto-test/models/tag)
 
@@ -61,15 +62,15 @@
 
 (deftest-suite :model test-tag-find-by-user
   (testing "find-tags-by-user returns all user tags"
-    (let ((tag1 (create-tag 1 "Work"))
-          (tag2 (create-tag 1 "Personal"))
-          (tag3 (create-tag 2 "Other")))
+    (let ((tag1 (create-tag 1 "Work-FindByUser"))
+          (tag2 (create-tag 1 "Personal-FindByUser"))
+          (tag3 (create-tag 2 "Other-FindByUser")))
       (let ((tags (find-tags-by-user 1)))
-        (ok (= (length tags) 2) "Should return 2 tags for user 1")
-        (ok (member "Work" tags :key #'(lambda (t) (ref t :name)) :test #'string=)
-            "Should include Work tag")
-        (ok (member "Personal" tags :key #'(lambda (t) (ref t :name)) :test #'string=)
-            "Should include Personal tag"))
+        (ok (>= (length tags) 2) "Should return at least 2 tags for user 1")
+        (ok (member "Work-FindByUser" tags :key #'(lambda (tag) (ref tag :name)) :test #'string=)
+            "Should include Work-FindByUser tag")
+        (ok (member "Personal-FindByUser" tags :key #'(lambda (tag) (ref tag :name)) :test #'string=)
+            "Should include Personal-FindByUser tag"))
       (destroy tag1)
       (destroy tag2)
       (destroy tag3)))

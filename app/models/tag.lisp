@@ -1,8 +1,16 @@
 ; -*- mode: lisp -*-
 (in-package #:cl-user)
 (defpackage #:dogatto/models/tag
-  (:use #:cl
-        #:clails/model)
+  (:use #:cl)
+  (:import-from #:clails/model
+                #:<base-model>
+                #:defmodel
+                #:make-record
+                #:ref
+                #:save
+                #:destroy
+                #:execute-query
+                #:query)
   (:import-from #:dogatto/utils/ulid
                 #:generate-ulid)
   (:export #:<tag>
@@ -17,7 +25,10 @@
 (in-package #:dogatto/models/tag)
 
 (defmodel <tag> (<base-model>)
-  (:table "tags"))
+  (:table "tags"
+   :relations ((:has-many "dogatto/models/todo-tag::<todo-tag>"
+                :as :todo-tags
+                :foreign-key :tag-id))))
 
 (defun validate-tag (tag)
   "Validate tag attributes.
@@ -57,16 +68,14 @@
    @return [<tag>] Created tag instance
    @condition validation-error If validation fails
    "
-  (let ((tag (make-instance '<tag>
-                            :ulid (generate-ulid)
-                            :owner-id owner-id
-                            :name (string-trim '(#\Space #\Tab) name)
-                            :color (if (or (null color) (string= color ""))
-                                       "#3B82F6"
-                                       color)
-                            :merged-to-ulid merged-to-ulid
-                            :created-at (get-universal-time)
-                            :updated-at (get-universal-time))))
+  (let ((tag (make-record '<tag>
+                          :ulid (generate-ulid)
+                          :owner-id owner-id
+                          :name (string-trim '(#\Space #\Tab) name)
+                          :color (if (or (null color) (string= color ""))
+                                     "#3B82F6"
+                                     color)
+                          :merged-to-ulid merged-to-ulid)))
     (let ((errors (validate-tag tag)))
       (when errors
         (error "Validation failed: ~{~A~^, ~}" errors)))
@@ -80,7 +89,11 @@
    @return [<tag>] Tag instance
    @return [nil] If tag not found
    "
-  (find-by-id '<tag> id))
+  (first (execute-query
+          (query <tag>
+                 :as :tag
+                 :where (:= (:tag :id) :id))
+          (list :id id))))
 
 (defun find-tag-by-ulid (ulid)
   "Find a tag by its ULID.
@@ -89,7 +102,11 @@
    @return [<tag>] Tag instance
    @return [nil] If tag not found
    "
-  (find-one '<tag> :ulid ulid))
+  (first (execute-query
+          (query <tag>
+                 :as :tag
+                 :where (:= (:tag :ulid) :ulid))
+          (list :ulid ulid))))
 
 (defun find-tags-by-user (owner-id)
   "Find all tags belonging to a user.
@@ -99,9 +116,12 @@
    @param owner-id [integer] User ID
    @return [list] List of tag instances
    "
-  (find-all '<tag> 
-            :owner-id owner-id
-            :order-by '(:name :asc)))
+  (execute-query
+   (query <tag>
+          :as :tag
+          :where (:= (:tag :owner-id) :owner-id)
+          :order-by ((:tag :name :asc)))
+   (list :owner-id owner-id)))
 
 (defun update-tag (tag &key name color merged-to-ulid)
   "Update tag attributes.

@@ -79,7 +79,7 @@
    :dogatto
    :appender (make-console-appender
               :formatter (make-instance '<text-formatter>))
-   :level :warn)
+   :level :trace)
 
   ;; clails framework logger
   (register-logger
@@ -93,21 +93,21 @@
    :sql
    :appender (make-console-appender
               :formatter (make-instance '<text-formatter>))
-   :level :error)
+   :level :debug)
 
   ;; web-access logger
   (register-logger
    :web-access
    :appender (make-console-appender
               :formatter (make-instance '<text-formatter>))
-   :level :warn)
+   :level :debug)
 
   ;; audit logger
   (register-logger
    :audit
    :appender (make-console-appender
               :formatter (make-instance '<text-formatter>))
-   :level :info)
+   :level :debug)
 
   ;; task logger
   (register-logger
