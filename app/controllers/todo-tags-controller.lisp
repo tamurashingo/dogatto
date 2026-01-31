@@ -7,6 +7,7 @@
                 #:find-todo-by-ulid)
   (:import-from #:dogatto/models/todo-tag
                 #:assign-tags-to-todo
+                #:remove-tag-from-todo
                 #:find-tags-for-todo)
   (:import-from #:dogatto/utils/session
                 #:get-session
@@ -112,3 +113,37 @@
             (set-response controller
                          `(("status" . "error")
                            ("message" . ,(format nil "Failed to assign tags: ~A" e))))))))))
+
+(defmethod do-delete ((controller <todo-tags-controller>))
+  "Remove a specific tag from a TODO."
+  (let ((user (get-authenticated-user (env controller))))
+    (unless user
+      (setf (slot-value controller 'clails/controller/base-controller:code) 401)
+      (return-from do-delete
+        (set-response controller
+                     `(("status" . "error")
+                       ("message" . "Authentication required")))))
+    
+    (let* ((ulid (param controller "ulid"))
+           (tag-ulid (param controller "tagUlid"))
+           (todo (find-todo-by-ulid ulid (ref user :id))))
+      
+      (unless todo
+        (setf (slot-value controller 'clails/controller/base-controller:code) 404)
+        (return-from do-delete
+          (set-response controller
+                       `(("status" . "error")
+                         ("message" . "TODO not found")))))
+      
+      (handler-case
+          (progn
+            (remove-tag-from-todo ulid tag-ulid)
+            (setf (slot-value controller 'clails/controller/base-controller:code) 200)
+            (set-response controller
+                         `(("status" . "success")
+                           ("message" . "Tag removed successfully"))))
+        (error (e)
+          (setf (slot-value controller 'clails/controller/base-controller:code) 400)
+          (set-response controller
+                       `(("status" . "error")
+                         ("message" . ,(format nil "Failed to remove tag: ~A" e)))))))))
