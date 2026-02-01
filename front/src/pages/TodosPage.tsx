@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import TagBadge from '../components/TagBadge';
+import TagFilter from '../components/TagFilter';
 import { todosApi } from '../api/todos';
-import type { Todo } from '../api/todos';
+import type { Todo, GetTodosParams } from '../api/todos';
 import { ApiError } from '../api/error';
 import '../styles/todos.css';
 
@@ -16,15 +17,27 @@ export default function TodosPage(): React.JSX.Element {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedTagUlids, setSelectedTagUlids] = useState<string[]>([]);
+  const [includeUntagged, setIncludeUntagged] = useState(false);
 
   /**
-   * Fetches todos from API.
+   * Fetches todos from API with optional tag filtering.
    */
-  const fetchTodos = async () => {
+  const fetchTodos = useCallback(async () => {
     try {
       setIsLoading(true);
       setError('');
-      const data = await todosApi.getTodos();
+      const params: GetTodosParams = {};
+      
+      if (selectedTagUlids.length > 0) {
+        params.tags = selectedTagUlids;
+      }
+      
+      if (includeUntagged) {
+        params.untagged = true;
+      }
+      
+      const data = await todosApi.getTodos(params);
       setTodos(data);
     } catch (err) {
       if (err instanceof ApiError) {
@@ -35,7 +48,7 @@ export default function TodosPage(): React.JSX.Element {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedTagUlids, includeUntagged]);
 
   /**
    * Toggles todo completion status.
@@ -102,9 +115,20 @@ export default function TodosPage(): React.JSX.Element {
     return dueDate < now;
   };
 
+  /**
+   * Handles tag filter change.
+   *
+   * @param tagUlids [string[]] Selected tag ULIDs
+   * @param untagged [boolean] Include untagged TODOs
+   */
+  const handleFilterChange = (tagUlids: string[], untagged: boolean) => {
+    setSelectedTagUlids(tagUlids);
+    setIncludeUntagged(untagged);
+  };
+
   useEffect(() => {
     fetchTodos();
-  }, []);
+  }, [fetchTodos]);
 
   return (
     <div className="todos-page">
@@ -116,6 +140,12 @@ export default function TodosPage(): React.JSX.Element {
             Create TODO
           </Link>
         </div>
+
+        <TagFilter
+          selectedTagUlids={selectedTagUlids}
+          includeUntagged={includeUntagged}
+          onChange={handleFilterChange}
+        />
 
         {error && (
           <div className="error-message">

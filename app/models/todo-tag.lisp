@@ -217,7 +217,7 @@
          :as :todo
          :joins ((:left-join :todo-tags))
          :where (:and (:= (:todo :owner-id) :owner-id)
-                      (:is-null (:todo-tags :id)))
+                      (:null (:todo-tags :id)))
          :order-by ((:todo :created-at :desc))))
 
 (defparameter *find-todos-untagged-and-status-query*
@@ -225,7 +225,7 @@
          :as :todo
          :joins ((:left-join :todo-tags))
          :where (:and (:= (:todo :owner-id) :owner-id)
-                      (:is-null (:todo-tags :id))
+                      (:null (:todo-tags :id))
                       (:= (:todo :status) :status))
          :order-by ((:todo :created-at :desc))))
 
