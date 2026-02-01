@@ -160,6 +160,9 @@ ros run
 (ref user :is-active)
 ```
 
+- `query` マクロで定義する `<query>` インスタンスは直接 `execute-query` に渡さない。 defvar 等で変数に持つ
+  - `<query>` インスタンスは一度 `execute-query` を実行すると、そのクエリがクラスにキャッシュされるため
+
 
 ### フロントエンド
 

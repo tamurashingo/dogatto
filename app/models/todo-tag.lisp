@@ -17,6 +17,8 @@
            #:remove-tag-from-todo
            #:find-tags-for-todo
            #:find-todos-for-tag
+           #:find-todos-by-tag-ulids
+           #:find-todos-untagged
            #:get-tag-statistics))
 
 (in-package #:dogatto/models/todo-tag)
@@ -186,3 +188,74 @@
       (list :total (getf row :total)
             :active (getf row :active)
             :completed (getf row :completed)))))
+
+(defparameter *find-todos-by-tag-ulids-query*
+  (query <todo-tag>
+         :as :todo-tags
+         :joins ((:inner-join :todo)
+                 (:inner-join :tag))
+         :where (:and (:= (:todo :owner-id) :owner-id)
+                      (:in (:tag :ulid) :tag-ulids))
+         :order-by ((:todo :created-at :desc))))
+
+(defparameter *find-todos-by-tag-ulids-and-status-query*
+  (query <todo-tag>
+         :as :todo-tags
+         :joins ((:inner-join :todo)
+                 (:inner-join :tag))
+         :where (:and (:= (:todo :owner-id) :owner-id)
+                      (:in (:tag :ulid) :tag-ulids)
+                      (:= (:todo :status) :status))
+         :order-by ((:todo :created-at :desc))))
+
+(defparameter *find-todos-untagged-query*
+  (query <todo>
+         :as :todo
+         :joins ((:left-join :todo-tags))
+         :where (:and (:= (:todo :owner-id) :owner-id)
+                      (:is-null (:todo-tags :id)))
+         :order-by ((:todo :created-at :desc))))
+
+(defparameter *find-todos-untagged-and-status-query*
+  (query <todo>
+         :as :todo
+         :joins ((:left-join :todo-tags))
+         :where (:and (:= (:todo :owner-id) :owner-id)
+                      (:is-null (:todo-tags :id))
+                      (:= (:todo :status) :status))
+         :order-by ((:todo :created-at :desc))))
+
+(defun find-todos-by-tag-ulids (owner-id tag-ulids &key status)
+  "Find TODOs filtered by tag ULIDs.
+
+   Returns TODOs that have at least one of the specified tags (OR condition).
+
+   @param owner-id [integer] Owner ID
+   @param tag-ulids [list] List of tag ULIDs to filter by
+   @param status [string] Status filter (\"active\" or \"completed\") (optional)
+   @return [list] List of <todo> instances
+   "
+  (let ((todo-tags (if status
+                       (execute-query *find-todos-by-tag-ulids-and-status-query*
+                                      (list :owner-id owner-id :tag-ulids tag-ulids :status status))
+                       (execute-query *find-todos-by-tag-ulids-query*
+                                      (list :owner-id owner-id :tag-ulids tag-ulids)))))
+    ;; Extract unique TODOs from todo-tags
+    (remove-duplicates
+     (mapcar #'(lambda (todo-tag)
+                 (ref todo-tag :todo))
+             todo-tags)
+     :key #'(lambda (todo) (ref todo :id)))))
+
+(defun find-todos-untagged (owner-id &key status)
+  "Find TODOs without any tags.
+
+   @param owner-id [integer] Owner ID
+   @param status [string] Status filter (\"active\" or \"completed\") (optional)
+   @return [list] List of <todo> instances
+   "
+  (if status
+      (execute-query *find-todos-untagged-and-status-query*
+                     (list :owner-id owner-id :status status))
+      (execute-query *find-todos-untagged-query*
+                     (list :owner-id owner-id))))

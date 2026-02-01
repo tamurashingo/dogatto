@@ -15,7 +15,11 @@
   (:import-from #:dogatto/models/user
                 #:find-user-by-id)
   (:import-from #:dogatto/models/todo-tag
-                #:find-tags-for-todo)
+                #:find-tags-for-todo
+                #:find-todos-by-tag-ulids
+                #:find-todos-untagged)
+  (:import-from #:cl-ppcre
+                #:split)
   (:import-from #:dogatto/utils/session
                 #:get-session
                 #:session-valid-p)
@@ -112,7 +116,10 @@
 (defmethod do-get ((controller <todos-list-controller>))
   "Get all todos for the authenticated user.
 
-   Returns JSON array of todos.
+   Supports query parameters:
+   - tags: Comma-separated tag ULIDs for filtering (OR condition)
+   - status: Filter by status (active/completed)
+   - untagged: If true, return only untagged TODOs
 
    @param controller [<todos-list-controller>] Controller instance
    @return [list] HTTP response via set-response
@@ -126,7 +133,22 @@
                        ("message" . "Authentication required")))))
     
     (let* ((user-id (ref user :id))
-           (todos (find-todos-by-user user-id))
+           (tags-param (param controller "tags"))
+           (status-param (param controller "status"))
+           (untagged-param (param controller "untagged"))
+           (tag-ulids (when tags-param
+                        (if (listp tags-param)
+                            tags-param
+                            (cl-ppcre:split "," tags-param))))
+           (untagged (or (string= untagged-param "true")
+                         (string= untagged-param "1")))
+           (todos (cond
+                    (untagged
+                     (find-todos-untagged user-id :status status-param))
+                    (tag-ulids
+                     (find-todos-by-tag-ulids user-id tag-ulids :status status-param))
+                    (t
+                     (find-todos-by-user user-id))))
            (todos-json (mapcar #'todo-to-json todos)))
       (setf (slot-value controller 'clails/controller/base-controller:code) 200)
       (set-response controller
