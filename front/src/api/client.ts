@@ -170,7 +170,7 @@ export class ApiClient {
   private async request<T>(url: string, options: RequestInit): Promise<ApiResponse<T>> {
     try {
       // Only include Content-Type header if there's a body
-      const headers = { ...this.defaultHeaders, ...options.headers };
+      const headers = { ...this.defaultHeaders, ...options.headers } as Record<string, string>;
       if (!options.body && headers['Content-Type']) {
         delete headers['Content-Type'];
       }

@@ -6,6 +6,7 @@ import TodosPage from './pages/TodosPage';
 import TodoCreatePage from './pages/TodoCreatePage';
 import TodoDetailPage from './pages/TodoDetailPage';
 import TodoEditPage from './pages/TodoEditPage';
+import TagsPage from './pages/TagsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
@@ -57,6 +58,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <TodoEditPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/tags',
+    element: (
+      <ProtectedRoute>
+        <TagsPage />
       </ProtectedRoute>
     ),
   },

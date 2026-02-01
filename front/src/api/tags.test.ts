@@ -37,8 +37,6 @@ describe('tagsApi', () => {
           data: { tags: mockTags },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await tagsApi.getTags();
@@ -74,8 +72,6 @@ describe('tagsApi', () => {
           },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await tagsApi.getTagByUlid('01HXXX1');
@@ -108,8 +104,6 @@ describe('tagsApi', () => {
           data: { tag: createdTag },
         },
         status: 201,
-        statusText: 'Created',
-        headers: {},
       });
 
       const result = await tagsApi.createTag(newTagData);
@@ -138,8 +132,6 @@ describe('tagsApi', () => {
           data: { tag: createdTag },
         },
         status: 201,
-        statusText: 'Created',
-        headers: {},
       });
 
       const result = await tagsApi.createTag(newTagData);
@@ -171,8 +163,6 @@ describe('tagsApi', () => {
           data: { tag: updatedTag },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await tagsApi.updateTag('01HXXX1', updateData);
@@ -201,8 +191,6 @@ describe('tagsApi', () => {
           data: { tag: updatedTag },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await tagsApi.updateTag('01HXXX1', updateData);
@@ -220,8 +208,6 @@ describe('tagsApi', () => {
           message: 'Tag deleted successfully',
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       await tagsApi.deleteTag('01HXXX1');

@@ -43,9 +43,10 @@
      :controller "dogatto/controllers/tags-controller:<tags-list-controller>")
     ;; SPA wildcard route (must be last)
     ;; All non-API routes return the same HTML for client-side routing
+    ;; Excludes static assets
     (:path "/*"
      :controller "dogatto/controllers/pages-controller:<pages-controller>"
-     :scanner "^/.*$")))
+     :scanner "^(?!/assets/)(?!/src/)(?!/api/)(?!/health).*$")))
 
 ;; startup hooks
 (push "dogatto/config/logger:initialize-logger" clails/environment:*startup-hooks*)

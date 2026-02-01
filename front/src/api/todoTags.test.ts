@@ -37,8 +37,6 @@ describe('todoTagsApi', () => {
           data: { tags: mockTags },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await todoTagsApi.getTagsForTodo('01TODO1');
@@ -76,8 +74,6 @@ describe('todoTagsApi', () => {
           data: { tags: mockTags },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await todoTagsApi.assignTagsToTodo('01TODO1', tagUlids);
@@ -108,8 +104,6 @@ describe('todoTagsApi', () => {
           data: { tags: mockTags },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await todoTagsApi.assignTagsToTodo('01TODO1', newTagUlids);
@@ -125,8 +119,6 @@ describe('todoTagsApi', () => {
           data: { tags: [] },
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       const result = await todoTagsApi.assignTagsToTodo('01TODO1', []);
@@ -147,8 +139,6 @@ describe('todoTagsApi', () => {
           message: 'Tag removed successfully',
         },
         status: 200,
-        statusText: 'OK',
-        headers: {},
       });
 
       await todoTagsApi.removeTagFromTodo('01TODO1', '01HXXX1');

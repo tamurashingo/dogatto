@@ -52,7 +52,7 @@
    :web-access
    :appender (make-console-appender
               :formatter (make-instance '<text-formatter>))
-   :level :info)
+   :level :debug)
 
   ;; audit logger
   (register-logger
