@@ -22,23 +22,23 @@
   - `<tag>` クラス定義
   - ULID生成
   - バリデーション（名前、色）
-- [ ] T003 [P1] Tag CRUD関数の実装
+- [x] T003 [P1] Tag CRUD関数の実装
   - `create-tag`
   - `find-tag-by-id`
   - `find-tag-by-ulid`
   - `find-tags-by-user`
   - `update-tag`
   - `delete-tag`
-- [ ] T004 [P1] TODO-Tag関連付け関数
+- [x] T004 [P1] TODO-Tag関連付け関数
   - `assign-tags-to-todo`
   - `remove-tag-from-todo`
   - `find-tags-for-todo`
   - `find-todos-for-tag`
-- [ ] T005 [P1] タグ統計関数
+- [x] T005 [P1] タグ統計関数
   - タグごとのTODO数
   - タグごとの完了TODO数
   - タグごとのアクティブTODO数
-- [ ] T006 [P1] Tagモデルのテスト
+- [x] T006 [P1] Tagモデルのテスト
   - CRUD操作のテスト
   - バリデーションのテスト
   - 一意性制約のテスト
@@ -51,32 +51,32 @@
 
 **目的**: タグCRUD用のAPIエンドポイントを実装
 
-- [ ] T007 [P1] Tagコントローラーの作成
+- [x] T007 [P1] Tagコントローラーの作成
   - `<tags-list-controller>` クラス
   - `<tag-item-controller>` クラス
-- [ ] T008 [P1] GET /api/v1/tags
+- [x] T008 [P1] GET /api/v1/tags
   - ユーザーの全タグ取得
   - 統計情報を含める
   - 認証チェック
-- [ ] T009 [P1] POST /api/v1/tags
+- [x] T009 [P1] POST /api/v1/tags
   - タグ作成
   - バリデーション
   - 重複チェック
   - 認証チェック
-- [ ] T010 [P1] GET /api/v1/tags/:ulid
+- [x] T010 [P1] GET /api/v1/tags/:ulid
   - タグ詳細取得
   - 関連するTODO一覧を含める
   - 認可チェック（所有者のみ）
-- [ ] T011 [P1] PUT /api/v1/tags/:ulid
+- [x] T011 [P1] PUT /api/v1/tags/:ulid
   - タグ更新
   - バリデーション
   - 重複チェック
   - 認可チェック
-- [ ] T012 [P1] DELETE /api/v1/tags/:ulid
+- [x] T012 [P1] DELETE /api/v1/tags/:ulid
   - タグ削除
   - 認可チェック
   - カスケード削除の確認
-- [ ] T013 [P1] Tagコントローラーのテスト
+- [x] T013 [P1] Tagコントローラーのテスト
   - 各エンドポイントのテスト
   - 認証・認可のテスト
   - バリデーションのテスト
@@ -88,15 +88,15 @@
 
 **目的**: TODOへのタグ割り当てAPIを実装
 
-- [ ] T014 [P1] PUT /api/v1/todos/:ulid/tags
+- [x] T014 [P1] PUT /api/v1/todos/:ulid/tags
   - タグ割り当て
   - 既存タグを新しいセットで置換
   - 最大10個の制限
   - 認可チェック
-- [ ] T015 [P1] DELETE /api/v1/todos/:ulid/tags/:tagUlid
+- [x] T015 [P1] DELETE /api/v1/todos/:ulid/tags/:tagUlid
   - タグ削除
   - 認可チェック
-- [ ] T016 [P1] TODOレスポンスにタグ配列を追加
+- [x] T016 [P1] TODOレスポンスにタグ配列を追加
   - 既存のTODO取得APIを拡張
   - タグ情報（ulid, name, color）を含める
 - [ ] T017 [P1] TODO-Tagコントローラーのテスト
@@ -110,14 +110,14 @@
 
 **目的**: タグでTODOをフィルタリングする機能を実装
 
-- [ ] T018 [P1] GET /api/v1/todos?tags=:ulids
+- [x] T018 [P1] GET /api/v1/todos?tags=:ulids
   - タグによるフィルタリング（OR条件）
   - 既存のTODO一覧エンドポイントを拡張
-- [ ] T019 [P1] GET /api/v1/todos?untagged=true
+- [x] T019 [P1] GET /api/v1/todos?untagged=true
   - タグなしTODOの取得
-- [ ] T020 [P1] 複合フィルタリング対応
+- [x] T020 [P1] 複合フィルタリング対応
   - タグ + ステータスフィルター
-- [ ] T021 [P1] フィルタリングのテスト
+- [x] T021 [P1] フィルタリングのテスト
   - 単一タグフィルター
   - 複数タグフィルター
   - タグなしフィルター
@@ -129,11 +129,11 @@
 
 **目的**: タグAPIのルーティングを設定
 
-- [ ] T022 [P1] ルーティング定義
+- [x] T022 [P1] ルーティング定義
   - `/api/v1/tags` → `<tags-list-controller>`
   - `/api/v1/tags/:id` → `<tag-item-controller>`
   - `/api/v1/todos/:id/tags` → TODO-Tagコントローラー
-- [ ] T023 [P1] application-loaderの更新
+- [x] T023 [P1] application-loaderの更新
   - 新しいコントローラーをロード
 
 ---
@@ -142,21 +142,21 @@
 
 **目的**: フロントエンド用のタグAPIクライアントを実装
 
-- [ ] T024 [P1] Tag型定義
+- [x] T024 [P1] Tag型定義
   - TypeScript型定義
-- [ ] T025 [P1] tagsApiクライアントの実装
+- [x] T025 [P1] tagsApiクライアントの実装
   - `getTags()`
   - `getTagByUlid(ulid)`
   - `createTag(data)`
   - `updateTag(ulid, data)`
   - `deleteTag(ulid)`
-- [ ] T026 [P1] TODO-Tag APIクライアント
+- [x] T026 [P1] TODO-Tag APIクライアント
   - `assignTagsToTodo(todoUlid, tagUlids)`
   - `removeTagFromTodo(todoUlid, tagUlid)`
-- [ ] T027 [P1] TODO APIクライアントの拡張
+- [x] T027 [P1] TODO APIクライアントの拡張
   - フィルタリングパラメータの追加
   - `getTodos({ tags?, untagged? })`
-- [ ] T028 [P1] APIクライアントのテスト
+- [x] T028 [P1] APIクライアントのテスト
   - 各メソッドのテスト
   - エラーハンドリングのテスト
 
@@ -166,17 +166,17 @@
 
 **目的**: タグ一覧ページを実装
 
-- [ ] T029 [P1] TagsPageコンポーネント作成
+- [x] T029 [P1] TagsPageコンポーネント作成
   - タグ一覧の表示
   - 「タグを作成」ボタン
   - 空状態の表示
-- [ ] T030 [P1] TagCardコンポーネント作成
+- [x] T030 [P1] TagCardコンポーネント作成
   - タグ名と色インジケーター
   - TODO数の表示
   - 編集・削除ボタン
-- [ ] T031 [P2] タグ統計の表示
+- [x] T031 [P2] タグ統計の表示
   - 完了数/アクティブ数
-- [ ] T032 [P2] レスポンシブデザイン
+- [x] T032 [P2] レスポンシブデザイン
   - モバイル対応
   - タブレット対応
 
@@ -186,18 +186,18 @@
 
 **目的**: タグ作成・編集用のモーダルを実装
 
-- [ ] T033 [P1] TagFormModalコンポーネント作成
+- [x] T033 [P1] TagFormModalコンポーネント作成
   - 作成/編集モード対応
   - フォームフィールド（名前、色）
-- [ ] T034 [P1] カラーピッカーの統合
+- [x] T034 [P1] カラーピッカーの統合
   - react-colorful等のライブラリ使用
   - デフォルトパレット提供
-- [ ] T035 [P1] フォームバリデーション
+- [x] T035 [P1] フォームバリデーション
   - 名前必須
   - 50文字制限
   - 重複チェック
   - 色コード形式チェック
-- [ ] T036 [P1] エラーハンドリング
+- [x] T036 [P1] エラーハンドリング
   - バリデーションエラー表示
   - APIエラー表示
 
@@ -207,14 +207,14 @@
 
 **目的**: タグ詳細ページを実装
 
-- [ ] T037 [P1] TagDetailPageコンポーネント作成
+- [x] T037 [P1] TagDetailPageコンポーネント作成
   - タグ情報の表示
   - 統計情報の表示
   - 編集・削除ボタン
-- [ ] T038 [P1] 関連TODO一覧の表示
+- [x] T038 [P1] 関連TODO一覧の表示
   - このタグが付いたTODOのリスト
   - TODOカードの再利用
-- [ ] T039 [P1] タグ削除機能
+- [x] T039 [P1] タグ削除機能
   - 確認ダイアログ
   - 削除後にタグ一覧へリダイレクト
 
@@ -224,16 +224,16 @@
 
 **目的**: TODOフォーム用のタグセレクターを実装
 
-- [ ] T040 [P1] TagSelectorコンポーネント作成
+- [x] T040 [P1] TagSelectorコンポーネント作成
   - マルチセレクト機能
   - タグ一覧のドロップダウン
-- [ ] T041 [P1] 選択済みタグの表示
+- [x] T041 [P1] 選択済みタグの表示
   - バッジ表示
   - 削除ボタン付き
-- [ ] T042 [P2] タグ検索機能
+- [x] T042 [P2] タグ検索機能
   - タグ名でフィルタリング
   - デバウンス処理
-- [ ] T043 [P1] 最大10個の制限
+- [x] T043 [P1] 最大10個の制限
   - 制限到達時の警告表示
   - 追加選択不可
 
@@ -243,10 +243,10 @@
 
 **目的**: TODO作成/編集ページにタグ機能を統合
 
-- [ ] T044 [P1] TodoCreatePageの拡張
+- [x] T044 [P1] TodoCreatePageの拡張
   - TagSelectorコンポーネントの追加
   - タグ情報をAPIリクエストに含める
-- [ ] T045 [P1] TodoEditPageの拡張
+- [x] T045 [P1] TodoEditPageの拡張
   - 既存タグの表示
   - TagSelectorコンポーネントの追加
   - タグ更新APIの呼び出し
@@ -257,13 +257,13 @@
 
 **目的**: TODO一覧と詳細ページにタグ表示を追加
 
-- [ ] T046 [P1] TagBadgeコンポーネント作成
+- [x] T046 [P1] TagBadgeコンポーネント作成
   - タグの色付きバッジ表示
   - クリックでフィルタリング
-- [ ] T047 [P1] TodosPageへのタグ表示
+- [x] T047 [P1] TodosPageへのタグ表示
   - TODOカードにタグバッジを追加
   - タグクリック時のフィルタリング
-- [ ] T048 [P1] TodoDetailPageへのタグ表示
+- [x] T048 [P1] TodoDetailPageへのタグ表示
   - タグ一覧の表示
   - インラインでのタグ追加/削除（P2）
 
