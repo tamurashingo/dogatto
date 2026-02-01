@@ -2,7 +2,10 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import TagSelector from '../components/TagSelector';
 import { todosApi } from '../api/todos';
+import { todoTagsApi } from '../api/todoTags';
+import type { Tag } from '../api/tags';
 import { ApiError } from '../api/error';
 import '../styles/todo-form.css';
 
@@ -16,6 +19,7 @@ export default function TodoCreatePage(): React.JSX.Element {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -58,11 +62,17 @@ export default function TodoCreatePage(): React.JSX.Element {
         ? Math.floor(new Date(dueDate).getTime() / 1000)
         : undefined;
 
-      await todosApi.createTodo({
+      const newTodo = await todosApi.createTodo({
         title: title.trim(),
         content: content.trim() || undefined,
         dueDate: dueDateTimestamp,
       });
+
+      // Add tags to the newly created TODO
+      if (selectedTags.length > 0) {
+        const tagUlids = selectedTags.map(tag => tag.ulid);
+        await todoTagsApi.assignTagsToTodo(newTodo.ulid, tagUlids);
+      }
 
       navigate('/todos');
     } catch (err) {
@@ -133,6 +143,11 @@ export default function TodoCreatePage(): React.JSX.Element {
                 disabled={isLoading}
               />
             </div>
+
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+            />
 
             <div className="form-actions">
               <button
