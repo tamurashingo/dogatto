@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import type { ApiResponse } from './client';
+import type { Tag } from './tags';
 
 /**
  * TODO data structure.
@@ -15,6 +16,7 @@ export interface Todo {
   completedAt: number | null;
   createdAt: number;
   updatedAt: number;
+  tags: Tag[];
 }
 
 /**
@@ -33,6 +35,15 @@ export interface UpdateTodoRequest {
   title?: string;
   content?: string;
   dueDate?: number;
+}
+
+/**
+ * TODO filtering parameters.
+ */
+export interface GetTodosParams {
+  tags?: string[];
+  status?: string;
+  untagged?: boolean;
 }
 
 /**
@@ -67,13 +78,35 @@ export const todosApi = {
    * Gets all todos for the authenticated user.
    *
    * Retrieves a list of all todos belonging to the current user.
+   * Supports filtering by tags, status, and untagged todos.
    *
+   * @param params [GetTodosParams] Filtering parameters (optional)
+   * @param params.tags [string[]] Filter by tag ULIDs (OR condition) (optional)
+   * @param params.status [string] Filter by status (active/completed) (optional)
+   * @param params.untagged [boolean] Get only untagged todos (optional)
    * @return [Promise<Todo[]>] List of todos
    * @throws [ApiError] When request fails
    */
-  async getTodos(): Promise<Todo[]> {
+  async getTodos(params?: GetTodosParams): Promise<Todo[]> {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.tags && params.tags.length > 0) {
+      queryParams.append('tags', params.tags.join(','));
+    }
+    
+    if (params?.status) {
+      queryParams.append('status', params.status);
+    }
+    
+    if (params?.untagged) {
+      queryParams.append('untagged', 'true');
+    }
+    
+    const queryString = queryParams.toString();
+    const url = queryString ? `/api/v1/todos?${queryString}` : '/api/v1/todos';
+    
     const response: ApiResponse<BackendResponse<TodoListResponse>> = 
-      await apiClient.get<BackendResponse<TodoListResponse>>('/api/v1/todos');
+      await apiClient.get<BackendResponse<TodoListResponse>>(url);
     return (response.data as any).data.todos;
   },
 
