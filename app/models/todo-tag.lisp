@@ -24,7 +24,7 @@
 (in-package #:dogatto/models/todo-tag)
 
 (defmodel <todo-tag> (<base-model>)
-  (:table "todo-tags"
+  (:table "todo_tags"
    :relations ((:belongs-to "dogatto/models/todo:<todo>"
                 :column :todo
                 :key :todo-id)
