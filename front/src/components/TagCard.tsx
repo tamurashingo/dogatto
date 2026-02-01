@@ -6,6 +6,7 @@ import type { Tag } from '../api/tags';
  */
 interface TagCardProps {
   tag: Tag;
+  onEdit: () => void;
   onDelete: () => void;
 }
 
@@ -14,7 +15,7 @@ interface TagCardProps {
  *
  * Displays a tag with its color, name, and action buttons.
  */
-export default function TagCard({ tag, onDelete }: TagCardProps): React.JSX.Element {
+export default function TagCard({ tag, onEdit, onDelete }: TagCardProps): React.JSX.Element {
   return (
     <div className="tag-card">
       <div className="tag-card-header">
@@ -26,13 +27,13 @@ export default function TagCard({ tag, onDelete }: TagCardProps): React.JSX.Elem
         <Link to={`/tags/${tag.ulid}`} className="btn-view">
           View
         </Link>
-        <Link 
-          to={`/tags/${tag.ulid}/edit`}
-          state={{ from: 'list' }}
+        <button 
+          onClick={onEdit}
           className="btn-edit"
+          type="button"
         >
           Edit
-        </Link>
+        </button>
         <button
           onClick={onDelete}
           className="btn-delete"
