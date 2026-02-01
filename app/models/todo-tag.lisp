@@ -36,16 +36,16 @@
 
 ;; Native queries
 @cl-batis:update
-("DELETE FROM todo_tags WHERE todo_id = :todo_id")
-(defsql delete-tags-for-todo (todo_id))
+("DELETE FROM todo_tags WHERE todo_id = :todo_id and owner_id = :owner_id")
+(defsql delete-tags-for-todo (todo_id owner_id))
 
 @cl-batis:update
 ("INSERT INTO todo_tags (todo_id, tag_id, created_at) VALUES (:todo_id, :tag_id, :created_at)")
 (defsql insert-todo-tag (todo_id tag_id created_at))
 
 @cl-batis:update
-("DELETE FROM todo_tags WHERE todo_id = :todo_id AND tag_id = :tag_id")
-(defsql delete-todo-tag (todo_id tag_id))
+("DELETE FROM todo_tags WHERE todo_id = :todo_id AND tag_id = :tag_id AND owner_id = :owenr_id")
+(defsql delete-todo-tag (todo_id tag_id owner_id))
 
 
 
@@ -53,7 +53,8 @@
   (query <todo>
          :as :todo
          :joins ((:inner-join :todo-tags))
-         :where (:= (:todo-tags :tag-id) :tag-id)
+         :where (:and (:= (:todo-tags :tag-id) :tag-id)
+                      (:= (:todo-tags :owner-id) :owner-id))
          :order-by ((:todo :created-at :desc))))
 
 
@@ -69,7 +70,7 @@
 (defsql select-tag-statistics (tag_id owner_id))
 
 ;; Functions
-(defun assign-tags-to-todo (todo-ulid tag-ulids)
+(defun assign-tags-to-todo (todo-ulid tag-ulids owner-id)
   "Assign tags to a TODO.
 
    Replaces all existing tags with the new set of tags.
@@ -84,30 +85,32 @@
   (when (> (length tag-ulids) 10)
     (error "Maximum 10 tags allowed per TODO"))
   
-  (let ((todo (find-todo-by-ulid todo-ulid)))
+  (let ((todo (find-todo-by-ulid todo-ulid owner-id)))
     (unless todo
       (error "TODO not found"))
     
     ;; Verify all tags exist
     (let ((tags (mapcar #'(lambda (tag-ulid)
-                            (or (find-tag-by-ulid tag-ulid)
+                            (or (find-tag-by-ulid tag-ulid owner-id)
                                 (error "Tag not found: ~A" tag-ulid)))
                         tag-ulids)))
       
       ;; Remove existing associations
       (clails/model:execute-query delete-tags-for-todo
-                                  (list :todo_id (ref todo :id)))
+                                  (list :todo_id (ref todo :id)
+                                        :owner_id owner-id))
       
       ;; Add new associations
       (dolist (tag tags)
-        (clails/model:execute-query insert-todo-tag
-                                    (list :todo_id (ref todo :id)
-                                          :tag_id (ref tag :id)
-                                          :created_at (get-universal-time))))
-      
+        (let ((record (make-record '<todo-tag>
+                                   :todo-id (ref todo :id)
+                                   :tag-id (ref tag :id)
+                                   :tag-ulid (ref tag :ulid)
+                                   :owner-id owner-id)))
+          (save record)))
       t)))
 
-(defun remove-tag-from-todo (todo-ulid tag-ulid)
+(defun remove-tag-from-todo (todo-ulid tag-ulid owner-id)
   "Remove a tag from a TODO.
 
    @param todo-ulid [string] TODO ULID
@@ -115,8 +118,8 @@
    @return [boolean] T if successful
    @condition not-found-error If TODO or tag not found
    "
-  (let ((todo (find-todo-by-ulid todo-ulid))
-        (tag (find-tag-by-ulid tag-ulid)))
+  (let ((todo (find-todo-by-ulid todo-ulid owner-id))
+        (tag (find-tag-by-ulid tag-ulid owner-id)))
     (unless todo
       (error "TODO not found"))
     (unless tag
@@ -152,7 +155,7 @@
                    (list :todo-id (ref todo :id)
                          :owner-id owner-id))))`
 
-(defun find-todos-for-tag (tag-ulid)
+(defun find-todos-for-tag (tag-ulid owner-id)
   "Find all TODOs with a specific tag.
 
    Returns TODOs ordered by created_at descending.
@@ -160,12 +163,13 @@
    @param tag-ulid [string] Tag ULID
    @return [list] List of TODO instances
    "
-  (let ((tag (find-tag-by-ulid tag-ulid)))
+  (let ((tag (find-tag-by-ulid tag-ulid owner-id)))
     (unless tag
       (return-from find-todos-for-tag nil))
     
     (execute-query *find-todos-for-tag-query*
-                   (list :tag-id (ref tag :id)))))
+                   (list :tag-id (ref tag :id)
+                         :owner-id owner-id))))
 
 (defun get-tag-statistics (tag-ulid owner-id)
   "Get statistics for a tag.

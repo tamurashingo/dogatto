@@ -26,6 +26,23 @@
   ()
   (:documentation "Controller for managing TODO tags (GET /todos/:ulid/tags, PUT /todos/:ulid/tags)"))
 
+(defun get-cookie-value (headers cookie-name)
+  "Extract cookie value from request headers.
+
+   @param headers [hash-table] Request headers
+   @param cookie-name [string] Name of the cookie to extract
+   @return [string] Cookie value if found
+   @return [nil] If cookie not found
+   "
+  (let ((cookie-header (gethash "cookie" headers)))
+    (when cookie-header
+      (let* ((cookies (cl-ppcre:split ";\\s*" cookie-header))
+             (target-cookie (find-if (lambda (c)
+                                       (cl-ppcre:scan (format nil "^~A=" cookie-name) c))
+                                     cookies)))
+        (when target-cookie
+          (cadr (cl-ppcre:split "=" target-cookie :limit 2)))))))
+
 (defun get-authenticated-user (env)
   "Get authenticated user from session.
 
@@ -33,12 +50,13 @@
    @return [<user>] User instance if authenticated
    @return [nil] If not authenticated
    "
-  (let* ((cookies (getf env :cookies))
-         (session-id (cdr (assoc "session_id" cookies :test #'string=))))
-    (when session-id
-      (let ((session (get-session session-id)))
-        (when (and session (session-valid-p session))
-          (find-user-by-id (getf session :user-id)))))))
+  (let* ((headers (getf env :headers))
+         (session-id (get-cookie-value headers "session_id")))
+    (when (and session-id (session-valid-p session-id))
+      (let* ((session-data (get-session session-id))
+             (user-id (getf session-data :user-id)))
+        (when user-id
+          (find-user-by-id user-id))))))
 
 (defun tag-to-json (tag)
   "Convert tag instance to JSON-friendly alist.
@@ -101,8 +119,8 @@
       (let ((tag-ulids (param controller "tagUlids")))
         (handler-case
             (progn
-              (assign-tags-to-todo ulid (or tag-ulids '()))
-              (let* ((tags (find-tags-for-todo ulid))
+              (assign-tags-to-todo ulid (or tag-ulids '()) (ref user :id))
+              (let* ((tags (find-tags-for-todo ulid (ref user :id)))
                      (tags-json (mapcar #'tag-to-json tags)))
                 (setf (slot-value controller 'clails/controller/base-controller:code) 200)
                 (set-response controller
