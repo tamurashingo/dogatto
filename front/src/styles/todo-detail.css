@@ -147,6 +147,13 @@
   color: #a0aec0;
 }
 
+/* Todo Tags List */
+.todo-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 /* Detail Grid */
 .detail-grid {
   display: grid;

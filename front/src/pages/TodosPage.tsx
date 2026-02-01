@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import TagBadge from '../components/TagBadge';
 import { todosApi } from '../api/todos';
 import type { Todo } from '../api/todos';
 import { ApiError } from '../api/error';
@@ -155,6 +156,19 @@ export default function TodosPage(): React.JSX.Element {
                 {todo.dueDate && (
                   <div className="todo-due-date">
                     Due: {formatDate(todo.dueDate)}
+                  </div>
+                )}
+
+                {todo.tags && todo.tags.length > 0 && (
+                  <div className="todo-tags">
+                    {todo.tags.map(tag => (
+                      <TagBadge
+                        key={tag.ulid}
+                        tag={tag}
+                        clickable
+                        size="small"
+                      />
+                    ))}
                   </div>
                 )}
 
