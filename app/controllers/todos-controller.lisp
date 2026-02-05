@@ -14,6 +14,12 @@
                 #:<todo>)
   (:import-from #:dogatto/models/user
                 #:find-user-by-id)
+  (:import-from #:dogatto/models/todo-tag
+                #:find-tags-for-todo
+                #:find-todos-by-tag-ulids
+                #:find-todos-untagged)
+  (:import-from #:cl-ppcre
+                #:split)
   (:import-from #:dogatto/utils/session
                 #:get-session
                 #:session-valid-p)
@@ -82,9 +88,15 @@
    @param todo [<todo>] TODO model instance
    @return [list] Alist representation of TODO
    "
-  (let ((content-val (ref todo :content))
-        (completed-at-val (ref todo :completed-at))
-        (due-date-val (ref todo :due-date)))
+  (let* ((content-val (ref todo :content))
+         (completed-at-val (ref todo :completed-at))
+         (due-date-val (ref todo :due-date))
+         (tags (find-tags-for-todo (ref todo :ulid) (ref todo :owner-id)))
+         (tags-json (mapcar #'(lambda (tag)
+                                (list (cons "ulid" (ref tag :ulid))
+                                      (cons "name" (ref tag :name))
+                                      (cons "color" (ref tag :color))))
+                            tags)))
     (list (cons "id" (ref todo :id))
           (cons "ulid" (ref todo :ulid))
           (cons "ownerId" (ref todo :owner-id))
@@ -98,12 +110,16 @@
                                   :null
                                   (universal-time-to-unix-time completed-at-val)))
           (cons "createdAt" (universal-time-to-unix-time (ref todo :created-at)))
-          (cons "updatedAt" (universal-time-to-unix-time (ref todo :updated-at))))))
+          (cons "updatedAt" (universal-time-to-unix-time (ref todo :updated-at)))
+          (cons "tags" tags-json))))
 
 (defmethod do-get ((controller <todos-list-controller>))
   "Get all todos for the authenticated user.
 
-   Returns JSON array of todos.
+   Supports query parameters:
+   - tags: Comma-separated tag ULIDs for filtering (OR condition)
+   - status: Filter by status (active/completed)
+   - untagged: If true, return only untagged TODOs
 
    @param controller [<todos-list-controller>] Controller instance
    @return [list] HTTP response via set-response
@@ -117,7 +133,22 @@
                        ("message" . "Authentication required")))))
     
     (let* ((user-id (ref user :id))
-           (todos (find-todos-by-user user-id))
+           (tags-param (param controller "tags"))
+           (status-param (param controller "status"))
+           (untagged-param (param controller "untagged"))
+           (tag-ulids (when tags-param
+                        (if (listp tags-param)
+                            tags-param
+                            (cl-ppcre:split "," tags-param))))
+           (untagged (or (string= untagged-param "true")
+                         (string= untagged-param "1")))
+           (todos (cond
+                    (untagged
+                     (find-todos-untagged user-id :status status-param))
+                    (tag-ulids
+                     (find-todos-by-tag-ulids user-id tag-ulids :status status-param))
+                    (t
+                     (find-todos-by-user user-id))))
            (todos-json (mapcar #'todo-to-json todos)))
       (setf (slot-value controller 'clails/controller/base-controller:code) 200)
       (set-response controller
@@ -189,7 +220,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((todo-ulid (param controller "id"))
-           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid (ref user :id)))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -197,14 +228,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "TODO not found")))))
-      
-      ;; Check if todo belongs to current user
-      (unless (= (ref todo :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-get
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Access denied")))))
       
       (setf (slot-value controller 'clails/controller/base-controller:code) 200)
       (set-response controller
@@ -229,7 +252,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((todo-ulid (param controller "id"))
-           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid (ref user :id)))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -237,14 +260,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "TODO not found")))))
-      
-      ;; Check if todo belongs to current user
-      (unless (= (ref todo :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-put
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Access denied")))))
       
       (let* ((title (param controller "title"))
              (content (param controller "content"))
@@ -290,7 +305,7 @@
                        ("message" . "Authentication required")))))
     
     (let* ((todo-ulid (param controller "id"))
-           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid (ref user :id)))))
       
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
@@ -298,14 +313,6 @@
           (set-response controller
                        `(("status" . "error")
                          ("message" . "TODO not found")))))
-      
-      ;; Check if todo belongs to current user
-      (unless (= (ref todo :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-delete
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Access denied")))))
       
       (delete-todo todo)
       (setf (slot-value controller 'clails/controller/base-controller:code) 200)
@@ -330,23 +337,16 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
+
     (let* ((todo-ulid (param controller "id"))
-           (todo (when todo-ulid (find-todo-by-ulid todo-ulid))))
-      
+           (todo (when todo-ulid (find-todo-by-ulid todo-ulid (ref user :id)))))
+
       (unless todo
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
         (return-from do-put
           (set-response controller
                        `(("status" . "error")
                          ("message" . "TODO not found")))))
-      
-      ;; Check if todo belongs to current user
-      (unless (= (ref todo :owner-id) (ref user :id))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 403)
-        (return-from do-put
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "Access denied")))))
       
       (toggle-todo-status todo)
       (setf (slot-value controller 'clails/controller/base-controller:code) 200)

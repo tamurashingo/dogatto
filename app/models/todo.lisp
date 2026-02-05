@@ -28,8 +28,12 @@
 (defmodel <todo> (<base-model>)
   (:table "todos"
    :relations ((:belongs-to "dogatto/models/user::<user>"
-                 :column :owner
-                 :key :owner-id))))
+                :column :owner
+                :key :owner-id)
+               (:has-many "dogatto/models/todo-tag::<todo-tag>"
+                :as :todo-tags
+                :foreign-key :todo-id))))
+                 
 
 (defmethod validate ((todo <todo>))
   "Validate TODO data.
@@ -94,7 +98,7 @@
         (car results)
         nil)))
 
-(defun find-todo-by-ulid (ulid)
+(defun find-todo-by-ulid (ulid owner-id)
   "Find a TODO by its ULID.
 
    @param ulid [string] TODO ULID
@@ -103,8 +107,10 @@
   (let ((results (execute-query
                    (query <todo>
                           :as :todo
-                          :where (:= (:todo :ulid) :ulid))
-                   (list :ulid ulid))))
+                          :where (:and (:= (:todo :ulid) :ulid)
+				       (:= (:todo :owner-id) :owner-id)))
+                   (list :ulid ulid
+                         :owner-id owner-id))))
     (if results
         (car results)
         nil)))

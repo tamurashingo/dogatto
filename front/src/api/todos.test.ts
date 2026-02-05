@@ -30,6 +30,7 @@ describe('todosApi', () => {
     completedAt: null,
     createdAt: 1705190400,
     updatedAt: 1705190400,
+    tags: [],
   };
 
   describe('getTodos', () => {
@@ -57,6 +58,73 @@ describe('todosApi', () => {
       // Act & Assert
       await expect(todosApi.getTodos()).rejects.toThrow(ApiError);
       await expect(todosApi.getTodos()).rejects.toThrow('Authentication required');
+    });
+
+    it('should get todos filtered by tags', async () => {
+      // Arrange
+      const mockTodos = [mockTodo];
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: { status: 'success', data: { todos: mockTodos } },
+        status: 200,
+      });
+
+      // Act
+      const result = await todosApi.getTodos({ tags: ['01TAG1', '01TAG2'] });
+
+      // Assert
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos?tags=01TAG1%2C01TAG2');
+      expect(result).toEqual(mockTodos);
+    });
+
+    it('should get todos filtered by status', async () => {
+      // Arrange
+      const mockTodos = [mockTodo];
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: { status: 'success', data: { todos: mockTodos } },
+        status: 200,
+      });
+
+      // Act
+      const result = await todosApi.getTodos({ status: 'active' });
+
+      // Assert
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos?status=active');
+      expect(result).toEqual(mockTodos);
+    });
+
+    it('should get untagged todos', async () => {
+      // Arrange
+      const mockTodos = [mockTodo];
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: { status: 'success', data: { todos: mockTodos } },
+        status: 200,
+      });
+
+      // Act
+      const result = await todosApi.getTodos({ untagged: true });
+
+      // Assert
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos?untagged=true');
+      expect(result).toEqual(mockTodos);
+    });
+
+    it('should get todos with combined filters', async () => {
+      // Arrange
+      const mockTodos = [mockTodo];
+      vi.mocked(apiClient.get).mockResolvedValue({
+        data: { status: 'success', data: { todos: mockTodos } },
+        status: 200,
+      });
+
+      // Act
+      const result = await todosApi.getTodos({ 
+        tags: ['01TAG1'], 
+        status: 'active' 
+      });
+
+      // Assert
+      expect(apiClient.get).toHaveBeenCalledWith('/api/v1/todos?tags=01TAG1&status=active');
+      expect(result).toEqual(mockTodos);
     });
   });
 

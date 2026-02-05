@@ -53,8 +53,13 @@ ros run
   - use を使用するのは cl のみ
   - それ以外のパッケージ外にあるシンボルを参照する場合は import-from で記述する
   - これは Java の import で * を使用しないのと同じ理由である
+  - ただし、以下の場合は use を使う
+    - controller パッケージ
+      - clails/controller/base-controller
+    - model パッケージ
+      - clails/model
 
-  - テストでは cl, rove, テスト対象となるパッケージを use して良い
+  - テストでは cl, rove, テスト対象となるパッケージを use する
 
 - パッケージ定義やパッケージの移動ではキーワードパラメータは使用しない
   - 以下のように `#` を付けて指定する
@@ -154,6 +159,9 @@ ros run
 
 (ref user :is-active)
 ```
+
+- `query` マクロで定義する `<query>` インスタンスは直接 `execute-query` に渡さない。 defvar 等で変数に持つ
+  - `<query>` インスタンスは一度 `execute-query` を実行すると、そのクエリがクラスにキャッシュされるため
 
 
 ### フロントエンド

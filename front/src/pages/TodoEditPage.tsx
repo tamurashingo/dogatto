@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import TagSelector from '../components/TagSelector';
 import { todosApi } from '../api/todos';
+import { todoTagsApi } from '../api/todoTags';
+import type { Tag } from '../api/tags';
 import { ApiError } from '../api/error';
 import '../styles/todo-form.css';
 
@@ -18,6 +21,7 @@ export default function TodoEditPage(): React.JSX.Element {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -40,6 +44,7 @@ export default function TodoEditPage(): React.JSX.Element {
         const todo = await todosApi.getTodoByUlid(ulid);
         setTitle(todo.title);
         setContent(todo.content || '');
+        setSelectedTags(todo.tags || []);
         
         if (todo.dueDate) {
           const date = new Date(todo.dueDate * 1000);
@@ -103,6 +108,10 @@ export default function TodoEditPage(): React.JSX.Element {
         content: content.trim() || undefined,
         dueDate: dueDateTimestamp,
       });
+
+      // Update tags
+      const tagUlids = selectedTags.map(tag => tag.ulid);
+      await todoTagsApi.assignTagsToTodo(ulid, tagUlids);
 
       // Navigate back to the source page
       if (from === 'detail') {
@@ -191,6 +200,11 @@ export default function TodoEditPage(): React.JSX.Element {
                 disabled={isLoading}
               />
             </div>
+
+            <TagSelector
+              selectedTags={selectedTags}
+              onChange={setSelectedTags}
+            />
 
             <div className="form-actions">
               <button

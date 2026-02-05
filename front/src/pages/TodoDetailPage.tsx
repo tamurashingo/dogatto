@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import TagBadge from '../components/TagBadge';
 import { todosApi } from '../api/todos';
 import type { Todo } from '../api/todos';
 import { ApiError } from '../api/error';
@@ -175,6 +176,22 @@ export default function TodoDetailPage(): React.JSX.Element {
               <div className="todo-section">
                 <h2>Description</h2>
                 <p className="todo-content">{todo.content}</p>
+              </div>
+            )}
+
+            {todo.tags && todo.tags.length > 0 && (
+              <div className="todo-section">
+                <h2>Tags</h2>
+                <div className="todo-tags-list">
+                  {todo.tags.map(tag => (
+                    <TagBadge
+                      key={tag.ulid}
+                      tag={tag}
+                      clickable
+                      size="medium"
+                    />
+                  ))}
+                </div>
               </div>
             )}
 

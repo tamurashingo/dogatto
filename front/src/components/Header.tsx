@@ -41,6 +41,10 @@ export default function Header(): React.JSX.Element | null {
       <div className="header-container">
         <div className="header-left">
           <Link to="/todos" className="app-title">Dogatto</Link>
+          <nav className="header-nav">
+            <Link to="/todos" className="nav-link">TODOs</Link>
+            <Link to="/tags" className="nav-link">Tags</Link>
+          </nav>
         </div>
 
         <div className="header-right">
