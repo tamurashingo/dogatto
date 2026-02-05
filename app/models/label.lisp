@@ -14,8 +14,15 @@
                 #:execute-query
                 #:query
                 #:validate)
+  (:import-from #:cl-batis
+                #:defsql)
+  (:import-from #:cl-syntax
+                #:use-syntax)
   (:import-from #:dogatto/utils/ulid
                 #:generate-ulid)
+  (:import-from #:dogatto/models/tag
+                #:<tag>
+                #:find-tag-by-ulid)
   (:export #:<label>
            #:create-label
            #:find-label-by-id
@@ -23,7 +30,12 @@
            #:find-labels-by-owner
            #:update-label
            #:delete-label
-           #:check-label-name-uniqueness))
+           #:check-label-name-uniqueness
+           #:estimate-todo-count-by-tags
+           #:get-label-todo-count
+           #:search-labels-by-name
+           #:search-labels-by-tag-name
+           #:get-label-stats))
 
 (in-package #:dogatto/models/label)
 
@@ -279,3 +291,173 @@
       (return-from delete-label nil))
     (destroy label)
     t))
+
+(cl-syntax:use-syntax :annot)
+
+@cl-batis:select
+("SELECT COUNT(DISTINCT t.id) as count
+  FROM todos t
+  INNER JOIN todo_tags tt ON t.id = tt.todo_id
+  WHERE t.owner_id = :owner_id
+  AND tt.tag_id IN (:tag_ids)
+  GROUP BY t.id
+  HAVING COUNT(DISTINCT tt.tag_id) = :tag_count")
+(defsql count-todos-by-tag-ids-and (owner_id tag_ids tag_count))
+
+(defun estimate-todo-count-by-tags (owner-id tag-ulids)
+  "Estimate TODO count by tag ULIDs (AND condition).
+
+   Counts TODOs that have ALL of the specified tags.
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @param tag-ulids [list] List of tag ULIDs
+   @return [integer] Count of TODOs matching all tags
+   "
+  (when (or (null tag-ulids) (zerop (length tag-ulids)))
+    (return-from estimate-todo-count-by-tags 0))
+  
+  ;; Get tag IDs from ULIDs (filtered by owner-id at SQL level)
+  (let ((tags (remove nil
+                      (mapcar #'(lambda (ulid)
+                                  (find-tag-by-ulid ulid owner-id))
+                              tag-ulids))))
+    
+    (when (null tags)
+      (return-from estimate-todo-count-by-tags 0))
+    
+    (let* ((tag-ids (mapcar #'(lambda (tag) (ref tag :id)) tags))
+           (tag-count (length tag-ids))
+           (result (clails/model:execute-query 
+                    count-todos-by-tag-ids-and
+                    (list :owner_id owner-id
+                          :tag_ids tag-ids
+                          :tag_count tag-count))))
+      ;; Count the number of results (each result is a TODO with all tags)
+      (length result))))
+
+(defun get-label-todo-count (label-ulid owner-id)
+  "Get TODO count for a label (AND condition).
+
+   Counts TODOs that have ALL tags associated with the label.
+   Query filters by owner-id at SQL level for security.
+
+   @param label-ulid [string] Label ULID
+   @param owner-id [integer] Owner user ID
+   @return [integer] Count of TODOs matching all label tags
+   @return [integer] 0 if label not found
+   "
+  (let ((label (find-label-by-ulid label-ulid owner-id)))
+    (unless label
+      (return-from get-label-todo-count 0))
+    
+    ;; Get tags for this label (filtered by owner-id at SQL level)
+    (let* ((tags (execute-query
+                  (query <tag>
+                         :as :tag
+                         :joins ((:inner-join :label-tags))
+                         :where (:and (:= (:label-tags :label-id) :label-id)
+                                      (:= (:label-tags :owner-id) :owner-id)
+                                      (:= (:tag :owner-id) :owner-id)))
+                  (list :label-id (ref label :id)
+                        :owner-id owner-id)))
+           (tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) tags)))
+      
+      (estimate-todo-count-by-tags owner-id tag-ulids))))
+
+(defparameter *search-labels-by-name-query*
+  (query <label>
+         :as :label
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:like (:lower (:label :name)) :pattern))
+         :order-by ((:label :name :asc))))
+
+(defun search-labels-by-name (owner-id query)
+  "Search labels by name.
+
+   Case-insensitive partial match search.
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @param query [string] Search query
+   @return [list] List of label instances
+   "
+  (when (or (null query) (string= (string-trim '(#\Space #\Tab) query) ""))
+    (return-from search-labels-by-name nil))
+  
+  (let ((search-pattern (format nil "%~A%" (string-trim '(#\Space #\Tab) query))))
+    (execute-query *search-labels-by-name-query*
+                   (list :owner-id owner-id
+                         :pattern (string-downcase search-pattern)))))
+
+(defparameter *search-labels-by-tag-name-query*
+  (query <label>
+         :as :label
+         :joins ((:inner-join :label-tags)
+                 (:inner-join :tag))
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:= (:label-tags :owner-id) :owner-id)
+                      (:= (:tag :owner-id) :owner-id)
+                      (:like (:lower (:tag :name)) :pattern))
+         :order-by ((:label :name :asc))))
+
+(defun search-labels-by-tag-name (owner-id query)
+  "Search labels by associated tag name.
+
+   Case-insensitive partial match search.
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @param query [string] Search query
+   @return [list] List of label instances
+   "
+  (when (or (null query) (string= (string-trim '(#\Space #\Tab) query) ""))
+    (return-from search-labels-by-tag-name nil))
+  
+  (let ((search-pattern (format nil "%~A%" (string-trim '(#\Space #\Tab) query))))
+    (remove-duplicates
+     (execute-query *search-labels-by-tag-name-query*
+                    (list :owner-id owner-id
+                          :pattern (string-downcase search-pattern)))
+     :key #'(lambda (label) (ref label :id)))))
+
+@cl-batis:select
+("SELECT 
+    COUNT(*) as total_labels,
+    SUM(CASE WHEN todo_count > 0 THEN 1 ELSE 0 END) as used_labels
+  FROM (
+    SELECT l.id, 
+           (SELECT COUNT(DISTINCT t.id)
+            FROM todos t
+            INNER JOIN todo_tags tt ON t.id = tt.todo_id
+            WHERE tt.tag_id IN (
+              SELECT tag_id FROM label_tags WHERE label_id = l.id AND owner_id = :owner_id
+            )
+            AND t.owner_id = :owner_id
+            GROUP BY t.id
+            HAVING COUNT(DISTINCT tt.tag_id) = (
+              SELECT COUNT(*) FROM label_tags WHERE label_id = l.id AND owner_id = :owner_id
+            )
+           ) as todo_count
+    FROM labels l
+    WHERE l.owner_id = :owner_id
+  ) as label_stats")
+(defsql select-label-stats (owner_id))
+
+(defun get-label-stats (owner-id)
+  "Get label statistics.
+
+   Returns counts of total labels, used labels, and unused labels.
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @return [plist] Statistics (:total-labels :used-labels :unused-labels)
+   "
+  (let* ((result (clails/model:execute-query select-label-stats
+                                             (list :owner_id owner-id)))
+         (row (first result))
+         (total (or (getf row :total-labels) 0))
+         (used (or (getf row :used-labels) 0)))
+    (list :total-labels total
+          :used-labels used
+          :unused-labels (- total used))))
