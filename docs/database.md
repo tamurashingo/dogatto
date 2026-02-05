@@ -114,39 +114,55 @@ Stores comments on TODO items.
 
 ### tags
 
-Stores tags that can be attached to TODOs.
+Stores tags that can be attached to TODOs. Each user can create custom tags with names and colors.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| id | VARCHAR(26) | PRIMARY KEY | ULID |
-| user-id | VARCHAR(26) | NOT NULL, FOREIGN KEY | User who owns this tag |
-| name | VARCHAR(100) | NOT NULL | Tag name |
-| color | VARCHAR(7) | NULL | Hex color code (e.g., #FF5733) |
-| created-at | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Creation timestamp |
-| updated-at | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE | Last update timestamp |
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Internal ID |
+| ulid | VARCHAR(26) | NOT NULL, UNIQUE | ULID for external reference |
+| owner-id | BIGINT | NOT NULL, FOREIGN KEY | User who owns this tag |
+| name | VARCHAR(50) | NOT NULL | Tag name (1-50 characters) |
+| color | VARCHAR(7) | NOT NULL, DEFAULT '#3B82F6' | Hex color code (e.g., #3B82F6) |
+| created-at | BIGINT | NOT NULL | Creation timestamp (Unix time) |
+| updated-at | BIGINT | NOT NULL | Last update timestamp (Unix time) |
 
 **Indexes:**
 - PRIMARY KEY: `id`
-- FOREIGN KEY: `user-id` REFERENCES `users(id)` ON DELETE CASCADE
-- INDEX: `user-id`
+- UNIQUE: `ulid`
+- FOREIGN KEY: `owner-id` REFERENCES `users(id)` ON DELETE CASCADE
+- INDEX: `owner-id`
 - INDEX: `name`
-- UNIQUE COMPOSITE: `(user-id, name)` - Tag names must be unique per user
+- UNIQUE COMPOSITE: `(owner-id, name)` - Tag names must be unique per user (case-insensitive)
+
+**Constraints:**
+- Tag names are validated to be 1-50 characters
+- Color codes must be valid hex format (#RRGGBB)
+- Each user can have unlimited tags
+- Each TODO can have up to 10 tags (enforced at application level)
 
 ### todo-tags
 
-Junction table linking TODOs and Tags (many-to-many).
+Junction table linking TODOs and Tags (many-to-many). This enables TODOs to have multiple tags.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| todo-id | VARCHAR(26) | FOREIGN KEY | TODO reference |
-| tag-id | VARCHAR(26) | FOREIGN KEY | Tag reference |
+| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | Internal ID |
+| todo-id | BIGINT | NOT NULL, FOREIGN KEY | TODO reference |
+| tag-id | BIGINT | NOT NULL, FOREIGN KEY | Tag reference |
+| created-at | BIGINT | NOT NULL | Creation timestamp (Unix time) |
 
 **Indexes:**
-- PRIMARY KEY: `(todo-id, tag-id)`
+- PRIMARY KEY: `id`
 - FOREIGN KEY: `todo-id` REFERENCES `todos(id)` ON DELETE CASCADE
 - FOREIGN KEY: `tag-id` REFERENCES `tags(id)` ON DELETE CASCADE
 - INDEX: `todo-id`
 - INDEX: `tag-id`
+- UNIQUE COMPOSITE: `(todo-id, tag-id)` - Prevents duplicate tag assignments
+
+**Constraints:**
+- When a TODO is deleted, all its tag associations are removed (CASCADE)
+- When a tag is deleted, all its associations with TODOs are removed (CASCADE)
+- Each TODO-tag combination can only exist once (UNIQUE constraint)
 
 ### labels
 
@@ -259,12 +275,38 @@ Example: `20260111155249_create-users-table.lisp`
 ### Get user's pending TODOs with tags
 
 ```sql
-SELECT t.*, GROUP_CONCAT(tg.name) as tags
+SELECT t.*, 
+       GROUP_CONCAT(tg.name) as tag_names,
+       GROUP_CONCAT(tg.color) as tag_colors
 FROM todos t
 LEFT JOIN todo_tags tt ON t.id = tt.todo_id
 LEFT JOIN tags tg ON tt.tag_id = tg.id
 WHERE t.user_id = ? AND t.status = 'pending'
-GROUP BY t.id;
+GROUP BY t.id
+ORDER BY t.due_date ASC;
+```
+
+### Get TODOs by tag (OR condition)
+
+```sql
+SELECT DISTINCT t.*
+FROM todos t
+INNER JOIN todo_tags tt ON t.id = tt.todo_id
+INNER JOIN tags tg ON tt.tag_id = tg.id
+WHERE t.user_id = ?
+  AND tg.ulid IN (?, ?, ?)  -- List of tag ULIDs
+ORDER BY t.created_at DESC;
+```
+
+### Get untagged TODOs
+
+```sql
+SELECT t.*
+FROM todos t
+LEFT JOIN todo_tags tt ON t.id = tt.todo_id
+WHERE t.user_id = ?
+  AND tt.todo_id IS NULL
+ORDER BY t.created_at DESC;
 ```
 
 ### Get TODOs due today
@@ -273,19 +315,44 @@ GROUP BY t.id;
 SELECT *
 FROM todos
 WHERE user_id = ?
-  AND DATE(due_date) = CURDATE()
+  AND DATE(FROM_UNIXTIME(due_date)) = CURDATE()
   AND status != 'completed';
 ```
 
 ### Get tag usage statistics
 
 ```sql
-SELECT tg.name, COUNT(tt.todo_id) as todo_count
+SELECT 
+  tg.ulid,
+  tg.name,
+  tg.color,
+  COUNT(DISTINCT tt.todo_id) as total_count,
+  COUNT(DISTINCT CASE WHEN t.status = 'completed' THEN tt.todo_id END) as completed_count,
+  COUNT(DISTINCT CASE WHEN t.status != 'completed' THEN tt.todo_id END) as active_count
 FROM tags tg
 LEFT JOIN todo_tags tt ON tg.id = tt.tag_id
-WHERE tg.user_id = ?
-GROUP BY tg.id, tg.name
-ORDER BY todo_count DESC;
+LEFT JOIN todos t ON tt.todo_id = t.id
+WHERE tg.owner_id = ?
+GROUP BY tg.id, tg.ulid, tg.name, tg.color
+ORDER BY total_count DESC;
+```
+
+### Get tag details with associated TODOs
+
+```sql
+SELECT 
+  tg.*,
+  t.id as todo_id,
+  t.ulid as todo_ulid,
+  t.title,
+  t.status,
+  t.due_date
+FROM tags tg
+LEFT JOIN todo_tags tt ON tg.id = tt.tag_id
+LEFT JOIN todos t ON tt.todo_id = t.id
+WHERE tg.ulid = ?
+  AND tg.owner_id = ?
+ORDER BY t.created_at DESC;
 ```
 
 ## Backup and Restore

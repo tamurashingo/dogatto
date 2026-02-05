@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import TagBadge from '../components/TagBadge';
 import TagFilter from '../components/TagFilter';
@@ -14,11 +14,28 @@ import '../styles/todos.css';
  * Displays list of todos with create, edit, delete, and toggle complete functionality.
  */
 export default function TodosPage(): React.JSX.Element {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedTagUlids, setSelectedTagUlids] = useState<string[]>([]);
   const [includeUntagged, setIncludeUntagged] = useState(false);
+
+  /**
+   * Initializes filter state from URL query parameters.
+   */
+  useEffect(() => {
+    const tagsParam = searchParams.get('tags');
+    const untaggedParam = searchParams.get('untagged');
+    
+    if (tagsParam) {
+      setSelectedTagUlids(tagsParam.split(',').filter(Boolean));
+    }
+    
+    if (untaggedParam === 'true') {
+      setIncludeUntagged(true);
+    }
+  }, [searchParams]);
 
   /**
    * Fetches todos from API with optional tag filtering.
@@ -118,12 +135,27 @@ export default function TodosPage(): React.JSX.Element {
   /**
    * Handles tag filter change.
    *
+   * Updates both state and URL query parameters.
+   *
    * @param tagUlids [string[]] Selected tag ULIDs
    * @param untagged [boolean] Include untagged TODOs
    */
   const handleFilterChange = (tagUlids: string[], untagged: boolean) => {
     setSelectedTagUlids(tagUlids);
     setIncludeUntagged(untagged);
+    
+    // Update URL query parameters
+    const newParams = new URLSearchParams();
+    
+    if (tagUlids.length > 0) {
+      newParams.set('tags', tagUlids.join(','));
+    }
+    
+    if (untagged) {
+      newParams.set('untagged', 'true');
+    }
+    
+    setSearchParams(newParams);
   };
 
   useEffect(() => {

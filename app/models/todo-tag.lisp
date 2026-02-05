@@ -196,19 +196,19 @@
 (defparameter *find-todos-by-tag-ulids-query*
   (query <todo-tag>
          :as :todo-tags
-         :joins ((:inner-join :todo)
-                 (:inner-join :tag))
+         :joins ((:inner-join :todo))
          :where (:and (:= (:todo :owner-id) :owner-id)
-                      (:in (:tag :ulid) :tag-ulids))
+                      (:= (:todo-tags :owner-id) :owner-id)
+                      (:in (:todo-tags :tag-ulid) :tag-ulids))
          :order-by ((:todo :created-at :desc))))
 
 (defparameter *find-todos-by-tag-ulids-and-status-query*
   (query <todo-tag>
          :as :todo-tags
-         :joins ((:inner-join :todo)
-                 (:inner-join :tag))
+         :joins ((:inner-join :todo))
          :where (:and (:= (:todo :owner-id) :owner-id)
-                      (:in (:tag :ulid) :tag-ulids)
+                      (:= (:todo-tags :owner-id) :owner-id)
+                      (:in (:todo-tags :tag-ulid) :tag-ulids)
                       (:= (:todo :status) :status))
          :order-by ((:todo :created-at :desc))))
 
@@ -244,6 +244,7 @@
                                       (list :owner-id owner-id :tag-ulids tag-ulids :status status))
                        (execute-query *find-todos-by-tag-ulids-query*
                                       (list :owner-id owner-id :tag-ulids tag-ulids)))))
+
     ;; Extract unique TODOs from todo-tags
     (remove-duplicates
      (mapcar #'(lambda (todo-tag)

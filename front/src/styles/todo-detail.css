@@ -20,7 +20,7 @@
   display: inline-block;
   padding: 0.5rem 1rem;
   background: #e2e8f0;
-  color: #2d3748;
+  color: #1a202c;
   text-decoration: none;
   border-radius: 0.375rem;
   font-weight: 600;
@@ -56,14 +56,14 @@
 
 /* Detail Container */
 .detail-container {
-  background: white;
+  background: #ffffff;
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .todo-detail {
-  border-left: 4px solid #4299e1;
+  border-left: 4px solid #3182ce;
   padding-left: 1.5rem;
 }
 
@@ -110,8 +110,9 @@
 
 /* Title */
 .todo-detail .todo-title {
-  color: #2d3748;
+  color: #1a202c;
   font-size: 2rem;
+  font-weight: 700;
   margin: 0 0 1.5rem 0;
   word-break: break-word;
 }
@@ -127,8 +128,9 @@
 }
 
 .todo-section h2 {
-  color: #2d3748;
+  color: #1a202c;
   font-size: 1.25rem;
+  font-weight: 600;
   margin: 0 0 0.75rem 0;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #e2e8f0;
@@ -268,74 +270,111 @@
   }
 
   .detail-container {
-    background: #2d3748;
+    background: #374151;
   }
 
-  .btn-back,
-  .btn-back-inline {
-    background: #4a5568;
-    color: #f7fafc;
+  .todo-detail {
+    border-left-color: #60a5fa;
   }
 
-  .btn-back:hover,
-  .btn-back-inline:hover {
-    background: #718096;
+  .todo-detail.completed {
+    border-left-color: #34d399;
   }
 
-  .error-message {
-    background: #9b2c2c;
-    color: #fed7d7;
-    border-left-color: #fc8181;
+  .todo-detail.overdue {
+    border-left-color: #f87171;
   }
 
-  .todo-section h2 {
-    color: #f7fafc;
-    border-bottom-color: #4a5568;
+  .todo-detail-page .btn-back,
+  .todo-detail-page .btn-back-inline {
+    background: #4b5563;
+    color: #ffffff;
   }
 
-  .todo-detail .todo-title {
-    color: #f7fafc;
+  .todo-detail-page .btn-back:hover,
+  .todo-detail-page .btn-back-inline:hover {
+    background: #6b7280;
+  }
+
+  .todo-detail-page .error-message {
+    background: #991b1b;
+    color: #fecaca;
+    border-left-color: #f87171;
+  }
+
+  .todo-detail-page .todo-section h2 {
+    color: #ffffff;
+    border-bottom-color: #4b5563;
+  }
+
+  .todo-detail-page .todo-detail .todo-title {
+    color: #ffffff;
   }
 
   .todo-detail.completed .todo-title {
-    color: #718096;
+    color: #9ca3af;
   }
 
-  .todo-content {
-    color: #e2e8f0;
+  .todo-detail-page .todo-content {
+    color: #e5e7eb;
   }
 
   .todo-detail.completed .todo-content {
-    color: #718096;
+    color: #9ca3af;
   }
 
-  .detail-label {
-    color: #a0aec0;
+  .todo-detail-page .detail-label {
+    color: #d1d5db;
   }
 
-  .detail-value {
-    color: #f7fafc;
+  .todo-detail-page .detail-value {
+    color: #f3f4f6;
   }
 
-  .action-buttons {
-    border-top-color: #4a5568;
+  .todo-detail-page .action-buttons {
+    border-top-color: #4b5563;
   }
 
-  .btn-toggle {
-    background: #2c5282;
-    color: #bee3f8;
+  .todo-detail-page .btn-toggle {
+    background: #1e40af;
+    color: #dbeafe;
   }
 
-  .btn-toggle:hover {
-    background: #2b6cb0;
+  .todo-detail-page .btn-toggle:hover {
+    background: #1e3a8a;
   }
 
-  .btn-delete-large {
-    background: #9b2c2c;
-    color: #fed7d7;
+  .todo-detail-page .btn-edit-large {
+    background: #1e40af;
+    color: #dbeafe;
   }
 
-  .btn-delete-large:hover {
-    background: #c53030;
+  .todo-detail-page .btn-edit-large:hover {
+    background: #1e3a8a;
+  }
+
+  .todo-detail-page .btn-delete-large {
+    background: #991b1b;
+    color: #fecaca;
+  }
+
+  .todo-detail-page .btn-delete-large:hover {
+    background: #7f1d1d;
+  }
+
+  .badge.pending,
+  .badge.active {
+    background: #1e40af;
+    color: #dbeafe;
+  }
+
+  .badge.completed {
+    background: #065f46;
+    color: #d1fae5;
+  }
+
+  .badge.overdue-badge {
+    background: #991b1b;
+    color: #fecaca;
   }
 }
