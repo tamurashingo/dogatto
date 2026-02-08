@@ -3,6 +3,7 @@ import type { Label, CreateLabelRequest, UpdateLabelRequest } from '../api/label
 import { tagsApi } from '../api/tags';
 import { labelsApi } from '../api/labels';
 import type { Tag } from '../api/tags';
+import '../styles/label-form-modal.css';
 
 /**
  * Label form modal props.
