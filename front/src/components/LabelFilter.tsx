@@ -23,6 +23,7 @@ interface LabelFilterProps {
 export default function LabelFilter({ selectedLabelUlid, onChange }: LabelFilterProps): React.JSX.Element {
   const [labels, setLabels] = useState<Label[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Fetches labels from API.
@@ -31,10 +32,13 @@ export default function LabelFilter({ selectedLabelUlid, onChange }: LabelFilter
     const fetchLabels = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const response = await labelsApi.getLabels({ filter: 'used' });
         setLabels(response.labels);
       } catch (err) {
         console.error('Failed to load labels:', err);
+        setError('Failed to load labels');
+        setLabels([]);
       } finally {
         setIsLoading(false);
       }
@@ -53,6 +57,14 @@ export default function LabelFilter({ selectedLabelUlid, onChange }: LabelFilter
     onChange(value === '' ? null : value);
   };
 
+  if (error) {
+    return (
+      <div className="label-filter">
+        <p className="label-filter-error">{error}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="label-filter">
       <label htmlFor="label-filter-select" className="label-filter-label">
@@ -63,9 +75,11 @@ export default function LabelFilter({ selectedLabelUlid, onChange }: LabelFilter
         className="label-filter-select"
         value={selectedLabelUlid || ''}
         onChange={handleChange}
-        disabled={isLoading}
+        disabled={isLoading || labels.length === 0}
       >
-        <option value="">All Labels</option>
+        <option value="">
+          {isLoading ? 'Loading labels...' : labels.length === 0 ? 'No labels available' : 'All Labels'}
+        </option>
         {labels.map(label => (
           <option key={label.ulid} value={label.ulid}>
             {label.name} ({label.todoCount})

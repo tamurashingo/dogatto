@@ -401,6 +401,13 @@
   opacity: 0.6;
 }
 
+.label-filter-error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin: 0;
+  padding: 0.5rem;
+}
+
 @media (prefers-color-scheme: dark) {
   .label-filter {
     background: #2d3748;
@@ -422,5 +429,9 @@
 
   .label-filter-select:disabled {
     background: #374151;
+  }
+
+  .label-filter-error {
+    color: #fc8181;
   }
 }
