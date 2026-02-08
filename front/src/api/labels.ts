@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import type { ApiResponse } from './client';
+import type { Tag } from './tags';
 
 /**
  * Label data structure.
@@ -11,6 +12,7 @@ export interface Label {
   description: string | null;
   tagCount: number;
   todoCount: number;
+  tags?: Tag[];
   createdAt: number;
   updatedAt: number;
 }

@@ -1,4 +1,5 @@
 import type { Label } from '../api/labels';
+import TagBadge from './TagBadge';
 
 /**
  * Label card component props.
@@ -13,9 +14,12 @@ interface LabelCardProps {
 /**
  * Label card component.
  *
- * Displays a label with its name, description, tag count, TODO count, and action buttons.
+ * Displays a label with its name, description, tags, TODO count, and action buttons.
  */
 export default function LabelCard({ label, onClick, onEdit, onDelete }: LabelCardProps): React.JSX.Element {
+  const displayTags = label.tags?.slice(0, 5) || [];
+  const remainingCount = (label.tags?.length || 0) - displayTags.length;
+
   return (
     <div className="label-card" onClick={onClick}>
       <div className="label-card-header">
@@ -24,6 +28,17 @@ export default function LabelCard({ label, onClick, onEdit, onDelete }: LabelCar
 
       {label.description && (
         <p className="label-description">{label.description}</p>
+      )}
+
+      {label.tags && label.tags.length > 0 && (
+        <div className="label-tags">
+          {displayTags.map(tag => (
+            <TagBadge key={tag.ulid} tag={tag} />
+          ))}
+          {remainingCount > 0 && (
+            <span className="tag-badge tag-more">+{remainingCount}</span>
+          )}
+        </div>
       )}
 
       <div className="label-stats">

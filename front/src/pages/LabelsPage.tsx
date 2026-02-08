@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import LabelCard from '../components/LabelCard';
 import LabelFormModal from '../components/LabelFormModal';
+import LabelDeleteConfirm from '../components/LabelDeleteConfirm';
 import { labelsApi } from '../api/labels';
 import type { Label, LabelStats, CreateLabelRequest, UpdateLabelRequest, LabelSearchParams } from '../api/labels';
 import { ApiError } from '../api/error';
@@ -21,6 +22,7 @@ export default function LabelsPage(): React.JSX.Element {
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLabel, setEditingLabel] = useState<Label | undefined>(undefined);
+  const [deletingLabel, setDeletingLabel] = useState<Label | undefined>(undefined);
   
   // Search and filter state
   const [searchMode, setSearchMode] = useState<'label_name' | 'tag_name'>('label_name');
@@ -90,7 +92,14 @@ export default function LabelsPage(): React.JSX.Element {
     if (!editingLabel) return;
 
     try {
-      await labelsApi.updateLabel(editingLabel.ulid, data as UpdateLabelRequest);
+      // Fetch full label details first if tags are not loaded
+      let labelWithTags = editingLabel;
+      if (!editingLabel.tags) {
+        labelWithTags = await labelsApi.getLabelByUlid(editingLabel.ulid);
+        setEditingLabel(labelWithTags);
+      }
+
+      await labelsApi.updateLabel(labelWithTags.ulid, data as UpdateLabelRequest);
       await fetchLabels(); // Refresh list
     } catch (err) {
       if (err instanceof ApiError) {
@@ -107,9 +116,19 @@ export default function LabelsPage(): React.JSX.Element {
    *
    * @param label [Label] Label to edit
    */
-  const handleEdit = (label: Label) => {
-    setEditingLabel(label);
-    setIsModalOpen(true);
+  const handleEdit = async (label: Label) => {
+    // Fetch full label details including tags
+    try {
+      const labelWithTags = await labelsApi.getLabelByUlid(label.ulid);
+      setEditingLabel(labelWithTags);
+      setIsModalOpen(true);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Failed to load label details');
+      }
+    }
   };
 
   /**
@@ -121,17 +140,23 @@ export default function LabelsPage(): React.JSX.Element {
   };
 
   /**
-   * Deletes a label.
+   * Opens delete confirmation dialog.
    *
-   * @param ulid [string] Label ULID
+   * @param label [Label] Label to delete
    */
-  const handleDelete = async (ulid: string) => {
-    if (!window.confirm('Are you sure you want to delete this label?')) {
-      return;
-    }
+  const handleDeleteClick = (label: Label) => {
+    setDeletingLabel(label);
+  };
+
+  /**
+   * Confirms and executes label deletion.
+   */
+  const handleConfirmDelete = async () => {
+    if (!deletingLabel) return;
 
     try {
-      await labelsApi.deleteLabel(ulid);
+      await labelsApi.deleteLabel(deletingLabel.ulid);
+      setDeletingLabel(undefined);
       await fetchLabels(); // Refresh list
     } catch (err) {
       if (err instanceof ApiError) {
@@ -139,7 +164,15 @@ export default function LabelsPage(): React.JSX.Element {
       } else {
         setError('Failed to delete label');
       }
+      setDeletingLabel(undefined);
     }
+  };
+
+  /**
+   * Cancels label deletion.
+   */
+  const handleCancelDelete = () => {
+    setDeletingLabel(undefined);
   };
 
   /**
@@ -283,7 +316,7 @@ export default function LabelsPage(): React.JSX.Element {
                 label={label}
                 onClick={() => handleLabelClick(label)}
                 onEdit={() => handleEdit(label)}
-                onDelete={() => handleDelete(label.ulid)}
+                onDelete={() => handleDeleteClick(label)}
               />
             ))}
           </div>
@@ -297,6 +330,15 @@ export default function LabelsPage(): React.JSX.Element {
         onClose={handleCloseModal}
         onSubmit={editingLabel ? handleUpdate : handleCreate}
       />
+
+      {deletingLabel && (
+        <LabelDeleteConfirm
+          isOpen={true}
+          label={deletingLabel}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 }

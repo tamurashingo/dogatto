@@ -24,10 +24,13 @@ export default function LabelFormModal({ isOpen, mode, label, onClose, onSubmit 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTagUlids, setSelectedTagUlids] = useState<string[]>([]);
+  const [originalTagUlids, setOriginalTagUlids] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [estimatedTodoCount, setEstimatedTodoCount] = useState<number | null>(null);
+  const [originalTodoCount, setOriginalTodoCount] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showTagChangeWarning, setShowTagChangeWarning] = useState(false);
   const [error, setError] = useState('');
 
   /**
@@ -94,6 +97,19 @@ export default function LabelFormModal({ isOpen, mode, label, onClose, onSubmit 
       return;
     }
 
+    // Check if tags changed in edit mode
+    if (mode === 'edit' && !showTagChangeWarning) {
+      const tagsChanged = 
+        originalTagUlids.length !== selectedTagUlids.length ||
+        originalTagUlids.some(ulid => !selectedTagUlids.includes(ulid)) ||
+        selectedTagUlids.some(ulid => !originalTagUlids.includes(ulid));
+
+      if (tagsChanged) {
+        setShowTagChangeWarning(true);
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
       const data = {
@@ -112,13 +128,41 @@ export default function LabelFormModal({ isOpen, mode, label, onClose, onSubmit 
   };
 
   /**
+   * Confirms tag changes and proceeds with submission.
+   */
+  const handleConfirmTagChange = () => {
+    setShowTagChangeWarning(false);
+    // Re-submit the form
+    const data = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      tagUlids: selectedTagUlids,
+    };
+    setIsSubmitting(true);
+    onSubmit(data)
+      .then(() => handleClose())
+      .catch(() => {})
+      .finally(() => setIsSubmitting(false));
+  };
+
+  /**
+   * Cancels tag change confirmation.
+   */
+  const handleCancelTagChange = () => {
+    setShowTagChangeWarning(false);
+  };
+
+  /**
    * Closes modal and resets form.
    */
   const handleClose = () => {
     setName('');
     setDescription('');
     setSelectedTagUlids([]);
+    setOriginalTagUlids([]);
     setEstimatedTodoCount(null);
+    setOriginalTodoCount(null);
+    setShowTagChangeWarning(false);
     setError('');
     onClose();
   };
@@ -128,13 +172,23 @@ export default function LabelFormModal({ isOpen, mode, label, onClose, onSubmit 
     if (isOpen && mode === 'edit' && label) {
       setName(label.name);
       setDescription(label.description || '');
-      // Note: We don't have tag ULIDs in label object, would need to fetch them
-      // For now, reset to empty
-      setSelectedTagUlids([]);
+      // Load tags from label if available
+      if (label.tags) {
+        const tagUlids = label.tags.map(tag => tag.ulid);
+        setSelectedTagUlids(tagUlids);
+        setOriginalTagUlids(tagUlids);
+        setOriginalTodoCount(label.todoCount);
+      } else {
+        setSelectedTagUlids([]);
+        setOriginalTagUlids([]);
+        setOriginalTodoCount(null);
+      }
     } else if (isOpen && mode === 'create') {
       setName('');
       setDescription('');
       setSelectedTagUlids([]);
+      setOriginalTagUlids([]);
+      setOriginalTodoCount(null);
     }
   }, [isOpen, mode, label]);
 
@@ -252,6 +306,71 @@ export default function LabelFormModal({ isOpen, mode, label, onClose, onSubmit 
           </div>
         </form>
       </div>
+
+      {/* Tag Change Confirmation Dialog */}
+      {showTagChangeWarning && mode === 'edit' && (
+        <div className="warning-overlay">
+          <div className="warning-dialog">
+            <h3>Confirm Tag Changes</h3>
+            <p>You are about to change the tags for this label. This will affect which TODOs match this label.</p>
+            
+            <div className="tag-comparison">
+              <div className="tag-comparison-col">
+                <h4>Current Tags ({originalTagUlids.length})</h4>
+                <div className="tag-list">
+                  {availableTags
+                    .filter(tag => originalTagUlids.includes(tag.ulid))
+                    .map(tag => (
+                      <div key={tag.ulid} className="tag-item">
+                        <span className="tag-color-dot" style={{ backgroundColor: tag.color }} />
+                        <span>{tag.name}</span>
+                      </div>
+                    ))}
+                </div>
+                <div className="todo-count">
+                  Current TODO count: <strong>{originalTodoCount ?? 0}</strong>
+                </div>
+              </div>
+              
+              <div className="arrow">→</div>
+              
+              <div className="tag-comparison-col">
+                <h4>New Tags ({selectedTagUlids.length})</h4>
+                <div className="tag-list">
+                  {availableTags
+                    .filter(tag => selectedTagUlids.includes(tag.ulid))
+                    .map(tag => (
+                      <div key={tag.ulid} className="tag-item">
+                        <span className="tag-color-dot" style={{ backgroundColor: tag.color }} />
+                        <span>{tag.name}</span>
+                      </div>
+                    ))}
+                </div>
+                <div className="todo-count">
+                  Estimated TODO count: <strong>{estimatedTodoCount ?? 0}</strong>
+                </div>
+              </div>
+            </div>
+            
+            <div className="warning-actions">
+              <button
+                type="button"
+                onClick={handleCancelTagChange}
+                className="btn-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmTagChange}
+                className="btn-confirm"
+              >
+                Confirm Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

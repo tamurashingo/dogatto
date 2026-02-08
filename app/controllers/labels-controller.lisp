@@ -79,22 +79,37 @@
         (when user-id
           (find-user-by-id user-id))))))
 
-(defun label-to-json (label tag-count todo-count)
+(defun tag-to-json (tag)
+  "Convert tag instance to JSON-friendly alist.
+
+   @param tag [<tag>] Tag instance
+   @return [list] Alist representation of tag
+   "
+  (list (cons "id" (ref tag :id))
+        (cons "ulid" (ref tag :ulid))
+        (cons "name" (ref tag :name))
+        (cons "color" (ref tag :color))))
+
+(defun label-to-json (label tag-count todo-count &optional tags)
   "Convert label instance to JSON-friendly alist.
 
    @param label [<label>] Label instance
    @param tag-count [integer] Number of tags associated with label
    @param todo-count [integer] Number of TODOs matching label
+   @param tags [list] Optional list of tag instances
    @return [list] Alist representation of label
    "
-  (list (cons "id" (ref label :id))
-        (cons "ulid" (ref label :ulid))
-        (cons "name" (ref label :name))
-        (cons "description" (ref label :description))
-        (cons "tagCount" tag-count)
-        (cons "todoCount" todo-count)
-        (cons "createdAt" (ref label :created-at))
-        (cons "updatedAt" (ref label :updated-at))))
+  (let ((base-json (list (cons "id" (ref label :id))
+                         (cons "ulid" (ref label :ulid))
+                         (cons "name" (ref label :name))
+                         (cons "description" (ref label :description))
+                         (cons "tagCount" tag-count)
+                         (cons "todoCount" todo-count)
+                         (cons "createdAt" (ref label :created-at))
+                         (cons "updatedAt" (ref label :updated-at)))))
+    (if tags
+        (append base-json (list (cons "tags" (mapcar #'tag-to-json tags))))
+        base-json)))
 
 (defmethod do-get ((controller <labels-list-controller>))
   "Get all labels for the authenticated user with optional filtering."
@@ -234,7 +249,7 @@
         (setf (slot-value controller 'clails/controller/base-controller:code) 200)
         (set-response controller
                      `(("status" . "success")
-                       ("data" . (("label" . ,(label-to-json label tag-count todo-count))))))))))
+                       ("data" . (("label" . ,(label-to-json label tag-count todo-count tags))))))))))
 
 (defmethod do-put ((controller <label-item-controller>))
   "Update a label."
