@@ -17,7 +17,10 @@
   (:import-from #:dogatto/models/todo-tag
                 #:find-tags-for-todo
                 #:find-todos-by-tag-ulids
+                #:find-todos-by-label-tags
                 #:find-todos-untagged)
+  (:import-from #:dogatto/models/label-tag
+                #:find-tags-for-label)
   (:import-from #:cl-ppcre
                 #:split)
   (:import-from #:dogatto/utils/session
@@ -118,6 +121,7 @@
 
    Supports query parameters:
    - tags: Comma-separated tag ULIDs for filtering (OR condition)
+   - label: Label ULID for filtering (AND condition on label's tags)
    - status: Filter by status (active/completed)
    - untagged: If true, return only untagged TODOs
 
@@ -134,6 +138,7 @@
     
     (let* ((user-id (ref user :id))
            (tags-param (param controller "tags"))
+           (label-param (param controller "label"))
            (status-param (param controller "status"))
            (untagged-param (param controller "untagged"))
            (tag-ulids (when tags-param
@@ -143,6 +148,13 @@
            (untagged (or (string= untagged-param "true")
                          (string= untagged-param "1")))
            (todos (cond
+                    (label-param
+                     ;; Filter by label's tags (AND condition)
+                     (let* ((label-tags (find-tags-for-label label-param user-id))
+                            (label-tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) label-tags)))
+                       (if label-tag-ulids
+                           (find-todos-by-label-tags user-id label-tag-ulids :status status-param)
+                           nil)))
                     (untagged
                      (find-todos-untagged user-id :status status-param))
                     (tag-ulids

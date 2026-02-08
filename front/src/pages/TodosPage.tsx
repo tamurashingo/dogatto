@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import TagBadge from '../components/TagBadge';
 import TagFilter from '../components/TagFilter';
+import LabelFilter from '../components/LabelFilter';
 import { todosApi } from '../api/todos';
 import type { Todo, GetTodosParams } from '../api/todos';
 import { ApiError } from '../api/error';
@@ -19,6 +20,7 @@ export default function TodosPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedTagUlids, setSelectedTagUlids] = useState<string[]>([]);
+  const [selectedLabelUlid, setSelectedLabelUlid] = useState<string | null>(null);
   const [includeUntagged, setIncludeUntagged] = useState(false);
 
   /**
@@ -26,10 +28,15 @@ export default function TodosPage(): React.JSX.Element {
    */
   useEffect(() => {
     const tagsParam = searchParams.get('tags');
+    const labelParam = searchParams.get('label');
     const untaggedParam = searchParams.get('untagged');
     
     if (tagsParam) {
       setSelectedTagUlids(tagsParam.split(',').filter(Boolean));
+    }
+    
+    if (labelParam) {
+      setSelectedLabelUlid(labelParam);
     }
     
     if (untaggedParam === 'true') {
@@ -38,7 +45,7 @@ export default function TodosPage(): React.JSX.Element {
   }, [searchParams]);
 
   /**
-   * Fetches todos from API with optional tag filtering.
+   * Fetches todos from API with optional tag and label filtering.
    */
   const fetchTodos = useCallback(async () => {
     try {
@@ -48,6 +55,10 @@ export default function TodosPage(): React.JSX.Element {
       
       if (selectedTagUlids.length > 0) {
         params.tags = selectedTagUlids;
+      }
+      
+      if (selectedLabelUlid) {
+        params.label = selectedLabelUlid;
       }
       
       if (includeUntagged) {
@@ -65,7 +76,7 @@ export default function TodosPage(): React.JSX.Element {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedTagUlids, includeUntagged]);
+  }, [selectedTagUlids, selectedLabelUlid, includeUntagged]);
 
   /**
    * Toggles todo completion status.
@@ -151,7 +162,39 @@ export default function TodosPage(): React.JSX.Element {
       newParams.set('tags', tagUlids.join(','));
     }
     
+    if (selectedLabelUlid) {
+      newParams.set('label', selectedLabelUlid);
+    }
+    
     if (untagged) {
+      newParams.set('untagged', 'true');
+    }
+    
+    setSearchParams(newParams);
+  };
+
+  /**
+   * Handles label filter change.
+   *
+   * Updates both state and URL query parameters.
+   *
+   * @param labelUlid [string | null] Selected label ULID
+   */
+  const handleLabelChange = (labelUlid: string | null) => {
+    setSelectedLabelUlid(labelUlid);
+    
+    // Update URL query parameters
+    const newParams = new URLSearchParams();
+    
+    if (selectedTagUlids.length > 0) {
+      newParams.set('tags', selectedTagUlids.join(','));
+    }
+    
+    if (labelUlid) {
+      newParams.set('label', labelUlid);
+    }
+    
+    if (includeUntagged) {
       newParams.set('untagged', 'true');
     }
     
@@ -177,6 +220,11 @@ export default function TodosPage(): React.JSX.Element {
           selectedTagUlids={selectedTagUlids}
           includeUntagged={includeUntagged}
           onChange={handleFilterChange}
+        />
+
+        <LabelFilter
+          selectedLabelUlid={selectedLabelUlid}
+          onChange={handleLabelChange}
         />
 
         {error && (

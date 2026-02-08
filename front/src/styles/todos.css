@@ -353,3 +353,74 @@
     background: #7f1d1d;
   }
 }
+
+/* Label Filter Styles */
+.label-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.label-filter-label {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.label-filter-select {
+  flex: 1;
+  max-width: 300px;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+  background: white;
+  color: #2d3748;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.label-filter-select:hover:not(:disabled) {
+  border-color: #4299e1;
+}
+
+.label-filter-select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.label-filter-select:disabled {
+  background: #edf2f7;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .label-filter {
+    background: #2d3748;
+  }
+
+  .label-filter-label {
+    color: #e2e8f0;
+  }
+
+  .label-filter-select {
+    background: #1a202c;
+    color: #e2e8f0;
+    border-color: #4a5568;
+  }
+
+  .label-filter-select:hover:not(:disabled) {
+    border-color: #4299e1;
+  }
+
+  .label-filter-select:disabled {
+    background: #374151;
+  }
+}
