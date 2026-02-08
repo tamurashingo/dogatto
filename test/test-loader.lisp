@@ -10,6 +10,7 @@
   (:import-from :dogatto-test/models/user)
   (:import-from :dogatto-test/models/todo)
   (:import-from :dogatto-test/models/tag)
+  (:import-from :dogatto-test/models/label)
   (:import-from :dogatto-test/controllers/auth-controller)
   (:import-from :dogatto-test/controllers/todos-controller)
   (:import-from :dogatto-test/controllers/tags-controller)

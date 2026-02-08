@@ -12,7 +12,12 @@
                 #:save
                 #:destroy
                 #:execute-query
-                #:query
+                #:query)
+  (:import-from #:clails/model/query
+                #:set-order-by
+                #:set-limit
+                #:set-offset)
+  (:import-from #:clails/model/base-model
                 #:validate)
   (:import-from #:cl-batis
                 #:defsql)
@@ -34,7 +39,6 @@
            #:estimate-todo-count-by-tags
            #:get-label-todo-count
            #:search-labels-by-name
-           #:search-labels-by-tag-name
            #:get-label-stats))
 
 (in-package #:dogatto/models/label)
@@ -90,10 +94,25 @@
             (string= (ref label :ulid) ""))
     (setf (ref-error label :ulid) "ULID is required")))
 
+(cl-syntax:use-syntax :annot)
+
+(defparameter *check-name-exists-query*
+  (query <label>
+         :as :label
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:= (:label :name) :name))))
+
+(defparameter *check-name-exists-exclude-query*
+  (query <label>
+         :as :label
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:= (:label :name) :name)
+                      (:!= (:label :ulid) :exclude-ulid))))
+
 (defun check-label-name-uniqueness (owner-id name &optional exclude-ulid)
   "Check if label name is unique for the user.
 
-   Label names are case-insensitive unique per user.
+   Label names are case-insensitive unique per user (MySQL default).
    All queries filter by owner-id at SQL level.
 
    @param owner-id [integer] Owner user ID
@@ -103,35 +122,27 @@
    "
   (let* ((trimmed-name (string-trim '(#\Space #\Tab) name))
          (existing (if exclude-ulid
-                       (execute-query
-                        (query <label>
-                               :as :label
-                               :where (:and (:= (:label :owner-id) :owner-id)
-                                            (:= (:lower (:label :name)) :name)
-                                            (:/= (:label :ulid) :exclude-ulid)))
+                       (execute-query 
+                        *check-name-exists-exclude-query*
                         (list :owner-id owner-id
-                              :name (string-downcase trimmed-name)
+                              :name trimmed-name
                               :exclude-ulid exclude-ulid))
-                       (execute-query
-                        (query <label>
-                               :as :label
-                               :where (:and (:= (:label :owner-id) :owner-id)
-                                            (:= (:lower (:label :name)) :name)))
+                       (execute-query 
+                        *check-name-exists-query*
                         (list :owner-id owner-id
-                              :name (string-downcase trimmed-name))))))
+                              :name trimmed-name)))))
     (null existing)))
 
-(defun create-label (owner-id name description tag-ulids)
-  "Create a new label.
+(defun create-label (owner-id name description)
+  "Create a new label without tag associations.
 
    Creates a label with the specified attributes and saves it to the database.
-   Tag associations are created separately using label-tag model.
+   Tag associations must be created separately using label-tag functions.
    All operations filter by owner-id at SQL level.
 
    @param owner-id [integer] ID of the label owner (user)
    @param name [string] Label name (required, 1-100 characters)
    @param description [string] Label description (optional, max 1000 characters)
-   @param tag-ulids [list] List of tag ULIDs to associate with this label
    @return [<label>] Created label instance
    @return [nil] If validation fails
    @condition error If label name already exists for user
@@ -143,10 +154,6 @@
                              :name trimmed-name
                              :description description
                              :merged-to-ulid nil)))
-    
-    ;; Check tag-ulids is not empty
-    (when (or (null tag-ulids) (zerop (length tag-ulids)))
-      (error "At least one tag is required"))
     
     ;; Check uniqueness (filtered by owner-id at SQL level)
     (unless (check-label-name-uniqueness owner-id trimmed-name)
@@ -209,39 +216,35 @@
    @param q [string] Search query
    @return [list] List of label instances
    "
-  (let* ((page (or page 1))
-         (per-page (min (or per-page 20) 100))
-         (offset (* (1- page) per-page))
-         (sort-field (case sort
-                       (:tag-count :tag-count)
-                       (:todo-count :todo-count)
-                       (:updated-at :updated-at)
-                       (t :name)))
+  (let* ((page-num (or page 1))
+         (items-per-page (min (or per-page 20) 100))
+         (offset-val (* (1- page-num) items-per-page))
+         (sort-field (if (eq sort :updated-at) :updated-at :name))
          (sort-order (if (eq order :desc) :desc :asc)))
     
     ;; Basic query filtered by owner-id
     ;; Complex filtering (tag search, todo count) will be implemented in controller
-    (execute-query
-     (query <label>
-            :as :label
-            :where (:= (:label :owner-id) :owner-id)
-            :order-by ((:label sort-field sort-order))
-            :limit per-page
-            :offset offset)
-     (list :owner-id owner-id))))
+    (let ((q (query <label>
+                    :as :label
+                    :where (:= (:label :owner-id) :owner-id)
+                    :limit :items-per-page
+                    :offset :offset-val)))
+      (set-order-by q `((:label ,sort-field ,sort-order)))
+      (execute-query q (list :owner-id owner-id
+                             :items-per-page items-per-page
+                             :offset-val offset-val)))))
 
-(defun update-label (ulid owner-id &key name description tag-ulids)
+(defun update-label (ulid owner-id &key name description)
   "Update label attributes.
 
    Updates the specified attributes and saves changes to the database.
-   Tag associations must be updated separately using label-tag model.
+   Tag associations must be updated separately using label-tag functions.
    Query filters by owner-id at SQL level for security.
 
    @param ulid [string] Label ULID
    @param owner-id [integer] Owner user ID
    @param name [string] New label name (optional)
    @param description [string] New label description (optional)
-   @param tag-ulids [list] New list of tag ULIDs (optional)
    @return [<label>] Updated label instance
    @return [nil] If label not found or not owned by user or validation fails
    @condition error If new name already exists for user
@@ -260,11 +263,6 @@
     
     (when description
       (setf (ref label :description) description))
-    
-    ;; Check tag-ulids if provided
-    (when tag-ulids
-      (when (or (null tag-ulids) (zerop (length tag-ulids)))
-        (error "At least one tag is required")))
     
     (setf (ref label :updated-at) (get-universal-time))
     
@@ -369,13 +367,13 @@
   (query <label>
          :as :label
          :where (:and (:= (:label :owner-id) :owner-id)
-                      (:like (:lower (:label :name)) :pattern))
+                      (:like (:label :name) :pattern))
          :order-by ((:label :name :asc))))
 
 (defun search-labels-by-name (owner-id query)
   "Search labels by name.
 
-   Case-insensitive partial match search.
+   Case-insensitive partial match search (MySQL default).
    Query filters by owner-id at SQL level for security.
 
    @param owner-id [integer] Owner user ID
@@ -388,38 +386,9 @@
   (let ((search-pattern (format nil "%~A%" (string-trim '(#\Space #\Tab) query))))
     (execute-query *search-labels-by-name-query*
                    (list :owner-id owner-id
-                         :pattern (string-downcase search-pattern)))))
+                         :pattern search-pattern))))
 
-(defparameter *search-labels-by-tag-name-query*
-  (query <label>
-         :as :label
-         :joins ((:inner-join :label-tags)
-                 (:inner-join :tag))
-         :where (:and (:= (:label :owner-id) :owner-id)
-                      (:= (:label-tags :owner-id) :owner-id)
-                      (:= (:tag :owner-id) :owner-id)
-                      (:like (:lower (:tag :name)) :pattern))
-         :order-by ((:label :name :asc))))
 
-(defun search-labels-by-tag-name (owner-id query)
-  "Search labels by associated tag name.
-
-   Case-insensitive partial match search.
-   Query filters by owner-id at SQL level for security.
-
-   @param owner-id [integer] Owner user ID
-   @param query [string] Search query
-   @return [list] List of label instances
-   "
-  (when (or (null query) (string= (string-trim '(#\Space #\Tab) query) ""))
-    (return-from search-labels-by-tag-name nil))
-  
-  (let ((search-pattern (format nil "%~A%" (string-trim '(#\Space #\Tab) query))))
-    (remove-duplicates
-     (execute-query *search-labels-by-tag-name-query*
-                    (list :owner-id owner-id
-                          :pattern (string-downcase search-pattern)))
-     :key #'(lambda (label) (ref label :id)))))
 
 @cl-batis:select
 ("SELECT 

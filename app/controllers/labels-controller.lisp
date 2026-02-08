@@ -11,11 +11,11 @@
                 #:delete-label
                 #:estimate-todo-count-by-tags
                 #:search-labels-by-name
-                #:search-labels-by-tag-name
                 #:get-label-stats)
   (:import-from #:dogatto/models/label-tag
                 #:assign-tags-to-label
-                #:find-tags-for-label)
+                #:find-tags-for-label
+                #:find-labels-by-tag-name)
   (:import-from #:dogatto/utils/session
                 #:get-session
                 #:session-valid-p)
@@ -125,7 +125,7 @@
                       (search-labels-by-name owner-id q))
                      ;; Search by tag name
                      ((and q search-mode (string= search-mode "tag_name"))
-                      (search-labels-by-tag-name owner-id q))
+                      (find-labels-by-tag-name owner-id q))
                      ;; Normal list with pagination
                      (t
                       (find-labels-by-owner owner-id

@@ -28,6 +28,9 @@
   (:table "tags"
    :relations ((:has-many "dogatto/models/todo-tag::<todo-tag>"
                 :as :todo-tags
+                :foreign-key :tag-id)
+               (:has-many "dogatto/models/label-tag::<label-tag>"
+                :as :label-tags
                 :foreign-key :tag-id))))
 
 (defun validate-tag (tag)
