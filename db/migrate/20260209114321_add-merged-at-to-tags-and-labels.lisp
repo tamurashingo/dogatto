@@ -4,37 +4,59 @@
 (defmigration "20260209114321_add-merged-at-to-tags-and-labels"
   (:up #'(lambda (connection)
            ;; Add merged-at column to tags table
-           (execute-sql connection
-                        "ALTER TABLE tags ADD COLUMN `merged-at` BIGINT NULL
-                         COMMENT 'Unix timestamp when tag was merged'")
+           (add-column connection
+                       :table "tags"
+                       :columns '(("merged-at" :type :bigint
+                                               :not-null nil)))
            
            ;; Add index for merged-at in tags
-           (execute-sql connection
-                        "CREATE INDEX idx_tags_merged_at ON tags(`merged-at`)")
+           (add-index connection
+                      :table "tags"
+                      :index "idx-tags-merged-at"
+                      :columns '("merged-at"))
            
            ;; Add index for merged-to-ulid in tags
-           (execute-sql connection
-                        "CREATE INDEX idx_tags_merged_to_ulid ON tags(`merged-to-ulid`)")
+           (add-index connection
+                      :table "tags"
+                      :index "idx-tags-merged-to-ulid"
+                      :columns '("merged-to-ulid"))
            
            ;; Add merged-at column to labels table
-           (execute-sql connection
-                        "ALTER TABLE labels ADD COLUMN `merged-at` BIGINT NULL
-                         COMMENT 'Unix timestamp when label was merged'")
+           (add-column connection
+                       :table "labels"
+                       :columns '(("merged-at" :type :bigint
+                                               :not-null nil)))
            
            ;; Add index for merged-at in labels
-           (execute-sql connection
-                        "CREATE INDEX idx_labels_merged_at ON labels(`merged-at`)")
+           (add-index connection
+                      :table "labels"
+                      :index "idx-labels-merged-at"
+                      :columns '("merged-at"))
            
            ;; Add index for merged-to-ulid in labels
-           (execute-sql connection
-                        "CREATE INDEX idx_labels_merged_to_ulid ON labels(`merged-to-ulid`)")))
+           (add-index connection
+                      :table "labels"
+                      :index "idx-labels-merged-to-ulid"
+                      :columns '("merged-to-ulid")))
    :down #'(lambda (connection)
              ;; Drop indexes and columns for tags
-             (execute-sql connection "DROP INDEX idx_tags_merged_to_ulid ON tags")
-             (execute-sql connection "DROP INDEX idx_tags_merged_at ON tags")
-             (execute-sql connection "ALTER TABLE tags DROP COLUMN `merged-at`")
+             (drop-index connection
+                         :table "tags"
+                         :index "idx-tags-merged-to-ulid")
+             (drop-index connection
+                         :table "tags"
+                         :index "idx-tags-merged-at")
+             (drop-column connection
+                          :table "tags"
+                          :column "merged-at")
              
              ;; Drop indexes and columns for labels
-             (execute-sql connection "DROP INDEX idx_labels_merged_to_ulid ON labels")
-             (execute-sql connection "DROP INDEX idx_labels_merged_at ON labels")
-             (execute-sql connection "ALTER TABLE labels DROP COLUMN `merged-at`"))))
+             (drop-index connection
+                         :table "labels"
+                         :index "idx-labels-merged-to-ulid")
+             (drop-index connection
+                         :table "labels"
+                         :index "idx-labels-merged-at")
+             (drop-column connection
+                          :table "labels"
+                          :column "merged-at"))))
