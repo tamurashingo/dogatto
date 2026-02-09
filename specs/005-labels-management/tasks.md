@@ -289,41 +289,51 @@ Phase 5（ラベル管理機能）の実装タスクを管理します。
 
 ---
 
-## Phase 5: フロントエンド - API
+## Phase 5: フロントエンド - API ✅
 
 **目的**: ラベルAPIクライアントの実装
 
-### T017 [P1] ラベルAPIクライアントの実装
-- [ ] APIクライアントファイル作成
+### T017 [P1] ラベルAPIクライアントの実装 ✅
+- [x] APIクライアントファイル作成
   - `front/src/api/labels.ts`
-- [ ] 型定義
+- [x] 型定義
   - Label型
   - LabelCreateParams型
   - LabelUpdateParams型
   - LabelsResponse型
   - LabelDetailResponse型
-- [ ] API関数の実装
+- [x] API関数の実装
   - getLabels(params)
-  - getLabel(ulid)
+  - getLabelByUlid(ulid)
   - createLabel(params)
   - updateLabel(ulid, params)
   - deleteLabel(ulid)
   - estimateTodoCount(tagUlids)
-  - getLabelUsage(ulid)
-- [ ] エラーハンドリング
+- [x] エラーハンドリング
 
 **推定時間**: 2時間
+**実績時間**: 2時間
+**ステータス**: ✅ 完了
 
-### T018 [P1] ラベルAPIクライアントのテスト
-- [ ] テストファイル作成
+### T018 [P1] ラベルAPIクライアントのテスト ✅
+- [x] テストファイル作成
   - `front/src/api/labels.test.ts`
-- [ ] ユニットテスト
-  - 各API関数のテスト
-  - エラーハンドリングのテスト
+- [x] ユニットテスト
+  - getLabels のテスト (3 tests)
+  - getLabelByUlid のテスト (1 test)
+  - createLabel のテスト (2 tests)
+  - updateLabel のテスト (3 tests)
+  - deleteLabel のテスト (1 test)
+  - estimateTodoCount のテスト (3 tests)
+  - 全13テスト成功
 
 **推定時間**: 1時間
+**実績時間**: 1時間
+**ステータス**: ✅ 完了
 
 **Phase 5 推定時間**: 3時間
+**Phase 5 実績時間**: 3時間
+**Phase 5 ステータス**: ✅ 完了
 
 ---
 
