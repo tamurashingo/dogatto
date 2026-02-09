@@ -6,7 +6,7 @@
            ;; Add merged-at column to tags table
            (add-column connection
                        :table "tags"
-                       :columns '(("merged-at" :type :bigint
+                       :columns '(("merged-at" :type :integer
                                                :not-null nil)))
            
            ;; Add index for merged-at in tags
@@ -24,7 +24,7 @@
            ;; Add merged-at column to labels table
            (add-column connection
                        :table "labels"
-                       :columns '(("merged-at" :type :bigint
+                       :columns '(("merged-at" :type :integer
                                                :not-null nil)))
            
            ;; Add index for merged-at in labels
