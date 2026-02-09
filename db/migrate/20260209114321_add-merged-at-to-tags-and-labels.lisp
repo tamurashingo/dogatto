@@ -15,12 +15,6 @@
                       :index "idx-tags-merged-at"
                       :columns '("merged-at"))
            
-           ;; Add index for merged-to-ulid in tags
-           (add-index connection
-                      :table "tags"
-                      :index "idx-tags-merged-to-ulid"
-                      :columns '("merged-to-ulid"))
-           
            ;; Add merged-at column to labels table
            (add-column connection
                        :table "labels"
@@ -31,18 +25,9 @@
            (add-index connection
                       :table "labels"
                       :index "idx-labels-merged-at"
-                      :columns '("merged-at"))
-           
-           ;; Add index for merged-to-ulid in labels
-           (add-index connection
-                      :table "labels"
-                      :index "idx-labels-merged-to-ulid"
-                      :columns '("merged-to-ulid")))
+                      :columns '("merged-at")))
    :down #'(lambda (connection)
              ;; Drop indexes and columns for tags
-             (drop-index connection
-                         :table "tags"
-                         :index "idx-tags-merged-to-ulid")
              (drop-index connection
                          :table "tags"
                          :index "idx-tags-merged-at")
@@ -51,9 +36,6 @@
                           :column "merged-at")
              
              ;; Drop indexes and columns for labels
-             (drop-index connection
-                         :table "labels"
-                         :index "idx-labels-merged-to-ulid")
              (drop-index connection
                          :table "labels"
                          :index "idx-labels-merged-at")
