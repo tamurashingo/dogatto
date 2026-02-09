@@ -4,7 +4,6 @@
   (:use #:cl
         #:clails/controller/base-controller)
   (:import-from #:dogatto/models/label
-                #:create-label
                 #:find-labels-by-owner
                 #:find-label-by-ulid
                 #:update-label
@@ -14,11 +13,15 @@
                 #:get-label-stats)
   (:import-from #:dogatto/models/label-tag
                 #:assign-tags-to-label
+                #:create-label-with-tags
                 #:find-tags-for-label
-                #:find-labels-by-tag-name)
+                #:find-labels-by-tag-name
+                #:update-label-with-tags)
   (:import-from #:dogatto/utils/session
                 #:get-session
                 #:session-valid-p)
+  (:import-from #:dogatto/utils/request
+                #:read-body-as-string)
   (:import-from #:dogatto/models/user
                 #:find-user-by-id)
   (:import-from #:clails/model
@@ -174,8 +177,8 @@
         (set-response controller
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
-    
-    (let* ((body (getf (env controller) :raw-body))
+
+    (let* ((body (read-body-as-string (getf (env controller) :raw-body)))
            (json-data (jonathan:parse body :as :alist))
            (name (cdr (assoc "name" json-data :test #'string=)))
            (description (cdr (assoc "description" json-data :test #'string=)))
@@ -198,7 +201,7 @@
                          ("message" . "At least one tag is required")))))
       
       (handler-case
-          (let ((label (create-label owner-id name description tag-ulids)))
+          (let ((label (create-label-with-tags owner-id name description tag-ulids)))
             (if label
                 (progn
                   ;; Assign tags to label
@@ -218,6 +221,7 @@
                                  ("message" . "Validation failed"))))))
         (error (e)
           (setf (slot-value controller 'clails/controller/base-controller:code) 400)
+          (trivial-backtrace:print-backtrace e)
           (set-response controller
                        `(("status" . "error")
                          ("message" . ,(format nil "~A" e)))))))))
@@ -232,10 +236,10 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
-    (let* ((ulid (getf (params controller) :ulid))
+    (let* ((ulid (param controller "ulid"))
            (owner-id (ref user :id))
            (label (find-label-by-ulid ulid owner-id)))
-      
+
       (unless label
         (setf (slot-value controller 'clails/controller/base-controller:code) 404)
         (return-from do-get
@@ -261,8 +265,8 @@
                      `(("status" . "error")
                        ("message" . "Authentication required")))))
     
-    (let* ((ulid (getf (params controller) :ulid))
-           (body (getf (env controller) :raw-body))
+    (let* ((ulid (param controller "ulid"))
+           (body (read-body-as-string (getf (env controller) :raw-body)))
            (json-data (jonathan:parse body :as :alist))
            (name (cdr (assoc "name" json-data :test #'string=)))
            (description (cdr (assoc "description" json-data :test #'string=)))
@@ -270,10 +274,10 @@
            (owner-id (ref user :id)))
       
       (handler-case
-          (let ((label (update-label ulid owner-id
-                                    :name name
-                                    :description description
-                                    :tag-ulids tag-ulids)))
+          (let ((label (update-label-with-tags ulid owner-id
+                                               :name name
+                                               :description description
+                                               :tag-ulids tag-ulids)))
             (unless label
               (setf (slot-value controller 'clails/controller/base-controller:code) 404)
               (return-from do-put
@@ -294,6 +298,7 @@
                              ("data" . (("label" . ,(label-to-json label tag-count todo-count))))))))
         (error (e)
           (setf (slot-value controller 'clails/controller/base-controller:code) 400)
+          (trivial-backtrace:print-backtrace e)
           (set-response controller
                        `(("status" . "error")
                          ("message" . ,(format nil "~A" e)))))))))
