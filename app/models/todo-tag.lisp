@@ -19,6 +19,7 @@
            #:find-todos-for-tag
            #:find-todos-by-tag-ulids
            #:find-todos-untagged
+           #:find-todos-by-label-tags
            #:get-tag-statistics))
 
 (in-package #:dogatto/models/todo-tag)
@@ -264,3 +265,31 @@
                      (list :owner-id owner-id :status status))
       (execute-query *find-todos-untagged-query*
                      (list :owner-id owner-id))))
+
+(defun find-todos-by-label-tags (owner-id tag-ulids &key status)
+  "Find TODOs by label's tags (AND condition).
+
+   Finds TODOs that have ALL of the specified tags.
+   This is used for filtering by labels, as labels define a set of tags.
+
+   @param owner-id [integer] Owner ID
+   @param tag-ulids [list] List of tag ULIDs (AND condition - must have all)
+   @param status [string] Status filter (\"active\" or \"completed\") (optional)
+   @return [list] List of <todo> instances
+   "
+  (when (null tag-ulids)
+    (return-from find-todos-by-label-tags nil))
+  
+  ;; Get all TODOs that have at least one of the tags
+  (let ((candidate-todos (find-todos-by-tag-ulids owner-id tag-ulids :status status))
+        (tag-count (length tag-ulids)))
+    ;; Filter to only include TODOs that have ALL required tags
+    (remove-if-not
+     #'(lambda (todo)
+         (let* ((todo-tags (find-tags-for-todo (ref todo :ulid) owner-id))
+                (todo-tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) todo-tags)))
+           ;; Check if all required tag-ulids are in the todo's tags
+           (every #'(lambda (required-ulid)
+                      (member required-ulid todo-tag-ulids :test #'string=))
+                  tag-ulids)))
+     candidate-todos)))

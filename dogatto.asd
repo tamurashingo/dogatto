@@ -19,6 +19,7 @@
                "cl-redis"
                "uuid"
                "local-time"
+               "trivial-backtrace"
                "dogatto/application-loader")
   :in-order-to ((test-op (test-op "dogatto-test"))))
 

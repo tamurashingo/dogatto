@@ -22,6 +22,8 @@
   (:import-from :dogatto/models/todo)
   (:import-from :dogatto/models/tag)
   (:import-from :dogatto/models/todo-tag)
+  (:import-from :dogatto/models/label)
+  (:import-from :dogatto/models/label-tag)
   (:import-from :dogatto/controllers/auth-controller
                 #:<auth-register-controller>
                 #:<auth-login-controller>
@@ -34,6 +36,10 @@
   (:import-from :dogatto/controllers/tags-controller
                 #:<tags-list-controller>
                 #:<tag-item-controller>)
+  (:import-from :dogatto/controllers/labels-controller
+                #:<labels-list-controller>
+                #:<label-item-controller>
+                #:<label-estimate-controller>)
   (:import-from :dogatto/controllers/todo-tags-controller
                 #:<todo-tags-controller>))
 (in-package #:dogatto/application-loader)

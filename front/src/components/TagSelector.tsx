@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { tagsApi } from '../api/tags';
 import type { Tag } from '../api/tags';
 import { ApiError } from '../api/error';
+import { useDebounce } from '../hooks/useDebounce';
 import '../styles/tag-selector.css';
 
 /**
@@ -16,7 +17,7 @@ interface TagSelectorProps {
 /**
  * Tag selector component.
  *
- * Multi-select dropdown for selecting tags with search functionality.
+ * Multi-select dropdown for selecting tags with search functionality and debounced search.
  */
 export default function TagSelector({
   selectedTags,
@@ -28,6 +29,9 @@ export default function TagSelector({
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Debounce search query for better performance
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   /**
    * Fetches all available tags.
@@ -46,24 +50,24 @@ export default function TagSelector({
   };
 
   /**
-   * Filters tags based on search query.
+   * Filters tags based on debounced search query.
    *
    * @return [Tag[]] Filtered tags
    */
-  const getFilteredTags = (): Tag[] => {
-    const query = searchQuery.toLowerCase().trim();
+  const filteredTags = useMemo(() => {
+    const query = debouncedSearchQuery.toLowerCase().trim();
+    const available = allTags.filter(
+      tag => !selectedTags.some(selected => selected.ulid === tag.ulid)
+    );
+    
     if (!query) {
-      return allTags.filter(
-        tag => !selectedTags.some(selected => selected.ulid === tag.ulid)
-      );
+      return available;
     }
 
-    return allTags.filter(
-      tag =>
-        tag.name.toLowerCase().includes(query) &&
-        !selectedTags.some(selected => selected.ulid === tag.ulid)
+    return available.filter(tag =>
+      tag.name.toLowerCase().includes(query)
     );
-  };
+  }, [allTags, selectedTags, debouncedSearchQuery]);
 
   /**
    * Handles tag selection.
@@ -109,7 +113,6 @@ export default function TagSelector({
     };
   }, []);
 
-  const filteredTags = getFilteredTags();
   const isMaxReached = selectedTags.length >= maxTags;
 
   return (

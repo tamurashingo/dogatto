@@ -8,6 +8,7 @@ import TodoDetailPage from './pages/TodoDetailPage';
 import TodoEditPage from './pages/TodoEditPage';
 import TagsPage from './pages/TagsPage';
 import TagDetailPage from './pages/TagDetailPage';
+import LabelsPage from './pages/LabelsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 /**
@@ -75,6 +76,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <TagDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/labels',
+    element: (
+      <ProtectedRoute>
+        <LabelsPage />
       </ProtectedRoute>
     ),
   },

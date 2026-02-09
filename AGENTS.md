@@ -29,20 +29,36 @@ ros run
 
 - command
   - https://github.com/tamurashingo/clails/blob/develop/document/command.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - model / migration / sql など
   - https://github.com/tamurashingo/clails/blob/develop/document/model.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - view
   - https://github.com/tamurashingo/clails/blob/develop/document/view.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - controller
   - https://github.com/tamurashingo/clails/blob/develop/document/controller.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - environment
   - https://github.com/tamurashingo/clails/blob/develop/document/environment.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - test
   - https://github.com/tamurashingo/clails/blob/develop/document/testing.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - task
   - https://github.com/tamurashingo/clails/blob/develop/document/task.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 - logging
   - https://github.com/tamurashingo/clails/blob/develop/document/logging.md
+  - 上記の内容は以下の場所にダウンロードしています
+    - /home/tamurashingo/prog/cl/clails/document/command.md
 
 ### バックエンド
 

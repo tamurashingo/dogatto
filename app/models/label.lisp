@@ -1,0 +1,432 @@
+; -*- mode: lisp -*-
+(in-package #:cl-user)
+(defpackage #:dogatto/models/label
+  (:use #:cl)
+  (:import-from #:clails/model
+                #:<base-model>
+                #:defmodel
+                #:make-record
+                #:ref
+                #:ref-error
+                #:has-error-p
+                #:save
+                #:destroy
+                #:execute-query
+                #:query)
+  (:import-from #:clails/model/query
+                #:set-order-by
+                #:set-limit
+                #:set-offset)
+  (:import-from #:clails/model/base-model
+                #:validate)
+  (:import-from #:cl-batis
+                #:defsql)
+  (:import-from #:cl-syntax
+                #:use-syntax)
+  (:import-from #:dogatto/utils/ulid
+                #:generate-ulid)
+  (:import-from #:dogatto/models/tag
+                #:<tag>
+                #:find-tag-by-ulid)
+  (:export #:<label>
+           #:create-label
+           #:find-label-by-id
+           #:find-label-by-ulid
+           #:find-labels-by-owner
+           #:update-label
+           #:delete-label
+           #:check-label-name-uniqueness
+           #:estimate-todo-count-by-tags
+           #:get-label-todo-count
+           #:search-labels-by-name
+           #:get-label-stats))
+
+(in-package #:dogatto/models/label)
+
+(defmodel <label> (<base-model>)
+  (:table "labels"
+   :relations ((:has-many "dogatto/models/label-tag::<label-tag>"
+                :as :label-tags
+                :foreign-key :label-id))))
+
+(defun validate-label-name (label)
+  "Validate label name.
+
+   Checks if name is present and within length limits.
+
+   @param label [<label>] Label instance
+   "
+  (let ((name (ref label :name)))
+    (when (or (null name) (string= (string-trim '(#\Space #\Tab) name) ""))
+      (setf (ref-error label :name) "Label name is required"))
+    
+    (when (and name (> (length name) 100))
+      (setf (ref-error label :name) "Label name must be 100 characters or less"))))
+
+(defun validate-label-description (label)
+  "Validate label description.
+
+   Checks if description is within length limits.
+
+   @param label [<label>] Label instance
+   "
+  (let ((description (ref label :description)))
+    (when (and description (> (length description) 1000))
+      (setf (ref-error label :description) "Label description must be 1000 characters or less"))))
+
+(defmethod validate ((label <label>))
+  "Validate label data before saving.
+
+   Checks:
+   - name is required and not empty
+   - name is 100 characters or less
+   - description is 1000 characters or less (if provided)
+   - owner-id is required
+   "
+  (validate-label-name label)
+  (validate-label-description label)
+  
+  (when (or (null (ref label :owner-id))
+            (not (integerp (ref label :owner-id))))
+    (setf (ref-error label :owner-id) "Owner ID is required"))
+  
+  (when (or (null (ref label :ulid))
+            (string= (ref label :ulid) ""))
+    (setf (ref-error label :ulid) "ULID is required")))
+
+(cl-syntax:use-syntax :annot)
+
+(defparameter *check-name-exists-query*
+  (query <label>
+         :as :label
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:= (:label :name) :name))))
+
+(defparameter *check-name-exists-exclude-query*
+  (query <label>
+         :as :label
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:= (:label :name) :name)
+                      (:!= (:label :ulid) :exclude-ulid))))
+
+(defun check-label-name-uniqueness (owner-id name &optional exclude-ulid)
+  "Check if label name is unique for the user.
+
+   Label names are case-insensitive unique per user (MySQL default).
+   All queries filter by owner-id at SQL level.
+
+   @param owner-id [integer] Owner user ID
+   @param name [string] Label name to check
+   @param exclude-ulid [string] ULID to exclude from check (for updates)
+   @return [boolean] T if name is unique, NIL if duplicate exists
+   "
+  (let* ((trimmed-name (string-trim '(#\Space #\Tab) name))
+         (existing (if exclude-ulid
+                       (execute-query 
+                        *check-name-exists-exclude-query*
+                        (list :owner-id owner-id
+                              :name trimmed-name
+                              :exclude-ulid exclude-ulid))
+                       (execute-query 
+                        *check-name-exists-query*
+                        (list :owner-id owner-id
+                              :name trimmed-name)))))
+    (null existing)))
+
+(defun create-label (owner-id name description)
+  "Create a new label without tag associations.
+
+   Creates a label with the specified attributes and saves it to the database.
+   Tag associations must be created separately using label-tag functions.
+   All operations filter by owner-id at SQL level.
+
+   @param owner-id [integer] ID of the label owner (user)
+   @param name [string] Label name (required, 1-100 characters)
+   @param description [string] Label description (optional, max 1000 characters)
+   @return [<label>] Created label instance
+   @return [nil] If validation fails
+   @condition error If label name already exists for user
+   "
+  (let* ((trimmed-name (string-trim '(#\Space #\Tab) name))
+         (label (make-record '<label>
+                             :ulid (generate-ulid)
+                             :owner-id owner-id
+                             :name trimmed-name
+                             :description description
+                             :merged-to-ulid nil)))
+    
+    ;; Check uniqueness (filtered by owner-id at SQL level)
+    (unless (check-label-name-uniqueness owner-id trimmed-name)
+      (error "Label name already exists"))
+    
+    ;; Save will call validate method
+    (unless (save label)
+      (return-from create-label nil))
+    
+    label))
+
+(defun find-label-by-id (id owner-id)
+  "Find a label by its internal ID.
+
+   Query filters by owner-id at SQL level for security.
+
+   @param id [integer] Label ID
+   @param owner-id [integer] Owner user ID
+   @return [<label>] Label instance
+   @return [nil] If label not found or not owned by user
+   "
+  (first (execute-query
+          (query <label>
+                 :as :label
+                 :where (:and (:= (:label :id) :id)
+                              (:= (:label :owner-id) :owner-id)))
+          (list :id id
+                :owner-id owner-id))))
+
+(defun find-label-by-ulid (ulid owner-id)
+  "Find a label by its ULID.
+
+   Query filters by owner-id at SQL level for security.
+
+   @param ulid [string] Label ULID
+   @param owner-id [integer] Owner user ID
+   @return [<label>] Label instance
+   @return [nil] If label not found or not owned by user
+   "
+  (first (execute-query
+          (query <label>
+                 :as :label
+                 :where (:and (:= (:label :ulid) :ulid)
+                              (:= (:label :owner-id) :owner-id)))
+          (list :ulid ulid
+                :owner-id owner-id))))
+
+(defun find-labels-by-owner (owner-id &key page per-page sort order filter search-mode q)
+  "Find labels belonging to a user with optional filtering and pagination.
+
+   All queries filter by owner-id at SQL level for security.
+
+   @param owner-id [integer] User ID
+   @param page [integer] Page number (default 1)
+   @param per-page [integer] Items per page (default 20, max 100)
+   @param sort [keyword] Sort field (:name, :tag-count, :todo-count, :updated-at)
+   @param order [keyword] Sort order (:asc, :desc)
+   @param filter [keyword] Filter type (:all, :used, :unused)
+   @param search-mode [keyword] Search mode (:label-name, :tag-name)
+   @param q [string] Search query
+   @return [list] List of label instances
+   "
+  (let* ((page-num (or page 1))
+         (items-per-page (min (or per-page 20) 100))
+         (offset-val (* (1- page-num) items-per-page))
+         (sort-field (if (eq sort :updated-at) :updated-at :name))
+         (sort-order (if (eq order :desc) :desc :asc)))
+    
+    ;; Basic query filtered by owner-id
+    ;; Complex filtering (tag search, todo count) will be implemented in controller
+    (let ((q (query <label>
+                    :as :label
+                    :where (:= (:label :owner-id) :owner-id)
+                    :limit :items-per-page
+                    :offset :offset-val)))
+      (set-order-by q `((:label ,sort-field ,sort-order)))
+      (execute-query q (list :owner-id owner-id
+                             :items-per-page items-per-page
+                             :offset-val offset-val)))))
+
+(defun update-label (ulid owner-id &key name description)
+  "Update label attributes.
+
+   Updates the specified attributes and saves changes to the database.
+   Tag associations must be updated separately using label-tag functions.
+   Query filters by owner-id at SQL level for security.
+
+   @param ulid [string] Label ULID
+   @param owner-id [integer] Owner user ID
+   @param name [string] New label name (optional)
+   @param description [string] New label description (optional)
+   @return [<label>] Updated label instance
+   @return [nil] If label not found or not owned by user or validation fails
+   @condition error If new name already exists for user
+   "
+  (let ((label (find-label-by-ulid ulid owner-id)))
+    (unless label
+      (return-from update-label nil))
+    
+    (when name
+      (let ((trimmed-name (string-trim '(#\Space #\Tab) name)))
+        ;; Uniqueness check filtered by owner-id at SQL level
+        (unless (check-label-name-uniqueness owner-id trimmed-name ulid)
+          (error "Label name already exists"))
+        
+        (setf (ref label :name) trimmed-name)))
+    
+    (when description
+      (setf (ref label :description) description))
+    
+    (setf (ref label :updated-at) (get-universal-time))
+    
+    ;; Save will call validate method
+    (unless (save label)
+      (return-from update-label nil))
+    
+    label))
+
+(defun delete-label (ulid owner-id)
+  "Delete a label.
+
+   Deletes the label from the database. Associated label_tags records
+   will be deleted automatically by CASCADE constraint.
+   Query filters by owner-id at SQL level for security.
+
+   @param ulid [string] Label ULID
+   @param owner-id [integer] Owner user ID
+   @return [boolean] T if successful
+   @return [nil] If label not found or not owned by user
+   "
+  (let ((label (find-label-by-ulid ulid owner-id)))
+    (unless label
+      (return-from delete-label nil))
+    (destroy label)
+    t))
+
+(cl-syntax:use-syntax :annot)
+
+@cl-batis:select
+("SELECT COUNT(DISTINCT t.id) as count
+  FROM todos t
+  INNER JOIN todo_tags tt ON t.id = tt.todo_id
+  WHERE t.owner_id = :owner_id
+  AND tt.tag_id IN (:tag_ids)
+  GROUP BY t.id
+  HAVING COUNT(DISTINCT tt.tag_id) = :tag_count")
+(defsql count-todos-by-tag-ids-and (owner_id tag_ids tag_count))
+
+(defun estimate-todo-count-by-tags (owner-id tag-ulids)
+  "Estimate TODO count by tag ULIDs (AND condition).
+
+   Counts TODOs that have ALL of the specified tags.
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @param tag-ulids [list] List of tag ULIDs
+   @return [integer] Count of TODOs matching all tags
+   "
+  (when (or (null tag-ulids) (zerop (length tag-ulids)))
+    (return-from estimate-todo-count-by-tags 0))
+  
+  ;; Get tag IDs from ULIDs (filtered by owner-id at SQL level)
+  (let ((tags (remove nil
+                      (mapcar #'(lambda (ulid)
+                                  (find-tag-by-ulid ulid owner-id))
+                              tag-ulids))))
+    
+    (when (null tags)
+      (return-from estimate-todo-count-by-tags 0))
+    
+    (let* ((tag-ids (mapcar #'(lambda (tag) (ref tag :id)) tags))
+           (tag-count (length tag-ids))
+           (result (clails/model:execute-query 
+                    count-todos-by-tag-ids-and
+                    (list :owner_id owner-id
+                          :tag_ids tag-ids
+                          :tag_count tag-count))))
+      ;; Count the number of results (each result is a TODO with all tags)
+      (length result))))
+
+(defun get-label-todo-count (label-ulid owner-id)
+  "Get TODO count for a label (AND condition).
+
+   Counts TODOs that have ALL tags associated with the label.
+   Query filters by owner-id at SQL level for security.
+
+   @param label-ulid [string] Label ULID
+   @param owner-id [integer] Owner user ID
+   @return [integer] Count of TODOs matching all label tags
+   @return [integer] 0 if label not found
+   "
+  (let ((label (find-label-by-ulid label-ulid owner-id)))
+    (unless label
+      (return-from get-label-todo-count 0))
+    
+    ;; Get tags for this label (filtered by owner-id at SQL level)
+    (let* ((tags (execute-query
+                  (query <tag>
+                         :as :tag
+                         :joins ((:inner-join :label-tags))
+                         :where (:and (:= (:label-tags :label-id) :label-id)
+                                      (:= (:label-tags :owner-id) :owner-id)
+                                      (:= (:tag :owner-id) :owner-id)))
+                  (list :label-id (ref label :id)
+                        :owner-id owner-id)))
+           (tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) tags)))
+      
+      (estimate-todo-count-by-tags owner-id tag-ulids))))
+
+(defparameter *search-labels-by-name-query*
+  (query <label>
+         :as :label
+         :where (:and (:= (:label :owner-id) :owner-id)
+                      (:like (:label :name) :pattern))
+         :order-by ((:label :name :asc))))
+
+(defun search-labels-by-name (owner-id query)
+  "Search labels by name.
+
+   Case-insensitive partial match search (MySQL default).
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @param query [string] Search query
+   @return [list] List of label instances
+   "
+  (when (or (null query) (string= (string-trim '(#\Space #\Tab) query) ""))
+    (return-from search-labels-by-name nil))
+  
+  (let ((search-pattern (format nil "%~A%" (string-trim '(#\Space #\Tab) query))))
+    (execute-query *search-labels-by-name-query*
+                   (list :owner-id owner-id
+                         :pattern search-pattern))))
+
+
+
+@cl-batis:select
+("SELECT 
+    COUNT(*) as total_labels,
+    SUM(CASE WHEN todo_count > 0 THEN 1 ELSE 0 END) as used_labels
+  FROM (
+    SELECT l.id, 
+           (SELECT COUNT(DISTINCT t.id)
+            FROM todos t
+            INNER JOIN todo_tags tt ON t.id = tt.todo_id
+            WHERE tt.tag_id IN (
+              SELECT tag_id FROM label_tags WHERE label_id = l.id AND owner_id = :owner_id
+            )
+            AND t.owner_id = :owner_id
+            GROUP BY t.id
+            HAVING COUNT(DISTINCT tt.tag_id) = (
+              SELECT COUNT(*) FROM label_tags WHERE label_id = l.id AND owner_id = :owner_id
+            )
+           ) as todo_count
+    FROM labels l
+    WHERE l.owner_id = :owner_id
+  ) as label_stats")
+(defsql select-label-stats (owner_id))
+
+(defun get-label-stats (owner-id)
+  "Get label statistics.
+
+   Returns counts of total labels, used labels, and unused labels.
+   Query filters by owner-id at SQL level for security.
+
+   @param owner-id [integer] Owner user ID
+   @return [plist] Statistics (:total-labels :used-labels :unused-labels)
+   "
+  (let* ((result (clails/model:execute-query select-label-stats
+                                             (list :owner_id owner-id)))
+         (row (first result))
+         (total (or (getf row :total-labels) 0))
+         (used (or (getf row :used-labels) 0)))
+    (list :total-labels total
+          :used-labels used
+          :unused-labels (- total used))))

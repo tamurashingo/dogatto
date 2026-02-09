@@ -37,6 +37,7 @@ See [Architecture Documentation](docs/architecture.md) for detailed information 
 - [API Conventions](docs/api-conventions.md) - REST API standards
 - [Authentication API](docs/auth-api.md) - Authentication endpoints documentation
 - [Tags API](docs/tags-api.md) - Tag management API documentation
+- [Labels API](docs/labels-api.md) - Label management API documentation
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
 - [Phase 14 Integration Testing](docs/phase14-integration-testing.md) - Authentication integration testing
 - [Phase 15 UI/UX Improvements](docs/phase15-ui-ux-improvements.md) - UI/UX enhancements
@@ -156,11 +157,21 @@ The core TODO management features include:
   - Color-coded tags for visual organization
   - Tag statistics (total, completed, active TODOs per tag)
 
+- **Label Management**: Advanced TODO organization with multi-tag labels
+  - Create labels with multiple tags (OR condition)
+  - Search labels by name or tag name
+  - Filter labels (all/used/unused)
+  - Estimate TODO count before creating labels
+  - View label statistics and usage
+  - Edit and delete labels
+  - Associate labels with TODOs for complex filtering
+
 - **Filtering and Search**:
   - Filter by tags (multiple selection with OR condition)
   - Filter by status (active/completed)
   - Filter untagged TODOs
   - URL-based filter state (shareable links)
+  - Search labels by name or associated tags
 
 - **Visual Features**:
   - Color-coded tags

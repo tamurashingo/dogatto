@@ -42,6 +42,7 @@ export interface UpdateTodoRequest {
  */
 export interface GetTodosParams {
   tags?: string[];
+  label?: string;
   status?: string;
   untagged?: boolean;
 }
@@ -78,10 +79,11 @@ export const todosApi = {
    * Gets all todos for the authenticated user.
    *
    * Retrieves a list of all todos belonging to the current user.
-   * Supports filtering by tags, status, and untagged todos.
+   * Supports filtering by tags, labels, status, and untagged todos.
    *
    * @param params [GetTodosParams] Filtering parameters (optional)
    * @param params.tags [string[]] Filter by tag ULIDs (OR condition) (optional)
+   * @param params.label [string] Filter by label ULID (AND condition on label's tags) (optional)
    * @param params.status [string] Filter by status (active/completed) (optional)
    * @param params.untagged [boolean] Get only untagged todos (optional)
    * @return [Promise<Todo[]>] List of todos
@@ -92,6 +94,10 @@ export const todosApi = {
     
     if (params?.tags && params.tags.length > 0) {
       queryParams.append('tags', params.tags.join(','));
+    }
+    
+    if (params?.label) {
+      queryParams.append('label', params.label);
     }
     
     if (params?.status) {

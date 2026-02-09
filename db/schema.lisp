@@ -6,6 +6,8 @@
                            :columns '(
                                       ("label-id" :TYPE :INTEGER :NOT-NULL T)
                                       ("tag-id" :TYPE :INTEGER :NOT-NULL T)
+                                      ("label-ulid" :TYPE :STRING :SIZE 26 :NOT-NULL T)
+                                      ("owner-id" :TYPE :INTEGER :NOT-NULL T)
                                      )
 
   (create-table connection :table "todo_tags"
@@ -20,6 +22,7 @@
                                       ("owner-id" :TYPE :INTEGER :NOT-NULL T)
                                       ("name" :TYPE :STRING :SIZE 100 :NOT-NULL T)
                                       ("merged-to-ulid" :TYPE :STRING :SIZE 26 :NOT-NULL NIL)
+                                      ("description" :TYPE :TEXT :NOT-NULL NIL)
                                      )
 
   (create-table connection :table "tags"

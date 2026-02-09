@@ -43,6 +43,13 @@
      :controller "dogatto/controllers/tags-controller:<tag-item-controller>")
     (:path "/api/v1/tags"
      :controller "dogatto/controllers/tags-controller:<tags-list-controller>")
+    ;; Label endpoints
+    (:path "/api/v1/labels/estimate-todo-count"
+     :controller "dogatto/controllers/labels-controller:<label-estimate-controller>")
+    (:path "/api/v1/labels/:ulid"
+     :controller "dogatto/controllers/labels-controller:<label-item-controller>")
+    (:path "/api/v1/labels"
+     :controller "dogatto/controllers/labels-controller:<labels-list-controller>")
     ;; SPA wildcard route (must be last)
     ;; All non-API routes return the same HTML for client-side routing
     ;; Excludes static assets
