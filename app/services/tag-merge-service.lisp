@@ -137,21 +137,43 @@
         (let* ((source-tag (find-tag-by-ulid source-ulid))
                (source-id (ref source-tag :id)))
           
-          ;; Update todo_tags: point to target tag
+          ;; Step 1: Copy todo_tags records (only for TODOs not already having target tag)
           (execute-query
            (query ()
-             (:update "todo_tags"
-              :set (list :tag-id target-id)
-              :where (:= :tag-id source-id))))
+             (:raw "INSERT INTO todo_tags (todo_id, tag_id, created_at)
+                    SELECT todo_id, ?, ?
+                    FROM todo_tags
+                    WHERE tag_id = ?
+                      AND todo_id NOT IN (
+                        SELECT todo_id FROM todo_tags WHERE tag_id = ?
+                      )"
+                   target-id merge-time source-id target-id)))
           
-          ;; Update label_tags: point to target tag
+          ;; Step 2: Delete todo_tags records with source tag
           (execute-query
            (query ()
-             (:update "label_tags"
-              :set (list :tag-id target-id)
+             (:delete-from "todo_tags"
               :where (:= :tag-id source-id))))
           
-          ;; Mark source tag as merged
+          ;; Step 3: Copy label_tags records (only for labels not already having target tag)
+          (execute-query
+           (query ()
+             (:raw "INSERT INTO label_tags (label_id, tag_id, label_ulid, owner_id, created_at)
+                    SELECT label_id, ?, label_ulid, owner_id, ?
+                    FROM label_tags
+                    WHERE tag_id = ?
+                      AND label_id NOT IN (
+                        SELECT label_id FROM label_tags WHERE tag_id = ?
+                      )"
+                   target-id merge-time source-id target-id)))
+          
+          ;; Step 4: Delete label_tags records with source tag
+          (execute-query
+           (query ()
+             (:delete-from "label_tags"
+              :where (:= :tag-id source-id))))
+          
+          ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) target-ulid)
           (setf (ref source-tag :merged-at) merge-time)
           (save source-tag)
@@ -203,21 +225,43 @@
         (let* ((source-tag (find-tag-by-ulid source-ulid))
                (source-id (ref source-tag :id)))
           
-          ;; Update todo_tags: point to new tag
+          ;; Step 1: Copy todo_tags records (only for TODOs not already having new tag)
           (execute-query
            (query ()
-             (:update "todo_tags"
-              :set (list :tag-id new-tag-id)
-              :where (:= :tag-id source-id))))
+             (:raw "INSERT INTO todo_tags (todo_id, tag_id, created_at)
+                    SELECT todo_id, ?, ?
+                    FROM todo_tags
+                    WHERE tag_id = ?
+                      AND todo_id NOT IN (
+                        SELECT todo_id FROM todo_tags WHERE tag_id = ?
+                      )"
+                   new-tag-id merge-time source-id new-tag-id)))
           
-          ;; Update label_tags: point to new tag
+          ;; Step 2: Delete todo_tags records with source tag
           (execute-query
            (query ()
-             (:update "label_tags"
-              :set (list :tag-id new-tag-id)
+             (:delete-from "todo_tags"
               :where (:= :tag-id source-id))))
           
-          ;; Mark source tag as merged
+          ;; Step 3: Copy label_tags records (only for labels not already having new tag)
+          (execute-query
+           (query ()
+             (:raw "INSERT INTO label_tags (label_id, tag_id, label_ulid, owner_id, created_at)
+                    SELECT label_id, ?, label_ulid, owner_id, ?
+                    FROM label_tags
+                    WHERE tag_id = ?
+                      AND label_id NOT IN (
+                        SELECT label_id FROM label_tags WHERE tag_id = ?
+                      )"
+                   new-tag-id merge-time source-id new-tag-id)))
+          
+          ;; Step 4: Delete label_tags records with source tag
+          (execute-query
+           (query ()
+             (:delete-from "label_tags"
+              :where (:= :tag-id source-id))))
+          
+          ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) new-tag-ulid)
           (setf (ref source-tag :merged-at) merge-time)
           (save source-tag)
