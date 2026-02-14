@@ -9,6 +9,8 @@
   (:import-from #:dogatto/utils/session
                 #:get-session
                 #:session-valid-p)
+  (:import-from #:dogatto/utils/request
+                #:read-body-as-string)
   (:import-from #:dogatto/models/user
                 #:find-user-by-id)
   (:import-from #:dogatto/models/todo-tag
