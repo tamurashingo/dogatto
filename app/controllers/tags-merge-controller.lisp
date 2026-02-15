@@ -139,7 +139,7 @@
 
 ;;; POST /api/v1/tags/merge - Merge tags to existing tag
 (defmethod do-post ((controller <tags-merge-controller>))
-  (let* ((env (ref controller :env))
+  (let* ((env (env controller))
          (user (get-authenticated-user env)))
     
     ;; Check authentication
@@ -186,7 +186,7 @@
 
 ;;; POST /api/v1/tags/merge-to-new - Merge tags to new tag
 (defmethod do-post ((controller <tags-merge-to-new-controller>))
-  (let* ((env (ref controller :env))
+  (let* ((env (env controller))
          (user (get-authenticated-user env)))
     
     ;; Check authentication
