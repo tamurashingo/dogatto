@@ -27,8 +27,17 @@ export default function TagCard({
   isSelected = false,
   onToggleSelect,
 }: TagCardProps): React.JSX.Element {
+  const handleCardClick = () => {
+    if (isSelectionMode && onToggleSelect) {
+      onToggleSelect();
+    }
+  };
+
   return (
-    <div className={`tag-card ${isSelectionMode ? 'selection-mode' : ''} ${isSelected ? 'selected' : ''}`}>
+    <div 
+      className={`tag-card ${isSelectionMode ? 'selection-mode' : ''} ${isSelected ? 'selected' : ''}`}
+      onClick={handleCardClick}
+    >
       {isSelectionMode && (
         <div className="tag-selection">
           <input

@@ -23,7 +23,7 @@
   gap: 0.5rem;
 }
 
-.tag-badge {
+.tag-merge-modal .tag-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   font-size: 0.875rem;

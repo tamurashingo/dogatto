@@ -176,6 +176,10 @@
   background: #ebf8ff;
 }
 
+.tag-card.selected .tag-name {
+  color: #1a365d;
+}
+
 .tag-selection {
   position: absolute;
   top: 1rem;
@@ -332,5 +336,115 @@
 @media (min-width: 769px) and (max-width: 1024px) {
   .tags-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .tags-page {
+    background: linear-gradient(to bottom, #1a202c 0%, #2d3748 100%);
+  }
+
+  .tags-header h1 {
+    color: #ffffff;
+  }
+
+  .selection-info {
+    background: #234e52;
+    color: #e6fffa;
+    border-color: #2c7a7b;
+  }
+
+  .tag-card {
+    background: #374151;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .tag-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  .tag-card.selection-mode:hover {
+    border-color: #3b82f6;
+  }
+
+  .tag-card.selected {
+    border-color: #60a5fa;
+    background: #1e3a5f;
+  }
+
+  .tag-card.selected .tag-name {
+    color: #bfdbfe;
+  }
+
+  .tag-name {
+    color: #f3f4f6;
+  }
+
+  .tag-stats {
+    background: #2d3748;
+  }
+
+  .tag-stat-label {
+    color: #9ca3af;
+  }
+
+  .tag-stat-value {
+    color: #f3f4f6;
+  }
+
+  .tags-page .btn-view {
+    background: #4b5563;
+    color: #f9fafb;
+  }
+
+  .tags-page .btn-view:hover {
+    background: #6b7280;
+  }
+
+  .tags-page .btn-edit {
+    background: #1e40af;
+    color: #dbeafe;
+  }
+
+  .tags-page .btn-edit:hover {
+    background: #1e3a8a;
+  }
+
+  .tags-page .btn-delete {
+    background: #991b1b;
+    color: #fecaca;
+  }
+
+  .tags-page .btn-delete:hover {
+    background: #7f1d1d;
+    color: #ffffff;
+  }
+
+  .empty-state {
+    background: #374151;
+  }
+
+  .empty-state p {
+    color: #d1d5db;
+  }
+
+  .error-message {
+    background: #991b1b;
+    color: #fecaca;
+    border-color: #dc2626;
+  }
+
+  .loading {
+    color: #9ca3af;
+  }
+
+  .btn-cancel {
+    background: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .btn-cancel:hover {
+    background: #6b7280;
   }
 }
