@@ -150,12 +150,12 @@
                          AND todo_id NOT IN (
                            SELECT todo_id FROM todo_tags WHERE tag_id = ?
                          )"
-                      (list target-id merge-time source-id target-id))
+                      target-id merge-time source-id target-id)
           
           ;; Step 2: Delete todo_tags records with source tag
           (dbi:do-sql conn
                       "DELETE FROM todo_tags WHERE tag_id = ?"
-                      (list source-id))
+                      source-id)
           
           ;; Step 3: Copy label_tags records (only for labels not already having target tag)
           (dbi:do-sql conn
@@ -166,12 +166,12 @@
                          AND label_id NOT IN (
                            SELECT label_id FROM label_tags WHERE tag_id = ?
                          )"
-                      (list target-id merge-time source-id target-id))
+                      target-id merge-time source-id target-id)
           
           ;; Step 4: Delete label_tags records with source tag
           (dbi:do-sql conn
                       "DELETE FROM label_tags WHERE tag_id = ?"
-                      (list source-id))
+                      source-id)
           
           ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) target-ulid)
@@ -235,12 +235,12 @@
                          AND todo_id NOT IN (
                            SELECT todo_id FROM todo_tags WHERE tag_id = ?
                          )"
-                      (list new-tag-id merge-time source-id new-tag-id))
+                      new-tag-id merge-time source-id new-tag-id)
           
           ;; Step 2: Delete todo_tags records with source tag
           (dbi:do-sql conn
                       "DELETE FROM todo_tags WHERE tag_id = ?"
-                      (list source-id))
+                      source-id)
           
           ;; Step 3: Copy label_tags records (only for labels not already having new tag)
           (dbi:do-sql conn
@@ -251,12 +251,12 @@
                          AND label_id NOT IN (
                            SELECT label_id FROM label_tags WHERE tag_id = ?
                          )"
-                      (list new-tag-id merge-time source-id new-tag-id))
+                      new-tag-id merge-time source-id new-tag-id)
           
           ;; Step 4: Delete label_tags records with source tag
           (dbi:do-sql conn
                       "DELETE FROM label_tags WHERE tag_id = ?"
-                      (list source-id))
+                      source-id)
           
           ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) new-tag-ulid)
