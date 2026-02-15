@@ -15,7 +15,8 @@
   (:import-from :dogatto-test/controllers/todos-controller)
   (:import-from :dogatto-test/controllers/tags-controller)
   (:import-from :dogatto-test/controllers/todo-tags-controller)
-  (:import-from :dogatto-test/middleware/authentication))
+  (:import-from :dogatto-test/middleware/authentication)
+  (:import-from :dogatto-test/integration/label-search))
 (in-package #:dogatto-test/test-loader)
 
 (dogatto/config/logger:initialize-logger :test)
