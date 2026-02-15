@@ -106,36 +106,36 @@
                                (cons "name" (ref target-tag :name))))
         (cons "mergedAt" (ref tag :merged-at))))
 
-(defun error-response (status message &optional details)
+(defun error-response (controller status message &optional details)
   "Create error response.
 
+   @param controller [<rest-controller>] Controller instance
    @param status [integer] HTTP status code
    @param message [string] Error message
    @param details [list] Optional error details
-   @return [list] HTTP response list
+   @return [alist] Response data
    "
-  (list status
-        '(:content-type "application/json")
-        (list (to-json
-               (if details
-                   (list (cons "status" "error")
-                         (cons "message" message)
-                         (cons "details" details))
-                   (list (cons "status" "error")
-                         (cons "message" message)))))))
+  (setf (slot-value controller 'clails/controller/base-controller:code) status)
+  (set-response controller
+                (if details
+                    `(("status" . "error")
+                      ("message" . ,message)
+                      ("details" . ,details))
+                    `(("status" . "error")
+                      ("message" . ,message)))))
 
-(defun success-response (data &optional (status 200))
+(defun success-response (controller data &optional (status 200))
   "Create success response.
 
+   @param controller [<rest-controller>] Controller instance
    @param data [list] Response data
    @param status [integer] HTTP status code (default 200)
-   @return [list] HTTP response list
+   @return [alist] Response data
    "
-  (list status
-        '(:content-type "application/json")
-        (list (to-json
-               (list (cons "status" "success")
-                     (cons "data" data))))))
+  (setf (slot-value controller 'clails/controller/base-controller:code) status)
+  (set-response controller
+                `(("status" . "success")
+                  ("data" . ,data))))
 
 ;;; POST /api/v1/tags/merge - Merge tags to existing tag
 (defmethod do-post ((controller <tags-merge-controller>))
@@ -145,7 +145,7 @@
     ;; Check authentication
     (unless user
       (return-from do-post
-        (error-response 401 "Authentication required")))
+        (error-response controller 401 "Authentication required")))
     
     (handler-case
         (let* ((body (read-body-as-string env))
@@ -157,11 +157,11 @@
           ;; Validate input
           (unless source-ulids
             (return-from do-post
-              (error-response 400 "source_ulids is required")))
+              (error-response controller 400 "source_ulids is required")))
           
           (unless target-ulid
             (return-from do-post
-              (error-response 400 "target_ulid is required")))
+              (error-response controller 400 "target_ulid is required")))
           
           ;; Execute merge
           (let ((result (merge-tags-to-existing source-ulids target-ulid owner-id)))
@@ -173,16 +173,16 @@
                                                    (merged-tag-to-json tag target-tag))
                                                  merged-tags))
                        (target-tag-json (tag-to-json-with-stats target-tag)))
-                  (success-response
+                  (success-response controller
                    (list (cons "mergedTags" merged-tags-json)
                          (cons "targetTag" target-tag-json))))
                 ;; Failure
                 (let ((errors (getf result :errors)))
-                  (error-response 400 "Merge failed"
+                  (error-response controller 400 "Merge failed"
                                   (list (cons "errors" errors)))))))
       
       (error (e)
-        (error-response 500 (format nil "Internal server error: ~A" e))))))
+        (error-response controller 500 (format nil "Internal server error: ~A" e))))))
 
 ;;; POST /api/v1/tags/merge-to-new - Merge tags to new tag
 (defmethod do-post ((controller <tags-merge-to-new-controller>))
@@ -192,7 +192,7 @@
     ;; Check authentication
     (unless user
       (return-from do-post
-        (error-response 401 "Authentication required")))
+        (error-response controller 401 "Authentication required")))
     
     (handler-case
         (let* ((body (read-body-as-string env))
@@ -207,11 +207,11 @@
           ;; Validate input
           (unless source-ulids
             (return-from do-post
-              (error-response 400 "source_ulids is required")))
+              (error-response controller 400 "source_ulids is required")))
           
           (unless new-tag-name
             (return-from do-post
-              (error-response 400 "new_tag.name is required")))
+              (error-response controller 400 "new_tag.name is required")))
           
           ;; Execute merge
           (let ((result (merge-tags-to-new source-ulids new-tag-name owner-id
@@ -224,14 +224,14 @@
                                                    (merged-tag-to-json tag new-tag))
                                                  merged-tags))
                        (new-tag-json (tag-to-json-with-stats new-tag)))
-                  (success-response
+                  (success-response controller
                    (list (cons "mergedTags" merged-tags-json)
                          (cons "newTag" new-tag-json))
                    201))
                 ;; Failure
                 (let ((errors (getf result :errors)))
-                  (error-response 400 "Merge failed"
+                  (error-response controller 400 "Merge failed"
                                   (list (cons "errors" errors)))))))
       
       (error (e)
-        (error-response 500 (format nil "Internal server error: ~A" e))))))
+        (error-response controller 500 (format nil "Internal server error: ~A" e))))))
