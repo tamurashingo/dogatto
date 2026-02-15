@@ -150,7 +150,10 @@
     (handler-case
         (let* ((body (read-body-as-string (getf env :raw-body)))
                (json-data (parse body :as :alist))
-               (source-ulids (cdr (assoc "source_ulids" json-data :test #'string=)))
+               (source-ulids-raw (cdr (assoc "source_ulids" json-data :test #'string=)))
+               (source-ulids (if (vectorp source-ulids-raw)
+                                 (coerce source-ulids-raw 'list)
+                                 source-ulids-raw))
                (target-ulid (cdr (assoc "target_ulid" json-data :test #'string=)))
                (owner-id (ref user :id)))
           
@@ -182,6 +185,7 @@
                                   (list (cons "errors" errors)))))))
       
       (error (e)
+        (trivial-backtrace:print-backtrace e)
         (error-response controller 500 (format nil "Internal server error: ~A" e))))))
 
 ;;; POST /api/v1/tags/merge-to-new - Merge tags to new tag
@@ -197,7 +201,10 @@
     (handler-case
         (let* ((body (read-body-as-string (getf env :raw-body)))
                (json-data (parse body :as :alist))
-               (source-ulids (cdr (assoc "source_ulids" json-data :test #'string=)))
+               (source-ulids-raw (cdr (assoc "source_ulids" json-data :test #'string=)))
+               (source-ulids (if (vectorp source-ulids-raw)
+                                 (coerce source-ulids-raw 'list)
+                                 source-ulids-raw))
                (new-tag-data (cdr (assoc "new_tag" json-data :test #'string=)))
                (new-tag-name (cdr (assoc "name" new-tag-data :test #'string=)))
                (new-tag-color (or (cdr (assoc "color" new-tag-data :test #'string=))
@@ -234,4 +241,5 @@
                                   (list (cons "errors" errors)))))))
       
       (error (e)
+        (trivial-backtrace:print-backtrace e)
         (error-response controller 500 (format nil "Internal server error: ~A" e))))))
