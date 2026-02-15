@@ -14,12 +14,13 @@
   (:import-from #:dogatto/models/label
                 #:<label>)
   (:import-from #:dogatto/models/label-tag
-                #:create-label-with-tags)
+                #:create-label-with-tags
+                #:find-tags-for-label)
   (:import-from #:dogatto/models/todo
-                #:create-todo
-                #:find-todos-by-label)
+                #:create-todo)
   (:import-from #:dogatto/models/todo-tag
-                #:assign-tags-to-todo)
+                #:assign-tags-to-todo
+                #:find-todos-by-label-tags)
   (:import-from #:dogatto/utils/ulid
                 #:generate-ulid))
 (in-package #:dogatto-test/integration/label-search)
@@ -75,7 +76,9 @@
       
       ;; Test: Search by label "morning routine"
       ;; Expected: Should return only TODO B
-      (let ((todos-by-label (find-todos-by-label (ref label-morning-routine :ulid) user-id)))
+      (let* ((label-tags (find-tags-for-label (ref label-morning-routine :ulid) user-id))
+             (tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) label-tags))
+             (todos-by-label (find-todos-by-label-tags user-id tag-ulids)))
         (ok (= (length todos-by-label) 1)
             "Should find exactly 1 TODO with label 'morning routine'")
         
@@ -135,7 +138,9 @@
       ;; todo-3 has no tags
       
       ;; Test: Search by label "work tasks"
-      (let ((todos-by-label (find-todos-by-label (ref label-work :ulid) user-id)))
+      (let* ((label-tags (find-tags-for-label (ref label-work :ulid) user-id))
+             (tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) label-tags))
+             (todos-by-label (find-todos-by-label-tags user-id tag-ulids)))
         (ok (= (length todos-by-label) 2)
             "Should find exactly 2 TODOs with label 'work tasks'")
         
@@ -204,7 +209,9 @@
                            user-id)
       
       ;; Test: Search by label "critical tasks"
-      (let ((todos-by-label (find-todos-by-label (ref label-critical :ulid) user-id)))
+      (let* ((label-tags (find-tags-for-label (ref label-critical :ulid) user-id))
+             (tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) label-tags))
+             (todos-by-label (find-todos-by-label-tags user-id tag-ulids)))
         (ok (= (length todos-by-label) 1)
             "Should find exactly 1 TODO with all 3 tags")
         
@@ -259,7 +266,9 @@
                            user-id)
       
       ;; Test: Search by label should return empty
-      (let ((todos-by-label (find-todos-by-label (ref label-rare :ulid) user-id)))
+      (let* ((label-tags (find-tags-for-label (ref label-rare :ulid) user-id))
+             (tag-ulids (mapcar #'(lambda (tag) (ref tag :ulid)) label-tags))
+             (todos-by-label (find-todos-by-label-tags user-id tag-ulids)))
         (ok (= (length todos-by-label) 0)
             "Should return 0 TODOs when no TODO has all required tags"))
       

@@ -148,7 +148,7 @@
         (error-response 401 "Authentication required")))
     
     (handler-case
-        (let* ((body (dogatto/utils/request:read-body-as-string env))
+        (let* ((body (read-body-as-string env))
                (json-data (parse body :as :alist))
                (source-ulids (cdr (assoc "source_ulids" json-data :test #'string=)))
                (target-ulid (cdr (assoc "target_ulid" json-data :test #'string=)))
@@ -195,7 +195,7 @@
         (error-response 401 "Authentication required")))
     
     (handler-case
-        (let* ((body (dogatto/utils/request:read-body-as-string env))
+        (let* ((body (read-body-as-string env))
                (json-data (parse body :as :alist))
                (source-ulids (cdr (assoc "source_ulids" json-data :test #'string=)))
                (new-tag-data (cdr (assoc "new_tag" json-data :test #'string=)))
