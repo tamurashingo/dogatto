@@ -149,3 +149,65 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .merge-info {
+    background-color: #1a202c;
+  }
+
+  .merge-info h3 {
+    color: #f7fafc;
+  }
+
+  .mode-button {
+    color: #a0aec0;
+    background-color: #1a202c;
+  }
+
+  .mode-button:hover {
+    background-color: #2d3748;
+  }
+
+  .mode-button.active {
+    color: #60a5fa;
+    background-color: #1e3a5f;
+    border-color: #60a5fa;
+  }
+
+  .form-group label {
+    color: #f7fafc;
+  }
+
+  .form-group input[type="text"],
+  .form-group select {
+    background-color: #1a202c;
+    border-color: #4a5568;
+    color: #f7fafc;
+  }
+
+  .form-group input[type="text"]:focus,
+  .form-group select:focus {
+    border-color: #4299e1;
+  }
+
+  .form-group input[type="color"] {
+    background-color: #1a202c;
+    border-color: #4a5568;
+  }
+
+  .error-message {
+    background-color: #991b1b;
+    color: #fecaca;
+    border-color: #dc2626;
+  }
+
+  .btn-cancel {
+    color: #f7fafc;
+    background-color: #4a5568;
+  }
+
+  .btn-cancel:hover:not(:disabled) {
+    background-color: #718096;
+  }
+}
