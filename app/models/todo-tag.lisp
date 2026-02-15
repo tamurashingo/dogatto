@@ -20,7 +20,9 @@
            #:find-todos-by-tag-ulids
            #:find-todos-untagged
            #:find-todos-by-label-tags
-           #:get-tag-statistics))
+           #:get-tag-statistics
+           #:insert-todo-tags-from-source-to-target
+           #:delete-todo-tags-by-tag-id))
 
 (in-package #:dogatto/models/todo-tag)
 
@@ -47,6 +49,20 @@
 @cl-batis:update
 ("DELETE FROM todo_tags WHERE todo_id = :todo_id AND tag_id = :tag_id AND owner_id = :owenr_id")
 (defsql delete-todo-tag (todo_id tag_id owner_id))
+
+@cl-batis:update
+("INSERT INTO todo_tags (todo_id, tag_id, created_at)
+  SELECT todo_id, :target_id, :merge_time
+  FROM todo_tags
+  WHERE tag_id = :source_id
+    AND todo_id NOT IN (
+      SELECT todo_id FROM todo_tags WHERE tag_id = :target_id
+    )")
+(defsql insert-todo-tags-from-source-to-target (target_id merge_time source_id))
+
+@cl-batis:update
+("DELETE FROM todo_tags WHERE tag_id = :tag_id")
+(defsql delete-todo-tags-by-tag-id (tag_id))
 
 
 

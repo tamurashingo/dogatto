@@ -21,7 +21,9 @@
            #:assign-tags-to-label
            #:remove-tag-from-label
            #:find-tags-for-label
-           #:find-labels-by-tag-name))
+           #:find-labels-by-tag-name
+           #:insert-label-tags-from-source-to-target
+           #:delete-label-tags-by-tag-id))
 
 (in-package #:dogatto/models/label-tag)
 
@@ -110,6 +112,20 @@
 @cl-batis:update
 ("DELETE FROM label_tags WHERE label_id = :label_id AND tag_id = :tag_id AND owner_id = :owner_id")
 (defsql delete-label-tag (label_id tag_id owner_id))
+
+@cl-batis:update
+("INSERT INTO label_tags (label_id, tag_id, label_ulid, owner_id, created_at)
+  SELECT label_id, :target_id, label_ulid, owner_id, :merge_time
+  FROM label_tags
+  WHERE tag_id = :source_id
+    AND label_id NOT IN (
+      SELECT label_id FROM label_tags WHERE tag_id = :target_id
+    )")
+(defsql insert-label-tags-from-source-to-target (target_id merge_time source_id))
+
+@cl-batis:update
+("DELETE FROM label_tags WHERE tag_id = :tag_id")
+(defsql delete-label-tags-by-tag-id (tag_id))
 
 (defun assign-tags-to-label (label-ulid tag-ulids owner-id)
   "Assign tags to a label.

@@ -7,17 +7,17 @@
                 #:save
                 #:execute-query
                 #:with-transaction)
-  (:import-from #:clails/model/connection
-                #:get-connection)
-  (:import-from #:dbi
-                #:do-sql)
   (:import-from #:dogatto/models/tag
                 #:<tag>
                 #:find-tag-by-ulid)
   (:import-from #:dogatto/models/todo-tag
-                #:<todo-tag>)
+                #:<todo-tag>
+                #:insert-todo-tags-from-source-to-target
+                #:delete-todo-tags-by-tag-id)
   (:import-from #:dogatto/models/label-tag
-                #:<label-tag>)
+                #:<label-tag>
+                #:insert-label-tags-from-source-to-target
+                #:delete-label-tags-by-tag-id)
   (:export #:validate-merge-sources
            #:validate-merge-target
            #:merge-tags-to-existing
@@ -138,40 +138,27 @@
       
       (dolist (source-ulid source-ulids)
         (let* ((source-tag (find-tag-by-ulid source-ulid))
-               (source-id (ref source-tag :id))
-               (conn (get-connection)))
+               (source-id (ref source-tag :id)))
           
-          ;; Step 1: Copy todo_tags records (only for TODOs not already having target tag)
-          (dbi:do-sql conn
-                      "INSERT INTO todo_tags (todo_id, tag_id, created_at)
-                       SELECT todo_id, ?, ?
-                       FROM todo_tags
-                       WHERE tag_id = ?
-                         AND todo_id NOT IN (
-                           SELECT todo_id FROM todo_tags WHERE tag_id = ?
-                         )"
-                      target-id merge-time source-id target-id)
+          ;; Step 1: Copy todo_tags records from source to target (avoiding duplicates)
+          (execute-query insert-todo-tags-from-source-to-target
+                        (list :target_id target-id
+                              :merge_time merge-time
+                              :source_id source-id))
           
           ;; Step 2: Delete todo_tags records with source tag
-          (dbi:do-sql conn
-                      "DELETE FROM todo_tags WHERE tag_id = ?"
-                      source-id)
+          (execute-query delete-todo-tags-by-tag-id
+                        (list :tag_id source-id))
           
-          ;; Step 3: Copy label_tags records (only for labels not already having target tag)
-          (dbi:do-sql conn
-                      "INSERT INTO label_tags (label_id, tag_id, label_ulid, owner_id, created_at)
-                       SELECT label_id, ?, label_ulid, owner_id, ?
-                       FROM label_tags
-                       WHERE tag_id = ?
-                         AND label_id NOT IN (
-                           SELECT label_id FROM label_tags WHERE tag_id = ?
-                         )"
-                      target-id merge-time source-id target-id)
+          ;; Step 3: Copy label_tags records from source to target (avoiding duplicates)
+          (execute-query insert-label-tags-from-source-to-target
+                        (list :target_id target-id
+                              :merge_time merge-time
+                              :source_id source-id))
           
           ;; Step 4: Delete label_tags records with source tag
-          (dbi:do-sql conn
-                      "DELETE FROM label_tags WHERE tag_id = ?"
-                      source-id)
+          (execute-query delete-label-tags-by-tag-id
+                        (list :tag_id source-id))
           
           ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) target-ulid)
@@ -223,40 +210,27 @@
       
       (dolist (source-ulid source-ulids)
         (let* ((source-tag (find-tag-by-ulid source-ulid))
-               (source-id (ref source-tag :id))
-               (conn (get-connection)))
+               (source-id (ref source-tag :id)))
           
-          ;; Step 1: Copy todo_tags records (only for TODOs not already having new tag)
-          (dbi:do-sql conn
-                      "INSERT INTO todo_tags (todo_id, tag_id, created_at)
-                       SELECT todo_id, ?, ?
-                       FROM todo_tags
-                       WHERE tag_id = ?
-                         AND todo_id NOT IN (
-                           SELECT todo_id FROM todo_tags WHERE tag_id = ?
-                         )"
-                      new-tag-id merge-time source-id new-tag-id)
+          ;; Step 1: Copy todo_tags records from source to new tag (avoiding duplicates)
+          (execute-query insert-todo-tags-from-source-to-target
+                        (list :target_id new-tag-id
+                              :merge_time merge-time
+                              :source_id source-id))
           
           ;; Step 2: Delete todo_tags records with source tag
-          (dbi:do-sql conn
-                      "DELETE FROM todo_tags WHERE tag_id = ?"
-                      source-id)
+          (execute-query delete-todo-tags-by-tag-id
+                        (list :tag_id source-id))
           
-          ;; Step 3: Copy label_tags records (only for labels not already having new tag)
-          (dbi:do-sql conn
-                      "INSERT INTO label_tags (label_id, tag_id, label_ulid, owner_id, created_at)
-                       SELECT label_id, ?, label_ulid, owner_id, ?
-                       FROM label_tags
-                       WHERE tag_id = ?
-                         AND label_id NOT IN (
-                           SELECT label_id FROM label_tags WHERE tag_id = ?
-                         )"
-                      new-tag-id merge-time source-id new-tag-id)
+          ;; Step 3: Copy label_tags records from source to new tag (avoiding duplicates)
+          (execute-query insert-label-tags-from-source-to-target
+                        (list :target_id new-tag-id
+                              :merge_time merge-time
+                              :source_id source-id))
           
           ;; Step 4: Delete label_tags records with source tag
-          (dbi:do-sql conn
-                      "DELETE FROM label_tags WHERE tag_id = ?"
-                      source-id)
+          (execute-query delete-label-tags-by-tag-id
+                        (list :tag_id source-id))
           
           ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) new-tag-ulid)
