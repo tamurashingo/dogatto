@@ -69,6 +69,54 @@ interface TagWithStatisticsResponse {
 }
 
 /**
+ * Merged tag information.
+ */
+export interface MergedTag {
+  ulid: string;
+  name: string;
+  mergedTo: {
+    ulid: string;
+    name: string;
+  };
+  mergedAt: string;
+}
+
+/**
+ * Tag merge to existing response.
+ */
+interface MergeToExistingResponse {
+  mergedTags: MergedTag[];
+  targetTag: Tag & { todoCount: number };
+}
+
+/**
+ * Tag merge to new response.
+ */
+interface MergeToNewResponse {
+  mergedTags: MergedTag[];
+  newTag: Tag & { todoCount: number };
+}
+
+/**
+ * Tag merge request for existing tag.
+ */
+export interface MergeToExistingRequest {
+  source_ulids: string[];
+  target_ulid: string;
+}
+
+/**
+ * Tag merge request for new tag.
+ */
+export interface MergeToNewRequest {
+  source_ulids: string[];
+  new_tag: {
+    name: string;
+    color?: string;
+  };
+}
+
+/**
  * Tag API client.
  *
  * Provides methods for tag CRUD operations.
@@ -152,5 +200,43 @@ export const tagsApi = {
    */
   async deleteTag(ulid: string): Promise<void> {
     await apiClient.delete(`/api/v1/tags/${ulid}`);
+  },
+
+  /**
+   * Merges tags to an existing tag.
+   *
+   * Merges multiple source tags into an existing target tag.
+   * Source tags will be marked as merged and their TODOs will be reassigned.
+   *
+   * @param data [MergeToExistingRequest] Merge request data
+   * @param data.source_ulids [string[]] ULIDs of tags to merge
+   * @param data.target_ulid [string] ULID of target tag
+   * @return [Promise<MergeToExistingResponse>] Merge result with merged tags and target tag
+   * @throws [ApiError] When merge fails (e.g., validation error, tag not found)
+   */
+  async mergeToExisting(data: MergeToExistingRequest): Promise<MergeToExistingResponse> {
+    const response: ApiResponse<BackendResponse<MergeToExistingResponse>> =
+      await apiClient.post<BackendResponse<MergeToExistingResponse>>('/api/v1/tags/merge', data);
+    return (response.data as any).data;
+  },
+
+  /**
+   * Merges tags to a new tag.
+   *
+   * Merges multiple source tags into a newly created tag.
+   * Source tags will be marked as merged and their TODOs will be reassigned to the new tag.
+   *
+   * @param data [MergeToNewRequest] Merge request data
+   * @param data.source_ulids [string[]] ULIDs of tags to merge
+   * @param data.new_tag [object] New tag information
+   * @param data.new_tag.name [string] Name of new tag
+   * @param data.new_tag.color [string] Color of new tag (optional)
+   * @return [Promise<MergeToNewResponse>] Merge result with merged tags and new tag
+   * @throws [ApiError] When merge fails (e.g., validation error)
+   */
+  async mergeToNew(data: MergeToNewRequest): Promise<MergeToNewResponse> {
+    const response: ApiResponse<BackendResponse<MergeToNewResponse>> =
+      await apiClient.post<BackendResponse<MergeToNewResponse>>('/api/v1/tags/merge-to-new', data);
+    return (response.data as any).data;
   },
 };

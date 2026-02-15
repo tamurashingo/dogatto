@@ -19,30 +19,29 @@ export default function TodosPage(): React.JSX.Element {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedTagUlids, setSelectedTagUlids] = useState<string[]>([]);
-  const [selectedLabelUlid, setSelectedLabelUlid] = useState<string | null>(null);
-  const [includeUntagged, setIncludeUntagged] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Initialize filters from URL on mount
+  const initialTagsParam = searchParams.get('tags');
+  const initialLabelParam = searchParams.get('label');
+  const initialUntaggedParam = searchParams.get('untagged');
+  
+  const [selectedTagUlids, setSelectedTagUlids] = useState<string[]>(
+    initialTagsParam ? initialTagsParam.split(',').filter(Boolean) : []
+  );
+  const [selectedLabelUlid, setSelectedLabelUlid] = useState<string | null>(
+    initialLabelParam || null
+  );
+  const [includeUntagged, setIncludeUntagged] = useState(
+    initialUntaggedParam === 'true'
+  );
 
   /**
-   * Initializes filter state from URL query parameters.
+   * Mark as initialized after first render.
    */
   useEffect(() => {
-    const tagsParam = searchParams.get('tags');
-    const labelParam = searchParams.get('label');
-    const untaggedParam = searchParams.get('untagged');
-    
-    if (tagsParam) {
-      setSelectedTagUlids(tagsParam.split(',').filter(Boolean));
-    }
-    
-    if (labelParam) {
-      setSelectedLabelUlid(labelParam);
-    }
-    
-    if (untaggedParam === 'true') {
-      setIncludeUntagged(true);
-    }
-  }, [searchParams]);
+    setIsInitialized(true);
+  }, []);
 
   /**
    * Fetches todos from API with optional tag and label filtering.
@@ -202,8 +201,10 @@ export default function TodosPage(): React.JSX.Element {
   };
 
   useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+    if (isInitialized) {
+      fetchTodos();
+    }
+  }, [fetchTodos, isInitialized]);
 
   return (
     <div className="todos-page">

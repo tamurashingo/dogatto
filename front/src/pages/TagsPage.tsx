@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import TagCard from '../components/TagCard';
 import TagFormModal from '../components/TagFormModal';
+import TagMergeModal from '../components/TagMergeModal';
 import { tagsApi } from '../api/tags';
 import type { Tag, CreateTagRequest, UpdateTagRequest } from '../api/tags';
 import { ApiError } from '../api/error';
@@ -10,14 +11,17 @@ import '../styles/tags.css';
 /**
  * Tags page component.
  *
- * Displays list of tags with create, edit, and delete functionality.
+ * Displays list of tags with create, edit, delete, and merge functionality.
  */
 export default function TagsPage(): React.JSX.Element {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | undefined>(undefined);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   /**
    * Fetches tags from API.
@@ -119,6 +123,47 @@ export default function TagsPage(): React.JSX.Element {
     }
   };
 
+  /**
+   * Toggles selection mode for merging.
+   */
+  const handleToggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedTags([]);
+  };
+
+  /**
+   * Toggles tag selection.
+   *
+   * @param tag [Tag] Tag to toggle
+   */
+  const handleToggleTagSelection = (tag: Tag) => {
+    if (selectedTags.find(t => t.ulid === tag.ulid)) {
+      setSelectedTags(selectedTags.filter(t => t.ulid !== tag.ulid));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  /**
+   * Opens merge modal.
+   */
+  const handleOpenMergeModal = () => {
+    if (selectedTags.length < 1) {
+      setError('Please select at least 1 tag to merge');
+      return;
+    }
+    setIsMergeModalOpen(true);
+  };
+
+  /**
+   * Handles successful merge.
+   */
+  const handleMergeSuccess = () => {
+    setIsSelectionMode(false);
+    setSelectedTags([]);
+    fetchTags();
+  };
+
   useEffect(() => {
     fetchTags();
   }, []);
@@ -129,10 +174,39 @@ export default function TagsPage(): React.JSX.Element {
       <main className="main-content">
         <div className="tags-header">
           <h1>Tags</h1>
-          <button onClick={() => setIsModalOpen(true)} className="btn-create">
-            Create Tag
-          </button>
+          <div className="tags-actions">
+            {isSelectionMode && (
+              <>
+                <button
+                  onClick={handleOpenMergeModal}
+                  className="btn-merge"
+                  disabled={selectedTags.length < 1}
+                >
+                  Merge {selectedTags.length > 0 ? `(${selectedTags.length})` : ''}
+                </button>
+                <button onClick={handleToggleSelectionMode} className="btn-cancel">
+                  Cancel
+                </button>
+              </>
+            )}
+            {!isSelectionMode && (
+              <>
+                <button onClick={handleToggleSelectionMode} className="btn-select">
+                  Select to Merge
+                </button>
+                <button onClick={() => setIsModalOpen(true)} className="btn-create">
+                  Create Tag
+                </button>
+              </>
+            )}
+          </div>
         </div>
+
+        {isSelectionMode && (
+          <div className="selection-info">
+            <p>Select tags to merge. You can merge multiple tags into one existing tag or create a new tag.</p>
+          </div>
+        )}
 
         {error && (
           <div className="error-message">
@@ -157,6 +231,9 @@ export default function TagsPage(): React.JSX.Element {
                 tag={tag}
                 onEdit={() => handleEdit(tag)}
                 onDelete={() => handleDelete(tag.ulid)}
+                isSelectionMode={isSelectionMode}
+                isSelected={selectedTags.some(t => t.ulid === tag.ulid)}
+                onToggleSelect={() => handleToggleTagSelection(tag)}
               />
             ))}
           </div>
@@ -169,6 +246,13 @@ export default function TagsPage(): React.JSX.Element {
         tag={editingTag}
         onClose={handleCloseModal}
         onSubmit={editingTag ? handleUpdate : handleCreate}
+      />
+
+      <TagMergeModal
+        isOpen={isMergeModalOpen}
+        onClose={() => setIsMergeModalOpen(false)}
+        onSuccess={handleMergeSuccess}
+        selectedTags={selectedTags}
       />
     </div>
   );
