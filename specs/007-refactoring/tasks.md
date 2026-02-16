@@ -7,41 +7,44 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 0: Preparation and Infrastructure
 
-### Task 0.1: Document service layer patterns
+### Task 0.1: Document service layer patterns ✅
+**Status**: Completed (Commit: 1ea9fb9)  
 **Priority**: High  
 **Depends on**: None  
 **Estimated effort**: 1 hour  
 **Description**: Create service-patterns.md documenting standard patterns from tag-merge-service.lisp
 **Completion criteria**:
-- Document package structure
-- Document function signature patterns (return plist with :success, :errors, :data)
-- Document transaction management patterns
-- Document validation patterns
+- [x] Document package structure
+- [x] Document function signature patterns (return plist with :success, :errors, :data)
+- [x] Document transaction management patterns
+- [x] Document validation patterns
 
-### Task 0.2: Create common helper for authentication
+### Task 0.2: Create common helper for authentication ✅
+**Status**: Completed (Commit: 1ea9fb9)  
 **Priority**: High  
 **Depends on**: None  
 **Estimated effort**: 2 hours  
 **Description**: Extract get-authenticated-user from controllers into app/helpers/auth-helper.lisp
 **Completion criteria**:
-- Create app/helpers/auth-helper.lisp
-- Export get-authenticated-user function
-- Function extracts session_id from cookie
-- Function validates session and returns user
-- Keep duplicate code in controllers temporarily (remove in later phase)
+- [x] Create app/helpers/auth-helper.lisp
+- [x] Export get-authenticated-user function
+- [x] Function extracts session_id from cookie
+- [x] Function validates session and returns user
+- [x] Keep duplicate code in controllers temporarily (remove in later phase)
 
-### Task 0.3: Create common helper for JSON conversion
+### Task 0.3: Create common helper for JSON conversion ✅
+**Status**: Completed (Commit: 1ea9fb9)  
 **Priority**: Medium  
 **Depends on**: None  
 **Estimated effort**: 2 hours  
 **Description**: Extract JSON conversion functions into app/helpers/json-converters.lisp
 **Completion criteria**:
-- Create app/helpers/json-converters.lisp
-- Extract todo-to-json function
-- Extract tag-to-json function
-- Extract label-to-json function
-- Extract user-to-json function
-- Keep duplicate code in controllers temporarily (remove in later phase)
+- [x] Create app/helpers/json-converters.lisp
+- [x] Extract todo-to-json function
+- [x] Extract tag-to-json function
+- [x] Extract label-to-json function
+- [x] Extract user-to-json function
+- [x] Keep duplicate code in controllers temporarily (remove in later phase)
 
 ---
 
