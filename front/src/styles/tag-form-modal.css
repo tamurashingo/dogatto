@@ -247,3 +247,78 @@ form {
     width: 100%;
   }
 }
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .modal-content {
+    background: #2d3748;
+  }
+
+  .modal-header {
+    border-bottom-color: #4a5568;
+  }
+
+  .modal-header h2 {
+    color: #f7fafc;
+  }
+
+  .modal-close {
+    color: #a0aec0;
+  }
+
+  .modal-close:hover {
+    background: #4a5568;
+    color: #f7fafc;
+  }
+
+  .form-group label {
+    color: #f7fafc;
+  }
+
+  .form-group input[type="text"] {
+    background: #1a202c;
+    border-color: #4a5568;
+    color: #f7fafc;
+  }
+
+  .form-group input[type="text"]:focus {
+    border-color: #4299e1;
+  }
+
+  .error-text {
+    color: #fc8181;
+  }
+
+  .char-count {
+    color: #a0aec0;
+  }
+
+  .color-preview {
+    border-color: #4a5568;
+  }
+
+  .color-preview:hover {
+    border-color: #718096;
+  }
+
+  .color-swatch:hover {
+    border-color: #718096;
+  }
+
+  .color-swatch.selected {
+    border-color: #f7fafc;
+  }
+
+  .modal-actions {
+    border-top-color: #4a5568;
+  }
+
+  .btn-cancel {
+    background: #4a5568;
+    color: #f7fafc;
+  }
+
+  .btn-cancel:hover:not(:disabled) {
+    background: #718096;
+  }
+}

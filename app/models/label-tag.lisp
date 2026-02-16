@@ -21,7 +21,9 @@
            #:assign-tags-to-label
            #:remove-tag-from-label
            #:find-tags-for-label
-           #:find-labels-by-tag-name))
+           #:find-labels-by-tag-name
+           #:copy-label-tags-for-merge
+           #:delete-label-tags-for-merge))
 
 (in-package #:dogatto/models/label-tag)
 
@@ -110,6 +112,10 @@
 @cl-batis:update
 ("DELETE FROM label_tags WHERE label_id = :label_id AND tag_id = :tag_id AND owner_id = :owner_id")
 (defsql delete-label-tag (label_id tag_id owner_id))
+
+@cl-batis:update
+("DELETE FROM label_tags WHERE tag_id = :tag_id")
+(defsql delete-label-tags-by-tag-id (tag_id))
 
 (defun assign-tags-to-label (label-ulid tag-ulids owner-id)
   "Assign tags to a label.
@@ -237,3 +243,49 @@
     (execute-query *search-labels-by-tag-name-query*
                    (list :owner-id owner-id
                          :pattern pattern))))
+
+(defun copy-label-tags-for-merge (source-tag-id target-tag-id)
+  "Copy label tag associations from source to target for merge.
+
+   Queries label_tags with source tag, then creates new records with target tag,
+   avoiding duplicates (labels already having the target tag).
+
+   @param source-tag-id [integer] Source tag ID
+   @param target-tag-id [integer] Target tag ID
+   "
+  ;; Get all label_tags with source tag
+  (let* ((source-label-tags (execute-query
+                             (query <label-tag>
+                                    :as :label-tags
+                                    :where (:= (:label-tags :tag-id) :source-tag-id))
+                             (list :source-tag-id source-tag-id)))
+         ;; Get existing label_ids that already have target tag
+         (existing-label-tags (execute-query
+                               (query <label-tag>
+                                      :as :label-tags
+                                      :where (:= (:label-tags :tag-id) :target-tag-id))
+                               (list :target-tag-id target-tag-id)))
+         (existing-label-ids (mapcar (lambda (lt) (ref lt :label-id)) existing-label-tags)))
+    
+    ;; Create new label_tags records for labels that don't have target tag
+    (dolist (source-label-tag source-label-tags)
+      (let ((label-id (ref source-label-tag :label-id))
+            (label-ulid (ref source-label-tag :label-ulid))
+            (owner-id (ref source-label-tag :owner-id)))
+        (unless (member label-id existing-label-ids)
+          (let ((new-label-tag (make-record '<label-tag>
+                                            :label-id label-id
+                                            :tag-id target-tag-id
+                                            :label-ulid label-ulid
+                                            :owner-id owner-id)))
+            (save new-label-tag)))))))
+
+(defun delete-label-tags-for-merge (tag-id)
+  "Delete label tag associations for merge.
+
+   Deletes all label_tags records associated with the specified tag.
+
+   @param tag-id [integer] Tag ID
+   "
+  (execute-query delete-label-tags-by-tag-id
+                (list :tag_id tag-id)))

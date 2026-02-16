@@ -36,10 +36,14 @@
   (:import-from :dogatto/controllers/tags-controller
                 #:<tags-list-controller>
                 #:<tag-item-controller>)
+  (:import-from :dogatto/controllers/tags-merge-controller
+                #:<tags-merge-controller>
+                #:<tags-merge-to-new-controller>)
   (:import-from :dogatto/controllers/labels-controller
                 #:<labels-list-controller>
                 #:<label-item-controller>
                 #:<label-estimate-controller>)
   (:import-from :dogatto/controllers/todo-tags-controller
-                #:<todo-tags-controller>))
+                #:<todo-tags-controller>)
+  (:import-from :dogatto/services/tag-merge-service))
 (in-package #:dogatto/application-loader)

@@ -116,9 +116,10 @@
                 :owner-id owner-id))))
 
 (defun find-tags-by-user (owner-id)
-  "Find all tags belonging to a user.
+  "Find all active (non-merged) tags belonging to a user.
 
-   Returns tags ordered by name.
+   Returns only tags that have not been merged (merged_at is NULL).
+   Results are ordered by name.
 
    @param owner-id [integer] User ID
    @return [list] List of tag instances
@@ -126,7 +127,8 @@
   (execute-query
    (query <tag>
           :as :tag
-          :where (:= (:tag :owner-id) :owner-id)
+          :where (:and (:= (:tag :owner-id) :owner-id)
+                       (:null (:tag :merged-at)))
           :order-by ((:tag :name :asc)))
    (list :owner-id owner-id)))
 

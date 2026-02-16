@@ -39,6 +39,10 @@
     (:path "/api/v1/todos/:id"
      :controller "dogatto/controllers/todos-controller:<todo-item-controller>")
     ;; Tag endpoints
+    (:path "/api/v1/tags/merge-to-new"
+     :controller "dogatto/controllers/tags-merge-controller:<tags-merge-to-new-controller>")
+    (:path "/api/v1/tags/merge"
+     :controller "dogatto/controllers/tags-merge-controller:<tags-merge-controller>")
     (:path "/api/v1/tags/:ulid"
      :controller "dogatto/controllers/tags-controller:<tag-item-controller>")
     (:path "/api/v1/tags"

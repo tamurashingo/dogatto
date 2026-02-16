@@ -24,24 +24,84 @@
   margin: 0;
 }
 
+.tags-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.selection-info {
+  background: #e6fffa;
+  color: #234e52;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #81e6d9;
+}
+
+.selection-info p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
 /* Buttons */
 .btn-create,
-.btn-create-large {
+.btn-create-large,
+.btn-select,
+.btn-merge,
+.btn-cancel {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: #4299e1;
-  color: white;
   text-decoration: none;
   border-radius: 0.5rem;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: all 0.2s;
   border: none;
   cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.btn-create,
+.btn-create-large {
+  background: #4299e1;
+  color: white;
 }
 
 .btn-create:hover,
 .btn-create-large:hover {
   background: #3182ce;
+}
+
+.btn-select {
+  background: #48bb78;
+  color: white;
+}
+
+.btn-select:hover {
+  background: #38a169;
+}
+
+.btn-merge {
+  background: #ed8936;
+  color: white;
+}
+
+.btn-merge:hover:not(:disabled) {
+  background: #dd6b20;
+}
+
+.btn-merge:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-cancel:hover {
+  background: #cbd5e0;
 }
 
 .btn-create-large {
@@ -95,11 +155,41 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
   border: 2px solid transparent;
+  position: relative;
 }
 
 .tag-card:hover {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+.tag-card.selection-mode {
+  cursor: pointer;
+}
+
+.tag-card.selection-mode:hover {
+  border-color: #90cdf4;
+}
+
+.tag-card.selected {
+  border-color: #4299e1;
+  background: #ebf8ff;
+}
+
+.tag-card.selected .tag-name {
+  color: #1a365d;
+}
+
+.tag-selection {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.tag-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
 }
 
 .tag-card-header {
@@ -246,5 +336,115 @@
 @media (min-width: 769px) and (max-width: 1024px) {
   .tags-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .tags-page {
+    background: linear-gradient(to bottom, #1a202c 0%, #2d3748 100%);
+  }
+
+  .tags-header h1 {
+    color: #ffffff;
+  }
+
+  .selection-info {
+    background: #234e52;
+    color: #e6fffa;
+    border-color: #2c7a7b;
+  }
+
+  .tag-card {
+    background: #374151;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .tag-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+  }
+
+  .tag-card.selection-mode:hover {
+    border-color: #3b82f6;
+  }
+
+  .tag-card.selected {
+    border-color: #60a5fa;
+    background: #1e3a5f;
+  }
+
+  .tag-card.selected .tag-name {
+    color: #bfdbfe;
+  }
+
+  .tag-name {
+    color: #f3f4f6;
+  }
+
+  .tag-stats {
+    background: #2d3748;
+  }
+
+  .tag-stat-label {
+    color: #9ca3af;
+  }
+
+  .tag-stat-value {
+    color: #f3f4f6;
+  }
+
+  .tags-page .btn-view {
+    background: #4b5563;
+    color: #f9fafb;
+  }
+
+  .tags-page .btn-view:hover {
+    background: #6b7280;
+  }
+
+  .tags-page .btn-edit {
+    background: #1e40af;
+    color: #dbeafe;
+  }
+
+  .tags-page .btn-edit:hover {
+    background: #1e3a8a;
+  }
+
+  .tags-page .btn-delete {
+    background: #991b1b;
+    color: #fecaca;
+  }
+
+  .tags-page .btn-delete:hover {
+    background: #7f1d1d;
+    color: #ffffff;
+  }
+
+  .empty-state {
+    background: #374151;
+  }
+
+  .empty-state p {
+    color: #d1d5db;
+  }
+
+  .error-message {
+    background: #991b1b;
+    color: #fecaca;
+    border-color: #dc2626;
+  }
+
+  .loading {
+    color: #9ca3af;
+  }
+
+  .btn-cancel {
+    background: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .btn-cancel:hover {
+    background: #6b7280;
   }
 }
