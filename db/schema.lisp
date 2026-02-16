@@ -23,7 +23,7 @@
                                       ("name" :TYPE :STRING :SIZE 100 :NOT-NULL T)
                                       ("merged-to-ulid" :TYPE :STRING :SIZE 26 :NOT-NULL NIL)
                                       ("description" :TYPE :TEXT :NOT-NULL NIL)
-                                      ("merged-at" :TYPE :INTEGER :NOT-NULL NIL)
+                                      ("merged-at" :TYPE :DATETIME :NOT-NULL NIL)
                                      )
 
   (create-table connection :table "tags"
@@ -33,7 +33,7 @@
                                       ("name" :TYPE :STRING :SIZE 100 :NOT-NULL T)
                                       ("color" :TYPE :STRING :SIZE 7 :NOT-NULL NIL)
                                       ("merged-to-ulid" :TYPE :STRING :SIZE 26 :NOT-NULL NIL)
-                                      ("merged-at" :TYPE :INTEGER :NOT-NULL NIL)
+                                      ("merged-at" :TYPE :DATETIME :NOT-NULL NIL)
                                      )
 
   (create-table connection :table "todo_comments"
