@@ -12,12 +12,12 @@
                 #:find-tag-by-ulid)
   (:import-from #:dogatto/models/todo-tag
                 #:<todo-tag>
-                #:insert-todo-tags-from-source-to-target
-                #:delete-todo-tags-by-tag-id)
+                #:copy-todo-tags-for-merge
+                #:delete-todo-tags-for-merge)
   (:import-from #:dogatto/models/label-tag
                 #:<label-tag>
-                #:insert-label-tags-from-source-to-target
-                #:delete-label-tags-by-tag-id)
+                #:copy-label-tags-for-merge
+                #:delete-label-tags-for-merge)
   (:export #:validate-merge-sources
            #:validate-merge-target
            #:merge-tags-to-existing
@@ -44,7 +44,7 @@
     
     ;; Validate each source tag
     (dolist (ulid source-ulids)
-      (let ((tag (find-tag-by-ulid ulid)))
+      (let ((tag (find-tag-by-ulid ulid owner-id)))
         (cond
           ;; Tag not found
           ((null tag)
@@ -83,7 +83,7 @@
       (push "Target tag is required" errors)
       (return-from validate-merge-target (list nil errors)))
     
-    (setf target-tag (find-tag-by-ulid target-ulid))
+    (setf target-tag (find-tag-by-ulid target-ulid owner-id))
     
     (cond
       ;; Tag not found
@@ -115,6 +115,7 @@
    @param owner-id [integer] Owner ID for authorization
    @return [plist] Merge result with :success, :merged-tags, :target-tag, or :errors
    "
+
   ;; Validate sources
   (destructuring-bind (source-tags source-errors)
       (validate-merge-sources source-ulids owner-id)
@@ -131,38 +132,30 @@
   
   ;; Execute merge in transaction
   (with-transaction
-    (let ((merged-tags '())
-          (target-tag (find-tag-by-ulid target-ulid))
-          (target-id (ref target-tag :id))
-          (merge-time (get-universal-time)))
+    (let* ((merged-tags '())
+           (target-tag (find-tag-by-ulid target-ulid owner-id))
+           (target-id (ref target-tag :id))
+           (target-tag-ulid (ref target-tag :ulid)))
       
       (dolist (source-ulid source-ulids)
-        (let* ((source-tag (find-tag-by-ulid source-ulid))
+        (let* ((source-tag (find-tag-by-ulid source-ulid owner-id))
                (source-id (ref source-tag :id)))
           
           ;; Step 1: Copy todo_tags records from source to target (avoiding duplicates)
-          (execute-query insert-todo-tags-from-source-to-target
-                        (list :target_id target-id
-                              :merge_time merge-time
-                              :source_id source-id))
+          (copy-todo-tags-for-merge source-id target-id target-tag-ulid owner-id)
           
           ;; Step 2: Delete todo_tags records with source tag
-          (execute-query delete-todo-tags-by-tag-id
-                        (list :tag_id source-id))
+          (delete-todo-tags-for-merge source-id)
           
           ;; Step 3: Copy label_tags records from source to target (avoiding duplicates)
-          (execute-query insert-label-tags-from-source-to-target
-                        (list :target_id target-id
-                              :merge_time merge-time
-                              :source_id source-id))
+          (copy-label-tags-for-merge source-id target-id)
           
           ;; Step 4: Delete label_tags records with source tag
-          (execute-query delete-label-tags-by-tag-id
-                        (list :tag_id source-id))
+          (delete-label-tags-for-merge source-id)
           
           ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) target-ulid)
-          (setf (ref source-tag :merged-at) merge-time)
+          (setf (ref source-tag :merged-at) (get-universal-time))
           (save source-tag)
           
           (push source-tag merged-tags)))
@@ -205,36 +198,27 @@
     (let* ((new-tag (dogatto/models/tag:create-tag owner-id new-tag-name :color color))
            (new-tag-id (ref new-tag :id))
            (new-tag-ulid (ref new-tag :ulid))
-           (merged-tags '())
-           (merge-time (get-universal-time)))
+           (merged-tags '()))
       
       (dolist (source-ulid source-ulids)
         (let* ((source-tag (find-tag-by-ulid source-ulid))
                (source-id (ref source-tag :id)))
           
           ;; Step 1: Copy todo_tags records from source to new tag (avoiding duplicates)
-          (execute-query insert-todo-tags-from-source-to-target
-                        (list :target_id new-tag-id
-                              :merge_time merge-time
-                              :source_id source-id))
+          (copy-todo-tags-for-merge source-id new-tag-id new-tag-ulid owner-id)
           
           ;; Step 2: Delete todo_tags records with source tag
-          (execute-query delete-todo-tags-by-tag-id
-                        (list :tag_id source-id))
+          (delete-todo-tags-for-merge source-id)
           
           ;; Step 3: Copy label_tags records from source to new tag (avoiding duplicates)
-          (execute-query insert-label-tags-from-source-to-target
-                        (list :target_id new-tag-id
-                              :merge_time merge-time
-                              :source_id source-id))
+          (copy-label-tags-for-merge source-id new-tag-id)
           
           ;; Step 4: Delete label_tags records with source tag
-          (execute-query delete-label-tags-by-tag-id
-                        (list :tag_id source-id))
+          (delete-label-tags-for-merge source-id)
           
           ;; Step 5: Mark source tag as merged
           (setf (ref source-tag :merged-to-ulid) new-tag-ulid)
-          (setf (ref source-tag :merged-at) merge-time)
+          (setf (ref source-tag :merged-at) (get-universal-time))
           (save source-tag)
           
           (push source-tag merged-tags)))

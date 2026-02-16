@@ -21,8 +21,8 @@
            #:find-todos-untagged
            #:find-todos-by-label-tags
            #:get-tag-statistics
-           #:insert-todo-tags-from-source-to-target
-           #:delete-todo-tags-by-tag-id))
+           #:copy-todo-tags-for-merge
+           #:delete-todo-tags-for-merge))
 
 (in-package #:dogatto/models/todo-tag)
 
@@ -49,16 +49,6 @@
 @cl-batis:update
 ("DELETE FROM todo_tags WHERE todo_id = :todo_id AND tag_id = :tag_id AND owner_id = :owenr_id")
 (defsql delete-todo-tag (todo_id tag_id owner_id))
-
-@cl-batis:update
-("INSERT INTO todo_tags (todo_id, tag_id, created_at)
-  SELECT todo_id, :target_id, :merge_time
-  FROM todo_tags
-  WHERE tag_id = :source_id
-    AND todo_id NOT IN (
-      SELECT todo_id FROM todo_tags WHERE tag_id = :target_id
-    )")
-(defsql insert-todo-tags-from-source-to-target (target_id merge_time source_id))
 
 @cl-batis:update
 ("DELETE FROM todo_tags WHERE tag_id = :tag_id")
@@ -309,3 +299,49 @@
                       (member required-ulid todo-tag-ulids :test #'string=))
                   tag-ulids)))
      candidate-todos)))
+
+(defun copy-todo-tags-for-merge (source-tag-id target-tag-id target-tag-ulid owner-id)
+  "Copy TODO tag associations from source to target for merge.
+
+   Queries todo_tags with source tag, then creates new records with target tag,
+   avoiding duplicates (TODOs already having the target tag).
+
+   @param source-tag-id [integer] Source tag ID
+   @param target-tag-id [integer] Target tag ID
+   @param target-tag-ulid [string] Target tag ULID
+   @param owner-id [integer] Owner ID
+   "
+  ;; Get all todo_tags with source tag
+  (let* ((source-todo-tags (execute-query
+                            (query <todo-tag>
+                                   :as :todo-tags
+                                   :where (:= (:todo-tags :tag-id) :source-tag-id))
+                            (list :source-tag-id source-tag-id)))
+         ;; Get existing todo_ids that already have target tag
+         (existing-todo-tags (execute-query
+                              (query <todo-tag>
+                                     :as :todo-tags
+                                     :where (:= (:todo-tags :tag-id) :target-tag-id))
+                              (list :target-tag-id target-tag-id)))
+         (existing-todo-ids (mapcar (lambda (tt) (ref tt :todo-id)) existing-todo-tags)))
+    
+    ;; Create new todo_tags records for todos that don't have target tag
+    (dolist (source-todo-tag source-todo-tags)
+      (let ((todo-id (ref source-todo-tag :todo-id)))
+        (unless (member todo-id existing-todo-ids)
+          (let ((new-todo-tag (make-record '<todo-tag>
+                                           :todo-id todo-id
+                                           :tag-id target-tag-id
+                                           :tag-ulid target-tag-ulid
+                                           :owner-id owner-id)))
+            (save new-todo-tag)))))))
+
+(defun delete-todo-tags-for-merge (tag-id)
+  "Delete TODO tag associations for merge.
+
+   Deletes all todo_tags records associated with the specified tag.
+
+   @param tag-id [integer] Tag ID
+   "
+  (execute-query delete-todo-tags-by-tag-id
+                (list :tag_id tag-id)))
