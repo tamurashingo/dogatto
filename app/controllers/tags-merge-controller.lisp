@@ -86,7 +86,7 @@
    @param tag [<tag>] Tag instance
    @return [list] Alist representation with stats
    "
-  (let* ((stats (get-tag-statistics (ref tag :id)))
+  (let* ((stats (get-tag-statistics (ref tag :ulid) (ref tag :owner-id)))
          (basic (tag-to-json tag)))
     (append basic
             (list (cons "todoCount" (getf stats :total 0))
