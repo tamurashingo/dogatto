@@ -3,23 +3,15 @@
 (defpackage #:dogatto/controllers/auth-controller
   (:use #:cl
         #:clails/controller/base-controller)
-  (:import-from #:dogatto/models/user
-                #:find-user-by-email
-                #:find-user-by-id
-                #:create-user
-                #:user-exists-p
-                #:<user>)
-  (:import-from #:dogatto/utils/password
-                #:hash-password
-                #:verify-password
-                #:validate-password)
-  (:import-from #:dogatto/utils/session
-                #:create-session
-                #:get-session
-                #:delete-session
-                #:session-valid-p)
-  (:import-from #:dogatto/utils/ulid
-                #:generate-ulid)
+  (:import-from #:dogatto/services/auth-service
+                #:register-user
+                #:login-user
+                #:logout-user
+                #:get-current-user)
+  (:import-from #:dogatto/helpers/auth-helper
+                #:get-cookie-value)
+  (:import-from #:dogatto/helpers/json-converters
+                #:user-to-json)
   (:import-from #:clails/model
                 #:ref)
   (:export #:<auth-controller>
@@ -46,37 +38,6 @@
   ()
   (:documentation "Controller for getting current user information"))
 
-(defun user-to-json (user)
-  "Convert user model to JSON-safe alist without password hash.
-
-   @param user [<user>] User model instance
-   @return [alist] User data as alist
-   "
-  `(("id" . ,(ref user :id))
-    ("name" . ,(ref user :username))
-    ("email" . ,(ref user :email))
-    ("ulid" . ,(ref user :ulid))
-    ("registrationStatus" . ,(ref user :registration-status))
-    ("createdAt" . ,(ref user :created-at))
-    ("updatedAt" . ,(ref user :updated-at))))
-
-(defun get-cookie-value (headers cookie-name)
-  "Extract cookie value from request headers.
-
-   @param headers [hash-table] Request headers
-   @param cookie-name [string] Name of the cookie to extract
-   @return [string] Cookie value if found
-   @return [nil] If cookie not found
-   "
-  (let ((cookie-header (gethash "cookie" headers)))
-    (when cookie-header
-      (let* ((cookies (cl-ppcre:split ";\\s*" cookie-header))
-             (target-cookie (find-if (lambda (c)
-                                       (cl-ppcre:scan (format nil "^~A=" cookie-name) c))
-                                     cookies)))
-        (when target-cookie
-          (cadr (cl-ppcre:split "=" target-cookie :limit 2)))))))
-
 ;; POST /api/v1/auth/register
 (defmethod do-post ((controller <auth-register-controller>))
   "Register a new user.
@@ -88,66 +49,39 @@
 
    Returns 201 with user data on success, 400 on validation errors.
    "
-  (let ((name (param controller "name"))
-        (email (param controller "email"))
-        (password (param controller "password")))
+  (let* ((name (param controller "name"))
+         (email (param controller "email"))
+         (password (param controller "password"))
+         (result (register-user name email password)))
     
-    ;; Input validation
-    (cond
-      ((or (null name) (string= name ""))
-       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-       (set-response controller
-                     `(("status" . "error")
-                       ("message" . "Name is required"))))
-      
-      ((or (null email) (string= email ""))
-       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-       (set-response controller
-                     `(("status" . "error")
-                       ("message" . "Email is required"))))
-      
-      ((or (null password) (string= password ""))
-       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-       (set-response controller
-                     `(("status" . "error")
-                       ("message" . "Password is required"))))
-      
-      ;; Check email duplication
-      ((user-exists-p email)
-       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-       (set-response controller
-                     `(("status" . "error")
-                       ("message" . "Email already registered"))))
-      
-      ;; Validate password strength
-      (t (multiple-value-bind (valid errors)
-             (validate-password password)
-           (if valid
-               ;; Create user
-               (let* ((password-hash (hash-password password))
-                     (ulid (generate-ulid))
-                      (user (create-user :username name
-                                         :email email
-                                         :password-hash password-hash
-                                         :ulid ulid)))
-                 (if user
-                     (progn
-                       (setf (slot-value controller 'clails/controller/base-controller:code) 201)
-                       (set-response controller
-                                     `(("status" . "success")
-                                       ("data" . (("user" . ,(user-to-json user)))))))
-                     (progn
-                       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-                       (set-response controller
-                                     `(("status" . "error")
-                                       ("message" . "Failed to create user"))))))
-               ;; Password validation failed
-               (progn
-                 (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-                 (set-response controller
-                               `(("status" . "error")
-                                 ("message" . "Password validation failed")
-                                 ("errors" . ,errors))))))))))
+    (if (getf result :success)
+        ;; Success
+        (progn
+          (setf (slot-value controller 'clails/controller/base-controller:code) 201)
+          (set-response controller
+                       `(("status" . "success")
+                         ("data" . (("user" . ,(user-to-json (getf result :user))))))))
+        ;; Error
+        (let ((errors (getf result :errors)))
+          (setf (slot-value controller 'clails/controller/base-controller:code) 400)
+          ;; Check if it's password validation errors (multiple errors from password validation)
+          (if (and (> (length errors) 1)
+                   (not (member (car errors) '("Name is required" 
+                                                "Email is required" 
+                                                "Password is required"
+                                                "Email already registered")
+                                :test #'string=)))
+              ;; Password validation errors - use generic message for backward compatibility
+              (set-response controller
+                           `(("status" . "error")
+                             ("message" . "Password validation failed")
+                             ("errors" . ,errors)))
+              ;; Other errors - use first error as message
+              (set-response controller
+                           `(("status" . "error")
+                             ("message" . ,(car errors))
+                             ,@(when (cdr errors)
+                                 `(("errors" . ,errors))))))))))
 
 ;; POST /api/v1/auth/login
 (defmethod do-post ((controller <auth-login-controller>))
@@ -158,46 +92,33 @@
    - password: User's password (plain text)
 
    Returns 200 with user data and sets session cookie on success,
-   401 on authentication failure.
+   401 on authentication failure, 400 on validation error.
    "
-  (let ((email (param controller "email"))
-        (password (param controller "password")))
+  (let* ((email (param controller "email"))
+         (password (param controller "password"))
+         (result (login-user email password)))
     
-    ;; Input validation
-    (cond
-      ((or (null email) (string= email ""))
-       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-       (set-response controller
-                     `(("status" . "error")
-                       ("message" . "Email is required"))))
-      
-      ((or (null password) (string= password ""))
-       (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-       (set-response controller
-                     `(("status" . "error")
-                       ("message" . "Password is required"))))
-      
-      (t
-       (let ((user (find-user-by-email email)))
-         (if (and user
-                  (verify-password password (ref user :password-hash)))
-             ;; Authentication success
-             (let ((session-id (create-session (ref user :id))))
-               ;; Set cookie
-               (setf (slot-value controller 'clails/controller/base-controller:header)
-                     `(:content-type "application/json"
-                       :set-cookie ,(format nil "session_id=~A; Path=/; HttpOnly; SameSite=Strict; Max-Age=~D"
-                                            session-id
-                                            (* 7 24 60 60)))) ; 7 days
-               (set-response controller
-                             `(("status" . "success")
-                               ("data" . (("user" . ,(user-to-json user)))))))
-             ;; Authentication failed
-             (progn
-               (setf (slot-value controller 'clails/controller/base-controller:code) 401)
-               (set-response controller
-                             `(("status" . "error")
-                               ("message" . "Invalid email or password"))))))))))
+    (if (getf result :success)
+        ;; Success - set cookie and return user
+        (let ((session-id (getf result :session-id))
+              (user (getf result :user)))
+          (setf (slot-value controller 'clails/controller/base-controller:header)
+                `(:content-type "application/json"
+                  :set-cookie ,(format nil "session_id=~A; Path=/; HttpOnly; SameSite=Strict; Max-Age=~D"
+                                       session-id
+                                       (* 7 24 60 60)))) ; 7 days
+          (set-response controller
+                       `(("status" . "success")
+                         ("data" . (("user" . ,(user-to-json user)))))))
+        ;; Error - determine status code based on error type
+        (let ((error-msg (car (getf result :errors))))
+          ;; Use 400 for validation errors, 401 for authentication failures
+          (if (member error-msg '("Email is required" "Password is required") :test #'string=)
+              (setf (slot-value controller 'clails/controller/base-controller:code) 400)
+              (setf (slot-value controller 'clails/controller/base-controller:code) 401))
+          (set-response controller
+                       `(("status" . "error")
+                         ("message" . ,error-msg)))))))
 
 ;; POST /api/v1/auth/logout
 (defmethod do-post ((controller <auth-logout-controller>))
@@ -210,19 +131,23 @@
    "
   (let* ((env-data (env controller))
          (headers (getf env-data :headers))
-         (session-id (get-cookie-value headers "session_id")))
-    
-    (when session-id
-      (delete-session session-id))
+         (session-id (get-cookie-value headers "session_id"))
+         (result (logout-user session-id)))
     
     ;; Clear cookie
     (setf (slot-value controller 'clails/controller/base-controller:header)
           `(:content-type "application/json"
             :set-cookie "session_id=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"))
     
-    (set-response controller
-                  `(("status" . "success")
-                    ("message" . "Logged out successfully")))))
+    (if (getf result :success)
+        (set-response controller
+                     `(("status" . "success")
+                       ("message" . "Logged out successfully")))
+        (progn
+          (setf (slot-value controller 'clails/controller/base-controller:code) 500)
+          (set-response controller
+                       `(("status" . "error")
+                         ("message" . ,(car (getf result :errors)))))))))
 
 ;; GET /api/v1/auth/me
 (defmethod do-get ((controller <auth-me-controller>))
@@ -235,24 +160,16 @@
    "
   (let* ((env-data (env controller))
          (headers (getf env-data :headers))
-         (session-id (get-cookie-value headers "session_id")))
+         (session-id (get-cookie-value headers "session_id"))
+         (result (get-current-user session-id)))
     
-    (if (and session-id (session-valid-p session-id))
-        (let* ((session-data (get-session session-id))
-               (user-id (getf session-data :user-id))
-               (user (find-user-by-id user-id)))
-          (if user
-              (set-response controller
-                            `(("status" . "success")
-                              ("data" . (("user" . ,(user-to-json user))))))
-              (progn
-                (setf (slot-value controller 'clails/controller/base-controller:code) 401)
-                (set-response controller
-                              `(("status" . "error")
-                                ("message" . "User not found"))))))
+    (if (getf result :success)
+        (set-response controller
+                     `(("status" . "success")
+                       ("data" . (("user" . ,(user-to-json (getf result :user)))))))
         (progn
           (setf (slot-value controller 'clails/controller/base-controller:code) 401)
+          ;; Return "Not authenticated" for backward compatibility with tests
           (set-response controller
-                        `(("status" . "error")
-                          ("message" . "Not authenticated")))))))
-
+                       `(("status" . "error")
+                         ("message" . "Not authenticated")))))))
