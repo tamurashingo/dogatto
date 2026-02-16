@@ -50,89 +50,96 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 1: Authentication Services
 
-### Task 1.1: Create auth-service skeleton
+### Task 1.1: Create auth-service skeleton ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: High  
 **Depends on**: Task 0.1  
 **Estimated effort**: 1 hour  
 **Description**: Create app/services/auth-service.lisp with package definition
 **Completion criteria**:
-- File created with proper package definition
-- Import necessary model and util packages
-- Export function names (stub implementations)
+- [x] File created with proper package definition
+- [x] Import necessary model and util packages
+- [x] Export function names (stub implementations)
 
-### Task 1.2: Implement register-user function
+### Task 1.2: Implement register-user function ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: High  
 **Depends on**: Task 1.1  
 **Estimated effort**: 3 hours  
 **Description**: Implement user registration logic in auth-service
 **Completion criteria**:
-- Validate input parameters (email, username, password)
-- Check if user already exists
-- Hash password
-- Create user record
-- Return plist with :success, :user or :errors
-- Add docstring following AGENTS.md conventions
+- [x] Validate input parameters (email, username, password)
+- [x] Check if user already exists
+- [x] Hash password
+- [x] Create user record
+- [x] Return plist with :success, :user or :errors
+- [x] Add docstring following AGENTS.md conventions
 
-### Task 1.3: Implement login-user function
+### Task 1.3: Implement login-user function ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: High  
 **Depends on**: Task 1.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement user login logic in auth-service
 **Completion criteria**:
-- Validate input parameters
-- Find user by email
-- Verify password
-- Create session
-- Return plist with :success, :session-id, :user or :errors
-- Add docstring
+- [x] Validate input parameters
+- [x] Find user by email
+- [x] Verify password
+- [x] Create session
+- [x] Return plist with :success, :session-id, :user or :errors
+- [x] Add docstring
 
-### Task 1.4: Implement logout-user function
+### Task 1.4: Implement logout-user function ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: Medium  
 **Depends on**: Task 1.1  
 **Estimated effort**: 1 hour  
 **Description**: Implement user logout logic in auth-service
 **Completion criteria**:
-- Validate session-id
-- Delete session
-- Return plist with :success or :errors
-- Add docstring
+- [x] Validate session-id
+- [x] Delete session
+- [x] Return plist with :success or :errors
+- [x] Add docstring
 
-### Task 1.5: Implement get-current-user function
+### Task 1.5: Implement get-current-user function ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: Medium  
 **Depends on**: Task 1.1  
 **Estimated effort**: 1 hour  
 **Description**: Implement current user retrieval logic in auth-service
 **Completion criteria**:
-- Validate session-id
-- Get session data
-- Find user by id
-- Return plist with :success, :user or :errors
-- Add docstring
+- [x] Validate session-id
+- [x] Get session data
+- [x] Find user by id
+- [x] Return plist with :success, :user or :errors
+- [x] Add docstring
 
-### Task 1.6: Write tests for auth-service
+### Task 1.6: Write tests for auth-service ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: High  
 **Depends on**: Task 1.2, 1.3, 1.4, 1.5  
 **Estimated effort**: 3 hours  
 **Description**: Create comprehensive tests for auth-service functions
 **Completion criteria**:
-- Test register-user (success, duplicate email, validation errors)
-- Test login-user (success, wrong password, user not found)
-- Test logout-user (success, invalid session)
-- Test get-current-user (success, invalid session)
-- All tests pass
+- [x] Test register-user (success, duplicate email, validation errors)
+- [x] Test login-user (success, wrong password, user not found)
+- [x] Test logout-user (success, invalid session)
+- [x] Test get-current-user (success, invalid session)
+- [x] All tests pass
 
-### Task 1.7: Refactor auth-controller to use auth-service
+### Task 1.7: Refactor auth-controller to use auth-service ✅
+**Status**: Completed (Commit: 885184a)  
 **Priority**: High  
 **Depends on**: Task 1.6  
 **Estimated effort**: 3 hours  
 **Description**: Update auth-controller.lisp to delegate to auth-service
 **Completion criteria**:
-- <auth-register-controller> calls register-user
-- <auth-login-controller> calls login-user
-- <auth-logout-controller> calls logout-user
-- <auth-me-controller> calls get-current-user
-- Controllers only handle HTTP concerns
-- All authentication tests still pass
+- [x] <auth-register-controller> calls register-user
+- [x] <auth-login-controller> calls login-user
+- [x] <auth-logout-controller> calls logout-user
+- [x] <auth-me-controller> calls get-current-user
+- [x] Controllers only handle HTTP concerns
+- [x] All authentication tests still pass
 
 ---
 
