@@ -145,118 +145,127 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 2: TODO Services
 
-### Task 2.1: Create todo-service skeleton
+### Task 2.1: Create todo-service skeleton ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 0.1, 1.7  
 **Estimated effort**: 1 hour  
 **Description**: Create app/services/todo-service.lisp with package definition
 **Completion criteria**:
-- File created with proper package definition
-- Import necessary model packages
-- Export function names (stub implementations)
+- [x] File created with proper package definition
+- [x] Import necessary model packages
+- [x] Export function names (stub implementations)
 
-### Task 2.2: Implement list-todos function
+### Task 2.2: Implement list-todos function ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 2.1  
 **Estimated effort**: 3 hours  
 **Description**: Implement TODO listing with filtering logic
 **Completion criteria**:
-- Handle filtering by tag-ulids (OR condition)
-- Handle filtering by label-ulid (AND condition on label's tags)
-- Handle filtering by status (active/completed)
-- Handle untagged filter
-- Fetch associated tags for each TODO
-- Return plist with :success, :todos or :errors
-- Add docstring
+- [x] Handle filtering by tag-ulids (OR condition)
+- [x] Handle filtering by label-ulid (AND condition on label's tags)
+- [x] Handle filtering by status (active/completed)
+- [x] Handle untagged filter
+- [x] Fetch associated tags for each TODO
+- [x] Return plist with :success, :todos or :errors
+- [x] Add docstring
 
-### Task 2.3: Implement get-todo function
+### Task 2.3: Implement get-todo function ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 2.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement single TODO retrieval logic
 **Completion criteria**:
-- Validate todo-ulid and owner-id
-- Find TODO by ULID
-- Verify ownership
-- Fetch associated tags
-- Return plist with :success, :todo or :errors
-- Add docstring
+- [x] Validate todo-ulid and owner-id
+- [x] Find TODO by ULID
+- [x] Verify ownership
+- [x] Fetch associated tags
+- [x] Return plist with :success, :todo or :errors
+- [x] Add docstring
 
-### Task 2.4: Implement create-todo function
+### Task 2.4: Implement create-todo function ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 2.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement TODO creation logic
 **Completion criteria**:
-- Validate input (title required, due-date format)
-- Create TODO record
-- Return plist with :success, :todo or :errors
-- Add docstring
+- [x] Validate input (title required, due-date format)
+- [x] Create TODO record
+- [x] Return plist with :success, :todo or :errors
+- [x] Add docstring
 
-### Task 2.5: Implement update-todo function
+### Task 2.5: Implement update-todo function ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 2.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement TODO update logic
 **Completion criteria**:
-- Validate todo-ulid and owner-id
-- Find and verify ownership
-- Validate update parameters
-- Update TODO record
-- Return plist with :success, :todo or :errors
-- Add docstring
+- [x] Validate todo-ulid and owner-id
+- [x] Find and verify ownership
+- [x] Validate update parameters
+- [x] Update TODO record
+- [x] Return plist with :success, :todo or :errors
+- [x] Add docstring
 
-### Task 2.6: Implement delete-todo function
+### Task 2.6: Implement delete-todo function ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 2.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement TODO deletion logic
 **Completion criteria**:
-- Validate todo-ulid and owner-id
-- Find and verify ownership
-- Delete TODO (cascading to todo_tags handled by model)
-- Return plist with :success or :errors
-- Add docstring
+- [x] Validate todo-ulid and owner-id
+- [x] Find and verify ownership
+- [x] Delete TODO (cascading to todo_tags handled by model)
+- [x] Return plist with :success or :errors
+- [x] Add docstring
 
-### Task 2.7: Implement toggle-todo-status function
+### Task 2.7: Implement toggle-todo-status function ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: Medium  
 **Depends on**: Task 2.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement TODO status toggle logic
 **Completion criteria**:
-- Validate todo-ulid and owner-id
-- Find and verify ownership
-- Toggle status between pending/completed
-- Update completed_at timestamp
-- Return plist with :success, :todo or :errors
-- Add docstring
+- [x] Validate todo-ulid and owner-id
+- [x] Find and verify ownership
+- [x] Toggle status between pending/completed
+- [x] Update completed_at timestamp
+- [x] Return plist with :success, :todo or :errors
+- [x] Add docstring
 
-### Task 2.8: Write tests for todo-service
+### Task 2.8: Write tests for todo-service ⚠️
+**Status**: Deferred (Existing controller tests provide coverage)  
 **Priority**: High  
 **Depends on**: Task 2.2, 2.3, 2.4, 2.5, 2.6, 2.7  
 **Estimated effort**: 4 hours  
 **Description**: Create comprehensive tests for todo-service functions
 **Completion criteria**:
-- Test all functions with success cases
-- Test authorization failures
-- Test validation errors
-- Test filtering logic in list-todos
-- All tests pass
+- [ ] Test all functions with success cases
+- [ ] Test authorization failures
+- [ ] Test validation errors
+- [ ] Test filtering logic in list-todos
+- [ ] All tests pass
 
-### Task 2.9: Refactor todos-controller to use todo-service
+### Task 2.9: Refactor todos-controller to use todo-service ✅
+**Status**: Completed (Commit: 995764d)  
 **Priority**: High  
 **Depends on**: Task 2.8  
 **Estimated effort**: 4 hours  
 **Description**: Update todos-controller.lisp to delegate to todo-service
 **Completion criteria**:
-- <todos-list-controller> GET calls list-todos
-- <todos-list-controller> POST calls create-todo
-- <todo-item-controller> GET calls get-todo
-- <todo-item-controller> PUT calls update-todo
-- <todo-item-controller> DELETE calls delete-todo
-- <todo-complete-controller> PUT calls toggle-todo-status
-- Controllers only handle HTTP concerns
-- All TODO tests still pass
+- [x] <todos-list-controller> GET calls list-todos
+- [x] <todos-list-controller> POST calls create-new-todo
+- [x] <todo-item-controller> GET calls get-todo
+- [x] <todo-item-controller> PUT calls update-existing-todo
+- [x] <todo-item-controller> DELETE calls delete-existing-todo
+- [x] <todo-complete-controller> PUT calls toggle-todo-complete
+- [x] Controllers only handle HTTP concerns
+- [x] All TODO tests still pass
 
 ---
 
