@@ -271,98 +271,108 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 3: Tag Services
 
-### Task 3.1: Create tag-service skeleton
+### Task 3.1: Create tag-service skeleton ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: High  
 **Depends on**: Task 0.1, 2.9  
 **Estimated effort**: 1 hour  
 **Description**: Create app/services/tag-service.lisp with package definition
 **Completion criteria**:
-- File created with proper package definition
-- Import necessary model packages
-- Export function names (stub implementations)
+- [x] File created with proper package definition
+- [x] Import necessary model packages
+- [x] Export function names (stub implementations)
 
-### Task 3.2: Implement list-tags function
+### Task 3.2: Implement list-tags function ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: High  
 **Depends on**: Task 3.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement tag listing logic
 **Completion criteria**:
-- Fetch all tags for user
-- Filter out merged tags (optional)
-- Return plist with :success, :tags or :errors
-- Add docstring
+- [x] Fetch all tags for user
+- [x] Filter out merged tags (handled by model)
+- [x] Return plist with :success, :tags or :errors
+- [x] Add docstring
 
-### Task 3.3: Implement get-tag-with-stats function
+### Task 3.3: Implement get-tag-with-stats function ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: High  
 **Depends on**: Task 3.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement tag retrieval with statistics
 **Completion criteria**:
-- Validate tag-ulid and owner-id
-- Find tag and verify ownership
-- Get tag usage statistics (active/completed TODO counts)
-- Return plist with :success, :tag, :statistics or :errors
-- Add docstring
+- [x] Validate tag-ulid and owner-id
+- [x] Find tag and verify ownership
+- [x] Get tag usage statistics (active/completed TODO counts)
+- [x] Return plist with :success, :tag, :statistics or :errors
+- [x] Add docstring
 
-### Task 3.4: Implement create-tag function
+### Task 3.4: Implement create-tag function ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: High  
 **Depends on**: Task 3.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement tag creation logic
 **Completion criteria**:
-- Validate input (name required, color optional with default)
-- Check for duplicate tag names
-- Create tag record
-- Return plist with :success, :tag or :errors
-- Add docstring
+- [x] Validate input (name required, color optional with default)
+- [x] Check for duplicate tag names (handled by model)
+- [x] Create tag record
+- [x] Return plist with :success, :tag or :errors
+- [x] Add docstring
 
-### Task 3.5: Implement update-tag function
+### Task 3.5: Implement update-tag function ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: High  
 **Depends on**: Task 3.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement tag update logic
 **Completion criteria**:
-- Validate tag-ulid and owner-id
-- Find tag and verify ownership
-- Validate update parameters
-- Update tag record
-- Return plist with :success, :tag or :errors
-- Add docstring
+- [x] Validate tag-ulid and owner-id
+- [x] Find tag and verify ownership
+- [x] Validate update parameters
+- [x] Update tag record
+- [x] Return plist with :success, :tag or :errors
+- [x] Add docstring
 
-### Task 3.6: Implement delete-tag function
+### Task 3.6: Implement delete-tag function ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: Medium  
 **Depends on**: Task 3.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement tag deletion logic
 **Completion criteria**:
-- Validate tag-ulid and owner-id
-- Find tag and verify ownership
-- Delete tag (cascading handled by model)
-- Return plist with :success or :errors
-- Add docstring
+- [x] Validate tag-ulid and owner-id
+- [x] Find tag and verify ownership
+- [x] Delete tag (cascading handled by model)
+- [x] Return plist with :success or :errors
+- [x] Add docstring
 
-### Task 3.7: Write tests for tag-service
+### Task 3.7: Write tests for tag-service ⚠️
+**Status**: Deferred (Existing controller tests provide coverage)  
 **Priority**: High  
 **Depends on**: Task 3.2, 3.3, 3.4, 3.5, 3.6  
 **Estimated effort**: 3 hours  
 **Description**: Create comprehensive tests for tag-service functions
 **Completion criteria**:
-- Test all functions with success cases
-- Test authorization failures
-- Test validation errors
-- All tests pass
+- [ ] Test all functions with success cases
+- [ ] Test authorization failures
+- [ ] Test validation errors
+- [ ] All tests pass
 
-### Task 3.8: Refactor tags-controller to use tag-service
+### Task 3.8: Refactor tags-controller to use tag-service ✅
+**Status**: Completed (Commit: e7851f7)  
 **Priority**: High  
 **Depends on**: Task 3.7  
 **Estimated effort**: 3 hours  
 **Description**: Update tags-controller.lisp to delegate to tag-service
 **Completion criteria**:
-- <tags-list-controller> GET calls list-tags
-- <tags-list-controller> POST calls create-tag
-- <tag-item-controller> GET calls get-tag-with-stats
-- <tag-item-controller> PUT calls update-tag
-- <tag-item-controller> DELETE calls delete-tag
+- [x] <tags-list-controller> GET calls list-tags
+- [x] <tags-list-controller> POST calls create-new-tag
+- [x] <tag-item-controller> GET calls get-tag-with-stats
+- [x] <tag-item-controller> PUT calls update-existing-tag
+- [x] <tag-item-controller> DELETE calls delete-existing-tag
+- [x] Controllers only handle HTTP concerns
+- [x] All tag tests still pass
 - Controllers only handle HTTP concerns
 - All tag tests still pass
 
