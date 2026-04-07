@@ -380,63 +380,69 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 4: TODO-Tag Association Services
 
-### Task 4.1: Analyze todo-tags-controller requirements
+### Task 4.1: Analyze todo-tags-controller requirements ✅
+**Status**: Completed (Commit: ffe21bd)  
 **Priority**: Medium  
 **Depends on**: Task 2.9, 3.8  
 **Estimated effort**: 1 hour  
 **Description**: Review todo-tags-controller.lisp to determine service needs
 **Completion criteria**:
-- Document current operations (assign, remove)
-- Identify business logic to extract
-- Decide if separate service needed or integrate into todo-service
+- [x] Document current operations (assign, remove)
+- [x] Identify business logic to extract
+- [x] Decided to integrate into todo-service instead of separate service
 
-### Task 4.2: Implement assign-tags-to-todo function
+### Task 4.2: Implement assign-tags-to-todo function ✅
+**Status**: Completed (Commit: ffe21bd)  
 **Priority**: Medium  
 **Depends on**: Task 4.1  
 **Estimated effort**: 3 hours  
-**Description**: Implement tag assignment logic (in todo-service or separate service)
+**Description**: Implement tag assignment logic in todo-service
 **Completion criteria**:
-- Validate todo-ulid, tag-ulids, and owner-id
-- Verify TODO ownership
-- Verify all tags exist and belong to user
-- Remove existing tag associations
-- Create new tag associations
-- Use transaction for atomicity
-- Return plist with :success, :tags or :errors
-- Add docstring
+- [x] Validate todo-ulid, tag-ulids, and owner-id
+- [x] Verify TODO ownership
+- [x] Verify all tags exist and belong to user (handled by model)
+- [x] Remove existing tag associations (handled by model)
+- [x] Create new tag associations (handled by model)
+- [x] Use transaction for atomicity (handled by model)
+- [x] Return plist with :success, :tags or :errors
+- [x] Add docstring
 
-### Task 4.3: Implement remove-tag-from-todo function
+### Task 4.3: Implement remove-tag-from-todo function ✅
+**Status**: Completed (Commit: ffe21bd)  
 **Priority**: Low  
 **Depends on**: Task 4.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement single tag removal logic
 **Completion criteria**:
-- Validate todo-ulid, tag-ulid, and owner-id
-- Verify TODO ownership
-- Remove tag association
-- Return plist with :success or :errors
-- Add docstring
+- [x] Validate todo-ulid, tag-ulid, and owner-id
+- [x] Verify TODO ownership
+- [x] Remove tag association
+- [x] Return plist with :success or :errors
+- [x] Add docstring
 
-### Task 4.4: Write tests for todo-tag service functions
+### Task 4.4: Write tests for todo-tag service functions ⚠️
+**Status**: Deferred (Existing controller tests provide coverage)  
 **Priority**: Medium  
 **Depends on**: Task 4.2, 4.3  
 **Estimated effort**: 2 hours  
 **Description**: Create tests for tag association functions
 **Completion criteria**:
-- Test assign-tags-to-todo (success, validation, authorization)
-- Test remove-tag-from-todo (success, not found)
-- All tests pass
+- [ ] Test assign-tags-to-todo (success, validation, authorization)
+- [ ] Test remove-tag-from-todo (success, not found)
+- [ ] All tests pass
 
-### Task 4.5: Refactor todo-tags-controller to use service
+### Task 4.5: Refactor todo-tags-controller to use service ✅
+**Status**: Completed (Commit: ffe21bd)  
 **Priority**: Medium  
 **Depends on**: Task 4.4  
 **Estimated effort**: 2 hours  
 **Description**: Update todo-tags-controller.lisp to delegate to service
 **Completion criteria**:
-- PUT calls assign-tags-to-todo
-- DELETE calls remove-tag-from-todo
-- Controller only handles HTTP concerns
-- All tests still pass
+- [x] GET calls get-todo-tags
+- [x] PUT calls assign-todo-tags
+- [x] DELETE calls remove-todo-tag
+- [x] Controller only handles HTTP concerns
+- [x] All tests still pass
 
 ---
 
