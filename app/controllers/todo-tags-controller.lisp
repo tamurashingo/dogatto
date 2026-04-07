@@ -3,21 +3,16 @@
 (defpackage #:dogatto/controllers/todo-tags-controller
   (:use #:cl
         #:clails/controller/base-controller)
-  (:import-from #:dogatto/models/todo
-                #:find-todo-by-ulid)
-  (:import-from #:dogatto/models/todo-tag
-                #:assign-tags-to-todo
-                #:remove-tag-from-todo
-                #:find-tags-for-todo)
-  (:import-from #:dogatto/utils/session
-                #:get-session
-                #:session-valid-p)
-  (:import-from #:dogatto/models/user
-                #:find-user-by-id)
+  (:import-from #:dogatto/services/todo-service
+                #:get-todo-tags
+                #:assign-todo-tags
+                #:remove-todo-tag)
+  (:import-from #:dogatto/helpers/auth-helper
+                #:get-authenticated-user)
+  (:import-from #:dogatto/helpers/json-converters
+                #:tag-to-json)
   (:import-from #:clails/model
                 #:ref)
-  (:import-from #:jonathan
-                #:to-json)
   (:export #:<todo-tags-controller>))
 
 (in-package #:dogatto/controllers/todo-tags-controller)
@@ -26,40 +21,10 @@
   ()
   (:documentation "Controller for managing TODO tags (GET /todos/:ulid/tags, PUT /todos/:ulid/tags)"))
 
-(defun get-cookie-value (headers cookie-name)
-  "Extract cookie value from request headers.
+(defun tag-to-json-simple (tag)
+  "Convert tag instance to simplified JSON-friendly alist.
 
-   @param headers [hash-table] Request headers
-   @param cookie-name [string] Name of the cookie to extract
-   @return [string] Cookie value if found
-   @return [nil] If cookie not found
-   "
-  (let ((cookie-header (gethash "cookie" headers)))
-    (when cookie-header
-      (let* ((cookies (cl-ppcre:split ";\\s*" cookie-header))
-             (target-cookie (find-if (lambda (c)
-                                       (cl-ppcre:scan (format nil "^~A=" cookie-name) c))
-                                     cookies)))
-        (when target-cookie
-          (cadr (cl-ppcre:split "=" target-cookie :limit 2)))))))
-
-(defun get-authenticated-user (env)
-  "Get authenticated user from session.
-
-   @param env [plist] Request environment
-   @return [<user>] User instance if authenticated
-   @return [nil] If not authenticated
-   "
-  (let* ((headers (getf env :headers))
-         (session-id (get-cookie-value headers "session_id")))
-    (when (and session-id (session-valid-p session-id))
-      (let* ((session-data (get-session session-id))
-             (user-id (getf session-data :user-id)))
-        (when user-id
-          (find-user-by-id user-id))))))
-
-(defun tag-to-json (tag)
-  "Convert tag instance to JSON-friendly alist.
+   Provides a minimal representation without timestamps for nested use.
 
    @param tag [<tag>] Tag instance
    @return [list] Alist representation of tag
@@ -80,21 +45,20 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (todo (find-todo-by-ulid ulid (ref user :id))))
+           (result (get-todo-tags ulid (ref user :id))))
       
-      (unless todo
-        (setf (slot-value controller 'clails/controller/base-controller:code) 404)
-        (return-from do-get
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "TODO not found")))))
-      
-      (let* ((tags (find-tags-for-todo ulid))
-             (tags-json (mapcar #'tag-to-json tags)))
-        (setf (slot-value controller 'clails/controller/base-controller:code) 200)
-        (set-response controller
-                     `(("status" . "success")
-                       ("data" . (("tags" . ,tags-json)))))))))
+      (if (getf result :success)
+          (let* ((tags (getf result :tags))
+                 (tags-json (mapcar #'tag-to-json-simple tags)))
+            (setf (slot-value controller 'clails/controller/base-controller:code) 200)
+            (set-response controller
+                         `(("status" . "success")
+                           ("data" . (("tags" . ,tags-json))))))
+          (progn
+            (setf (slot-value controller 'clails/controller/base-controller:code) 404)
+            (set-response controller
+                         `(("status" . "error")
+                           ("message" . ,(car (getf result :errors))))))))))
 
 (defmethod do-put ((controller <todo-tags-controller>))
   "Assign tags to a TODO (replaces existing tags)."
@@ -107,30 +71,21 @@
                        ("message" . "Authentication required")))))
     
     (let* ((ulid (param controller "ulid"))
-           (todo (find-todo-by-ulid ulid (ref user :id))))
+           (tag-ulids (param controller "tagUlids"))
+           (result (assign-todo-tags ulid (or tag-ulids '()) (ref user :id))))
       
-      (unless todo
-        (setf (slot-value controller 'clails/controller/base-controller:code) 404)
-        (return-from do-put
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "TODO not found")))))
-      
-      (let ((tag-ulids (param controller "tagUlids")))
-        (handler-case
-            (progn
-              (assign-tags-to-todo ulid (or tag-ulids '()) (ref user :id))
-              (let* ((tags (find-tags-for-todo ulid (ref user :id)))
-                     (tags-json (mapcar #'tag-to-json tags)))
-                (setf (slot-value controller 'clails/controller/base-controller:code) 200)
-                (set-response controller
-                             `(("status" . "success")
-                               ("data" . (("tags" . ,tags-json)))))))
-          (error (e)
+      (if (getf result :success)
+          (let* ((tags (getf result :tags))
+                 (tags-json (mapcar #'tag-to-json-simple tags)))
+            (setf (slot-value controller 'clails/controller/base-controller:code) 200)
+            (set-response controller
+                         `(("status" . "success")
+                           ("data" . (("tags" . ,tags-json))))))
+          (progn
             (setf (slot-value controller 'clails/controller/base-controller:code) 400)
             (set-response controller
                          `(("status" . "error")
-                           ("message" . ,(format nil "Failed to assign tags: ~A" e))))))))))
+                           ("message" . ,(car (getf result :errors))))))))))
 
 (defmethod do-delete ((controller <todo-tags-controller>))
   "Remove a specific tag from a TODO."
@@ -144,24 +99,16 @@
     
     (let* ((ulid (param controller "ulid"))
            (tag-ulid (param controller "tagUlid"))
-           (todo (find-todo-by-ulid ulid (ref user :id))))
+           (result (remove-todo-tag ulid tag-ulid (ref user :id))))
       
-      (unless todo
-        (setf (slot-value controller 'clails/controller/base-controller:code) 404)
-        (return-from do-delete
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . "TODO not found")))))
-      
-      (handler-case
+      (if (getf result :success)
           (progn
-            (remove-tag-from-todo ulid tag-ulid)
             (setf (slot-value controller 'clails/controller/base-controller:code) 200)
             (set-response controller
                          `(("status" . "success")
                            ("message" . "Tag removed successfully"))))
-        (error (e)
-          (setf (slot-value controller 'clails/controller/base-controller:code) 400)
-          (set-response controller
-                       `(("status" . "error")
-                         ("message" . ,(format nil "Failed to remove tag: ~A" e)))))))))
+          (progn
+            (setf (slot-value controller 'clails/controller/base-controller:code) 400)
+            (set-response controller
+                         `(("status" . "error")
+                           ("message" . ,(car (getf result :errors))))))))))

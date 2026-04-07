@@ -17,7 +17,9 @@
                 #:find-tags-for-todo
                 #:find-todos-by-tag-ulids
                 #:find-todos-by-label-tags
-                #:find-todos-untagged)
+                #:find-todos-untagged
+                #:assign-tags-to-todo
+                #:remove-tag-from-todo)
   (:import-from #:dogatto/models/label-tag
                 #:find-tags-for-label)
   (:export #:list-todos
@@ -25,7 +27,10 @@
            #:create-new-todo
            #:update-existing-todo
            #:delete-existing-todo
-           #:toggle-todo-complete))
+           #:toggle-todo-complete
+           #:get-todo-tags
+           #:assign-todo-tags
+           #:remove-todo-tag))
 
 (in-package #:dogatto/services/todo-service)
 
@@ -195,3 +200,88 @@
         (list :success t :todo todo))
     (error (e)
       (list :success nil :errors (list (format nil "Failed to toggle TODO status: ~A" e))))))
+
+(defun get-todo-tags (todo-ulid owner-id)
+  "Get all tags for a TODO.
+   
+   @param todo-ulid [string] TODO ULID
+   @param owner-id [integer] Owner ID
+   @return [plist] Success with :tags or error with :errors
+   "
+  ;; Validate todo-ulid
+  (when (or (null todo-ulid) (string= (string-trim '(#\Space #\Tab) todo-ulid) ""))
+    (return-from get-todo-tags
+      (list :success nil :errors '("TODO ULID is required"))))
+  
+  (handler-case
+      (let ((todo (find-todo-by-ulid todo-ulid owner-id)))
+        (unless todo
+          (return-from get-todo-tags
+            (list :success nil :errors '("TODO not found"))))
+        
+        ;; Get tags for TODO
+        (let ((tags (find-tags-for-todo todo-ulid owner-id)))
+          (list :success t :tags tags)))
+    (error (e)
+      (list :success nil :errors (list (format nil "Failed to get TODO tags: ~A" e))))))
+
+(defun assign-todo-tags (todo-ulid tag-ulids owner-id)
+  "Assign tags to a TODO, replacing existing tags.
+   
+   Validates TODO ownership, verifies all tags exist and belong to user,
+   removes existing tag associations, and creates new ones atomically.
+   
+   @param todo-ulid [string] TODO ULID
+   @param tag-ulids [list] List of tag ULIDs to assign (empty list removes all tags)
+   @param owner-id [integer] Owner ID
+   @return [plist] Success with :tags or error with :errors
+   "
+  ;; Validate todo-ulid
+  (when (or (null todo-ulid) (string= (string-trim '(#\Space #\Tab) todo-ulid) ""))
+    (return-from assign-todo-tags
+      (list :success nil :errors '("TODO ULID is required"))))
+  
+  (handler-case
+      (let ((todo (find-todo-by-ulid todo-ulid owner-id)))
+        (unless todo
+          (return-from assign-todo-tags
+            (list :success nil :errors '("TODO not found"))))
+        
+        ;; Assign tags (model handles validation and transaction)
+        (assign-tags-to-todo todo-ulid (or tag-ulids '()) owner-id)
+        
+        ;; Get updated tags
+        (let ((tags (find-tags-for-todo todo-ulid owner-id)))
+          (list :success t :tags tags)))
+    (error (e)
+      (list :success nil :errors (list (format nil "Failed to assign tags: ~A" e))))))
+
+(defun remove-todo-tag (todo-ulid tag-ulid owner-id)
+  "Remove a specific tag from a TODO.
+   
+   @param todo-ulid [string] TODO ULID
+   @param tag-ulid [string] Tag ULID to remove
+   @param owner-id [integer] Owner ID
+   @return [plist] Success or error with :errors
+   "
+  ;; Validate todo-ulid
+  (when (or (null todo-ulid) (string= (string-trim '(#\Space #\Tab) todo-ulid) ""))
+    (return-from remove-todo-tag
+      (list :success nil :errors '("TODO ULID is required"))))
+  
+  ;; Validate tag-ulid
+  (when (or (null tag-ulid) (string= (string-trim '(#\Space #\Tab) tag-ulid) ""))
+    (return-from remove-todo-tag
+      (list :success nil :errors '("Tag ULID is required"))))
+  
+  (handler-case
+      (let ((todo (find-todo-by-ulid todo-ulid owner-id)))
+        (unless todo
+          (return-from remove-todo-tag
+            (list :success nil :errors '("TODO not found"))))
+        
+        ;; Remove tag
+        (remove-tag-from-todo todo-ulid tag-ulid)
+        (list :success t))
+    (error (e)
+      (list :success nil :errors (list (format nil "Failed to remove tag: ~A" e))))))
