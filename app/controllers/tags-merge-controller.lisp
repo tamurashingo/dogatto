@@ -6,13 +6,10 @@
   (:import-from #:dogatto/services/tag-merge-service
                 #:merge-tags-to-existing
                 #:merge-tags-to-new)
-  (:import-from #:dogatto/utils/session
-                #:get-session
-                #:session-valid-p)
+  (:import-from #:dogatto/helpers/auth-helper
+                #:get-authenticated-user)
   (:import-from #:dogatto/utils/request
                 #:read-body-as-string)
-  (:import-from #:dogatto/models/user
-                #:find-user-by-id)
   (:import-from #:dogatto/models/todo-tag
                 #:get-tag-statistics)
   (:import-from #:clails/model
@@ -32,38 +29,6 @@
 (defclass <tags-merge-to-new-controller> (<rest-controller>)
   ()
   (:documentation "Controller for merging tags to new tag (POST /api/v1/tags/merge-to-new)"))
-
-(defun get-cookie-value (headers cookie-name)
-  "Extract cookie value from request headers.
-
-   @param headers [hash-table] Request headers
-   @param cookie-name [string] Name of the cookie to extract
-   @return [string] Cookie value if found
-   @return [nil] If cookie not found
-   "
-  (let ((cookie-header (gethash "cookie" headers)))
-    (when cookie-header
-      (let* ((cookies (cl-ppcre:split ";\\s*" cookie-header))
-             (target-cookie (find-if (lambda (c)
-                                       (cl-ppcre:scan (format nil "^~A=" cookie-name) c))
-                                     cookies)))
-        (when target-cookie
-          (cadr (cl-ppcre:split "=" target-cookie :limit 2)))))))
-
-(defun get-authenticated-user (env)
-  "Get authenticated user from session.
-
-   @param env [plist] Request environment
-   @return [<user>] Authenticated user
-   @return [nil] If not authenticated
-   "
-  (let* ((headers (getf env :headers))
-         (session-id (get-cookie-value headers "session_id")))
-    (when (and session-id (session-valid-p session-id))
-      (let* ((session-data (get-session session-id))
-             (user-id (getf session-data :user-id)))
-        (when user-id
-          (find-user-by-id user-id))))))
 
 (defun tag-to-json (tag)
   "Convert tag instance to JSON-friendly alist.

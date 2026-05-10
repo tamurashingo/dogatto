@@ -45,5 +45,11 @@
                 #:<label-estimate-controller>)
   (:import-from :dogatto/controllers/todo-tags-controller
                 #:<todo-tags-controller>)
-  (:import-from :dogatto/services/tag-merge-service))
+  (:import-from :dogatto/services/tag-merge-service)
+  (:import-from :dogatto/services/auth-service)
+  (:import-from :dogatto/services/todo-service)
+  (:import-from :dogatto/services/tag-service)
+  (:import-from :dogatto/services/label-service)
+  (:import-from :dogatto/helpers/auth-helper)
+  (:import-from :dogatto/helpers/json-converters))
 (in-package #:dogatto/application-loader)

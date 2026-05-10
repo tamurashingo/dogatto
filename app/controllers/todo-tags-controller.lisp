@@ -10,7 +10,7 @@
   (:import-from #:dogatto/helpers/auth-helper
                 #:get-authenticated-user)
   (:import-from #:dogatto/helpers/json-converters
-                #:tag-to-json)
+                #:tag-to-json-simple)
   (:import-from #:clails/model
                 #:ref)
   (:export #:<todo-tags-controller>))
@@ -20,19 +20,6 @@
 (defclass <todo-tags-controller> (<rest-controller>)
   ()
   (:documentation "Controller for managing TODO tags (GET /todos/:ulid/tags, PUT /todos/:ulid/tags)"))
-
-(defun tag-to-json-simple (tag)
-  "Convert tag instance to simplified JSON-friendly alist.
-
-   Provides a minimal representation without timestamps for nested use.
-
-   @param tag [<tag>] Tag instance
-   @return [list] Alist representation of tag
-   "
-  (list (cons "id" (ref tag :id))
-        (cons "ulid" (ref tag :ulid))
-        (cons "name" (ref tag :name))
-        (cons "color" (ref tag :color))))
 
 (defmethod do-get ((controller <todo-tags-controller>))
   "Get all tags for a TODO."

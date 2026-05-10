@@ -448,182 +448,209 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 5: Label Services
 
-### Task 5.1: Create label-service skeleton
+### Task 5.1: Create label-service skeleton ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 0.1, 4.5  
 **Estimated effort**: 1 hour  
 **Description**: Create app/services/label-service.lisp with package definition
 **Completion criteria**:
-- File created with proper package definition
-- Import necessary model packages
-- Export function names (stub implementations)
+- [x] File created with proper package definition
+- [x] Import necessary model packages
+- [x] Export function names (stub implementations)
 
-### Task 5.2: Implement list-labels function
+### Task 5.2: Implement list-labels function ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 5.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement label listing with search logic
 **Completion criteria**:
-- Support search by name parameter
-- Support search by tag name
-- Fetch tag count and TODO count for each label
-- Return plist with :success, :labels or :errors
-- Add docstring
+- [x] Support search by name parameter
+- [x] Support search by tag name
+- [x] Fetch tag count and TODO count for each label
+- [x] Return plist with :success, :labels or :errors
+- [x] Add docstring
 
-### Task 5.3: Implement get-label function
+### Task 5.3: Implement get-label function ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 5.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement single label retrieval logic
 **Completion criteria**:
-- Validate label-ulid and owner-id
-- Find label and verify ownership
-- Fetch associated tags
-- Get statistics (tag count, TODO count)
-- Return plist with :success, :label, :tags, :statistics or :errors
-- Add docstring
+- [x] Validate label-ulid and owner-id
+- [x] Find label and verify ownership
+- [x] Fetch associated tags
+- [x] Get statistics (tag count, TODO count)
+- [x] Return plist with :success, :label, :tags, :statistics or :errors
+- [x] Add docstring
 
-### Task 5.4: Implement create-label-with-tags function
+### Task 5.4: Implement create-label-with-tags function ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 5.1  
 **Estimated effort**: 3 hours  
 **Description**: Implement label creation with tag assignment
 **Completion criteria**:
-- Validate input (name required, tag-ulids list)
-- Verify all tags exist and belong to user
-- Create label record
-- Assign tags to label
-- Use transaction for atomicity
-- Return plist with :success, :label, :tags or :errors
-- Add docstring
+- [x] Validate input (name required, tag-ulids list)
+- [x] Verify all tags exist and belong to user
+- [x] Create label record
+- [x] Assign tags to label
+- [x] Use transaction for atomicity
+- [x] Return plist with :success, :label, :tags or :errors
+- [x] Add docstring
 
-### Task 5.5: Implement update-label-with-tags function
+### Task 5.5: Implement update-label-with-tags function ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 5.1  
 **Estimated effort**: 3 hours  
 **Description**: Implement label update with tag reassignment
 **Completion criteria**:
-- Validate label-ulid and owner-id
-- Find label and verify ownership
-- Update label name if provided
-- Update tag associations if provided
-- Use transaction for atomicity
-- Return plist with :success, :label, :tags or :errors
-- Add docstring
+- [x] Validate label-ulid and owner-id
+- [x] Find label and verify ownership
+- [x] Update label name if provided
+- [x] Update tag associations if provided
+- [x] Use transaction for atomicity
+- [x] Return plist with :success, :label, :tags or :errors
+- [x] Add docstring
 
-### Task 5.6: Implement delete-label function
+### Task 5.6: Implement delete-label function ✅
+**Status**: Completed  
 **Priority**: Low  
 **Depends on**: Task 5.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement label deletion logic
 **Completion criteria**:
-- Validate label-ulid and owner-id
-- Find label and verify ownership
-- Delete label (cascading handled by model)
-- Return plist with :success or :errors
-- Add docstring
+- [x] Validate label-ulid and owner-id
+- [x] Find label and verify ownership
+- [x] Delete label (cascading handled by model)
+- [x] Return plist with :success or :errors
+- [x] Add docstring
 
-### Task 5.7: Implement estimate-todo-count function
+### Task 5.7: Implement estimate-todo-count function ✅
+**Status**: Completed  
 **Priority**: Low  
 **Depends on**: Task 5.1  
 **Estimated effort**: 2 hours  
 **Description**: Implement TODO count estimation logic
 **Completion criteria**:
-- Validate tag-ulids and owner-id
-- Calculate TODO count matching all tags (AND condition)
-- Return plist with :success, :count or :errors
-- Add docstring
+- [x] Validate tag-ulids and owner-id
+- [x] Calculate TODO count matching all tags (AND condition)
+- [x] Return plist with :success, :count or :errors
+- [x] Add docstring
 
-### Task 5.8: Write tests for label-service
+### Task 5.8: Write tests for label-service ⚠️
+**Status**: Deferred (Existing controller tests provide coverage)  
 **Priority**: Medium  
 **Depends on**: Task 5.2, 5.3, 5.4, 5.5, 5.6, 5.7  
 **Estimated effort**: 4 hours  
 **Description**: Create comprehensive tests for label-service functions
 **Completion criteria**:
-- Test all functions with success cases
-- Test authorization failures
-- Test validation errors
-- Test transaction rollback scenarios
-- All tests pass
+- [ ] Test all functions with success cases
+- [ ] Test authorization failures
+- [ ] Test validation errors
+- [ ] Test transaction rollback scenarios
+- [ ] All tests pass
 
-### Task 5.9: Refactor labels-controller to use label-service
+### Task 5.9: Refactor labels-controller to use label-service ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 5.8  
 **Estimated effort**: 4 hours  
 **Description**: Update labels-controller.lisp to delegate to label-service
 **Completion criteria**:
-- <labels-list-controller> GET calls list-labels
-- <labels-list-controller> POST calls create-label-with-tags
-- <label-item-controller> GET calls get-label
-- <label-item-controller> PUT calls update-label-with-tags
-- <label-item-controller> DELETE calls delete-label
-- <label-estimate-controller> GET calls estimate-todo-count
-- Controllers only handle HTTP concerns
-- All label tests still pass
+- [x] <labels-list-controller> GET calls list-labels
+- [x] <labels-list-controller> POST calls create-label-with-tags
+- [x] <label-item-controller> GET calls get-label
+- [x] <label-item-controller> PUT calls update-label-with-tags
+- [x] <label-item-controller> DELETE calls delete-label
+- [x] <label-estimate-controller> GET calls estimate-todo-count
+- [x] Controllers only handle HTTP concerns
+- [x] All label tests still pass
 
 ---
 
 ## Phase 6: Controller Cleanup
 
-### Task 6.1: Remove duplicate get-authenticated-user from auth-controller
+### Task 6.1: Remove duplicate get-authenticated-user from auth-controller ✅
+**Status**: Completed (Already done in Phase 1)  
 **Priority**: Low  
 **Depends on**: Task 0.2, 1.7  
 **Estimated effort**: 30 minutes  
 **Description**: Replace local get-authenticated-user with helper version
 **Completion criteria**:
-- Import from auth-helper
-- Remove local implementation
-- All tests still pass
+- [x] Import from auth-helper
+- [x] Remove local implementation
+- [x] All tests still pass
 
-### Task 6.2: Remove duplicate get-authenticated-user from todos-controller
+### Task 6.2: Remove duplicate get-authenticated-user from todos-controller ✅
+**Status**: Completed (Already done in Phase 2)  
 **Priority**: Low  
 **Depends on**: Task 0.2, 2.9  
 **Estimated effort**: 30 minutes  
 **Description**: Replace local get-authenticated-user with helper version
 **Completion criteria**:
-- Import from auth-helper
-- Remove local implementation
-- All tests still pass
+- [x] Import from auth-helper
+- [x] Remove local implementation
+- [x] All tests still pass
 
-### Task 6.3: Remove duplicate get-authenticated-user from tags-controller
+### Task 6.3: Remove duplicate get-authenticated-user from tags-controller ✅
+**Status**: Completed (Already done in Phase 3)  
 **Priority**: Low  
 **Depends on**: Task 0.2, 3.8  
 **Estimated effort**: 30 minutes  
 **Description**: Replace local get-authenticated-user with helper version
 **Completion criteria**:
-- Import from auth-helper
-- Remove local implementation
-- All tests still pass
+- [x] Import from auth-helper
+- [x] Remove local implementation
+- [x] All tests still pass
 
-### Task 6.4: Remove duplicate get-authenticated-user from labels-controller
+### Task 6.4: Remove duplicate get-authenticated-user from labels-controller ✅
+**Status**: Completed  
 **Priority**: Low  
 **Depends on**: Task 0.2, 5.9  
 **Estimated effort**: 30 minutes  
 **Description**: Replace local get-authenticated-user with helper version
 **Completion criteria**:
-- Import from auth-helper
-- Remove local implementation
-- All tests still pass
+- [x] Import from auth-helper
+- [x] Remove local implementation
+- [x] All tests still pass
 
-### Task 6.5: Remove duplicate get-authenticated-user from todo-tags-controller
+### Task 6.5: Remove duplicate get-authenticated-user from todo-tags-controller ✅
+**Status**: Completed (Already done in Phase 4)  
 **Priority**: Low  
 **Depends on**: Task 0.2, 4.5  
 **Estimated effort**: 30 minutes  
 **Description**: Replace local get-authenticated-user with helper version
 **Completion criteria**:
-- Import from auth-helper
-- Remove local implementation
-- All tests still pass
+- [x] Import from auth-helper
+- [x] Remove local implementation
+- [x] All tests still pass
 
-### Task 6.6: Replace JSON conversion functions in controllers
+### Task 6.5b: Remove duplicate get-authenticated-user from tags-merge-controller ✅
+**Status**: Completed  
+**Priority**: Low  
+**Depends on**: Task 0.2  
+**Estimated effort**: 30 minutes  
+**Description**: Replace local get-authenticated-user with helper version in tags-merge-controller
+**Completion criteria**:
+- [x] Import from auth-helper
+- [x] Remove local get-cookie-value and get-authenticated-user implementations
+- [x] All tests still pass
+
+### Task 6.6: Replace JSON conversion functions in controllers ✅
+**Status**: Completed  
 **Priority**: Low  
 **Depends on**: Task 0.3, 1.7, 2.9, 3.8, 4.5, 5.9  
 **Estimated effort**: 2 hours  
 **Description**: Replace local JSON conversion functions with helper versions
 **Completion criteria**:
-- All controllers import from json-converters
-- Remove duplicate implementations
-- All tests still pass
+- [x] All controllers import from json-converters (except tags-merge-controller which has merge-specific converters)
+- [x] Remove duplicate implementations (tag-to-json-simple from todo-tags-controller)
+- [x] Export tag-to-json-simple from json-converters helper
+- [x] All tests still pass
 
 ---
 
@@ -651,15 +678,16 @@ Break down the service layer refactoring into small, implementable tasks with cl
 - Verify todo-tags assignment transaction atomicity
 - Document transaction patterns
 
-### Task 7.3: Update application-loader.lisp
+### Task 7.3: Update application-loader.lisp ✅
+**Status**: Completed  
 **Priority**: High  
 **Depends on**: Task 7.1  
 **Estimated effort**: 1 hour  
 **Description**: Ensure all new services are loaded
 **Completion criteria**:
-- All service files imported
-- All helper files imported
-- Application loads without errors
+- [x] All service files imported
+- [x] All helper files imported
+- [x] Application loads without errors
 
 ### Task 7.4: Update CONTRIBUTING.md
 **Priority**: Medium  

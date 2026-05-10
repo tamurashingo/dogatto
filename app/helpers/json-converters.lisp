@@ -10,6 +10,7 @@
                 #:universal-time-to-unix-time)
   (:export #:todo-to-json
            #:tag-to-json
+           #:tag-to-json-simple
            #:label-to-json
            #:user-to-json))
 
