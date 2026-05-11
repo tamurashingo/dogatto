@@ -43,11 +43,77 @@ make front-build
 
 The backend is built with Common Lisp using the [clails](https://github.com/tamurashingo/clails) framework.
 
+#### Architecture: Controller → Service → Model
+
+The backend follows a 3-tier layered architecture:
+
+```
+Controller (HTTP concerns)
+    ↓
+Service (Business logic)
+    ↓
+Model (Database operations)
+```
+
+- **Controllers** (`app/controllers/`): Extract request parameters, call services, format HTTP responses. No business logic.
+- **Services** (`app/services/`): Implement business logic, input validation, transaction management. Return plist with `:success` and either `:errors` or data.
+- **Models** (`app/models/`): Database CRUD operations, single-model validation.
+- **Helpers** (`app/helpers/`): Shared utility functions (authentication, JSON conversion).
+
+#### Creating a New Service
+
+1. Create `app/services/<domain>-service.lisp`
+2. Follow the standard package pattern:
+
+```lisp
+(defpackage #:dogatto/services/<domain>-service
+  (:use #:cl)
+  (:import-from #:clails/model
+                #:ref
+                #:save)
+  (:import-from #:dogatto/models/<model>
+                #:<model-function>)
+  (:export #:service-function))
+```
+
+3. All service functions must return a plist:
+
+```lisp
+;; Success
+(list :success t :data value)
+
+;; Error
+(list :success nil :errors '("Error message"))
+```
+
+4. Use `with-transaction` for multi-model operations.
+5. Register the service in `app/application-loader.lisp`.
+
+See `app/services/tag-merge-service.lisp` as the reference implementation, and `specs/007-refactoring/service-patterns.md` for the full pattern guide.
+
 #### Creating Controllers
 
 Use clails generators:
 ```bash
 clails generate:controller <controller-name>
+```
+
+Controllers should only handle HTTP concerns and delegate to services:
+
+```lisp
+(defmethod do-get ((controller <my-controller>))
+  (let ((user (get-authenticated-user (env controller))))
+    (unless user
+      (setf (slot-value controller 'code) 401)
+      (return-from do-get
+        (set-response controller
+          '(("status" . "error") ("message" . "Authentication required")))))
+    (let ((result (my-service:my-function (ref user :id))))
+      (if (getf result :success)
+          (set-response controller
+            `(("status" . "success") ("data" . ,(getf result :data))))
+          (set-response controller
+            `(("status" . "error") ("message" . ,(car (getf result :errors)))))))))
 ```
 
 #### Creating Models
@@ -161,7 +227,7 @@ function createUser(username: string, email: string): Promise<User> {
 
 Run backend tests:
 ```bash
-# TODO: Add test command when available
+make test
 ```
 
 Run frontend tests:
@@ -235,9 +301,12 @@ Resolves #123
 .
 ├── app/                    # Backend application
 │   ├── config/            # Configuration files
-│   ├── controllers/       # Controllers
-│   ├── helpers/           # Helper functions
-│   ├── models/            # Models
+│   ├── controllers/       # Controllers (HTTP concerns only)
+│   ├── services/          # Service layer (business logic)
+│   ├── helpers/           # Shared helpers (auth, JSON converters)
+│   ├── models/            # Models (database operations)
+│   ├── middleware/        # Request middleware
+│   ├── utils/             # Utility functions
 │   └── views/             # View templates
 ├── db/                    # Database files
 │   └── migrate/           # Migration files

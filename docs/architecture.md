@@ -74,12 +74,26 @@ DOGATTOは**フルSPA方式**を採用しています。これは、サーバー
 │  └────────────────────────────────────────────────────┘     │
 │                                                              │
 │  ┌────────────────┐  ┌──────────────┐  ┌──────────────┐    │
-│  │ Controllers    │  │ Models       │  │ Middleware   │    │
-│  │ - auth         │  │ - user       │  │ - auth       │    │
+│  │ Controllers    │  │ Services     │  │ Middleware   │    │
+│  │ - auth         │  │ - auth       │  │ - auth       │    │
 │  │ - todos        │  │ - todo       │  │ - logging    │    │
 │  │ - tags         │  │ - tag        │  │ - error      │    │
+│  │ - tags-merge   │  │ - tag-merge  │  │              │    │
 │  │ - labels       │  │ - label      │  │              │    │
-│  └────────────────┘  └──────────────┘  └──────────────┘    │
+│  │ - todo-tags    │  │              │  │              │    │
+│  └───────┬────────┘  └──────┬───────┘  └──────────────┘    │
+│          │                  │                               │
+│          │  delegates to    │  calls                        │
+│          ▼                  ▼                               │
+│  ┌────────────────┐  ┌──────────────┐                      │
+│  │ Helpers        │  │ Models       │                      │
+│  │ - auth-helper  │  │ - user       │                      │
+│  │ - json-convert │  │ - todo       │                      │
+│  │                │  │ - tag        │                      │
+│  │                │  │ - label      │                      │
+│  │                │  │ - todo-tag   │                      │
+│  │                │  │ - label-tag  │                      │
+│  └────────────────┘  └──────────────┘                      │
 └──────────────────────────────────────────────────────────────┘
                            │
         ┌──────────────────┴──────────────────┐
@@ -265,24 +279,50 @@ public/
 
 ### バックエンド
 
+3層アーキテクチャ（Controller → Service → Model）を採用しています。
+
 ```
 app/
-├── controllers/
-│   ├── pages-controller.lisp      # HTML配信（SPA entry point）
-│   ├── auth-controller.lisp       # 認証API
-│   ├── todos-controller.lisp      # TODO API
-│   └── ...
-├── models/
+├── controllers/                       # HTTP関心事のみ
+│   ├── pages-controller.lisp          # HTML配信（SPA entry point）
+│   ├── auth-controller.lisp           # 認証API
+│   ├── todos-controller.lisp          # TODO API
+│   ├── tags-controller.lisp           # タグAPI
+│   ├── tags-merge-controller.lisp     # タグマージAPI
+│   ├── labels-controller.lisp         # ラベルAPI
+│   └── todo-tags-controller.lisp      # TODO-タグ関連付けAPI
+├── services/                          # ビジネスロジック・トランザクション管理
+│   ├── auth-service.lisp              # 認証サービス
+│   ├── todo-service.lisp              # TODOサービス
+│   ├── tag-service.lisp               # タグサービス
+│   ├── tag-merge-service.lisp         # タグマージサービス（リファレンス実装）
+│   └── label-service.lisp             # ラベルサービス
+├── helpers/                           # 共通ヘルパー
+│   ├── auth-helper.lisp               # 認証ヘルパー
+│   └── json-converters.lisp           # JSON変換ヘルパー
+├── models/                            # データベース操作
 │   ├── user.lisp
 │   ├── todo.lisp
-│   └── ...
+│   ├── tag.lisp
+│   ├── label.lisp
+│   ├── todo-tag.lisp
+│   └── label-tag.lisp
 ├── views/
 │   └── pages/
 │       └── show/
-│           └── show.html          # SPAのHTMLテンプレート
+│           └── show.html              # SPAのHTMLテンプレート
 └── config/
-    └── environment.lisp           # ルーティング設定
+    └── environment.lisp               # ルーティング設定
 ```
+
+#### レイヤーの責務
+
+| レイヤー | 責務 | 例 |
+|---------|------|-----|
+| Controller | HTTPリクエスト/レスポンス処理、パラメータ抽出 | ステータスコード設定、JSON変換 |
+| Service | ビジネスロジック、バリデーション、トランザクション管理 | 所有権チェック、複数モデルの整合性保証 |
+| Model | データベースCRUD、単一モデルのバリデーション | SQL実行、ユニーク制約チェック |
+| Helper | 横断的な共通処理 | セッションからユーザー取得、モデル→JSON変換 |
 
 ## 開発環境と本番環境の違い
 
@@ -343,6 +383,6 @@ app/
 
 ---
 
-**Version**: 1.0.0  
+**Version**: 2.0.0  
 **Created**: 2026-01-14  
-**Last Updated**: 2026-01-14
+**Last Updated**: 2026-04-24

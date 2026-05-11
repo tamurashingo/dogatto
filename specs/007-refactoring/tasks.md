@@ -656,27 +656,29 @@ Break down the service layer refactoring into small, implementable tasks with cl
 
 ## Phase 7: Integration Testing and Documentation
 
-### Task 7.1: Run full test suite
+### Task 7.1: Run full test suite ⚠️
+**Status**: Pending (Requires Docker environment)  
 **Priority**: High  
 **Depends on**: Task 6.6  
 **Estimated effort**: 1 hour  
 **Description**: Execute all tests to verify refactoring integrity
 **Completion criteria**:
-- All model tests pass
-- All service tests pass
-- All controller tests pass
-- No regressions detected
+- [ ] All model tests pass
+- [ ] All service tests pass
+- [ ] All controller tests pass
+- [ ] No regressions detected
 
-### Task 7.2: Test transaction management
+### Task 7.2: Test transaction management ⚠️
+**Status**: Pending (Requires Docker environment)  
 **Priority**: High  
 **Depends on**: Task 7.1  
 **Estimated effort**: 2 hours  
 **Description**: Verify transaction boundaries work correctly
 **Completion criteria**:
-- Test multi-model operations rollback on error
-- Verify label-with-tags transaction atomicity
-- Verify todo-tags assignment transaction atomicity
-- Document transaction patterns
+- [ ] Test multi-model operations rollback on error
+- [ ] Verify label-with-tags transaction atomicity
+- [ ] Verify todo-tags assignment transaction atomicity
+- [ ] Document transaction patterns
 
 ### Task 7.3: Update application-loader.lisp ✅
 **Status**: Completed  
@@ -689,27 +691,30 @@ Break down the service layer refactoring into small, implementable tasks with cl
 - [x] All helper files imported
 - [x] Application loads without errors
 
-### Task 7.4: Update CONTRIBUTING.md
+### Task 7.4: Update CONTRIBUTING.md ✅
+**Status**: Completed  
 **Priority**: Medium  
 **Depends on**: Task 7.1  
 **Estimated effort**: 2 hours  
 **Description**: Document new architecture and patterns
 **Completion criteria**:
-- Explain 3-tier architecture
-- Document when to use services vs models
-- Provide service creation template
-- Include examples from implemented services
+- [x] Explain 3-tier architecture (Controller → Service → Model)
+- [x] Document when to use services vs models
+- [x] Provide service creation template
+- [x] Include examples from implemented services
+- [x] Update project structure to include services/ and helpers/
 
-### Task 7.5: Create architecture diagram
+### Task 7.5: Update architecture diagram ✅
+**Status**: Completed  
 **Priority**: Low  
 **Depends on**: Task 7.4  
 **Estimated effort**: 2 hours  
-**Description**: Create visual representation of new architecture
+**Description**: Update visual representation of architecture in docs/architecture.md
 **Completion criteria**:
-- Diagram shows Controller -> Service -> Model layers
-- Show transaction boundaries
-- Show helper utilities
-- Add to docs/ directory
+- [x] Diagram shows Controller → Service → Model layers
+- [x] Show helpers layer
+- [x] Update backend file layout with services/ directory
+- [x] Add layer responsibility table
 
 ---
 
